@@ -64,7 +64,7 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
                     ------------------
                 where
                      ------------------
-                    !outputs_txOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                    !outputs_txOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                         OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)  ]
                     ------------------
                     -- 0 out is the FundDatum

@@ -66,7 +66,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
         !fundValidator_Address = Ledger.scriptHashAddress fundValidator_Hash
         ------------------
         !inputsRef_TxOuts =
-            [ LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoReferenceInputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput)
+            [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoReferenceInputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput)
             ]
         ------------------
         validate :: Bool
@@ -119,7 +119,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !protocolDatum_In = OnChainHelpers.getDatum_In_TxOut_And_Datum inputRef_TxOut_And_ProtocolDatum
                         ------------------
                         !outputs_txOuts =
-                            [ txOut | txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
+                            [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
                             ]
                         ------------------
                         -- 0 out is the FundDatum
@@ -447,7 +447,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                     !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
                     !fund_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
                     ------------------
-                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                         in  OnChainHelpers.isScriptAddress address && address == fund_Validator_Address]
                     ------------------
@@ -644,7 +644,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 where
                                     ------------------
                                     !outputs_txOuts =
-                                        [ txOut | txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
+                                        [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
                                         ]
                                     ------------------
                                     !outputs_txOuts_index0 =

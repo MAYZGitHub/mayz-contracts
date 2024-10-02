@@ -20,6 +20,8 @@ import           PlutusTx.Prelude       hiding (unless)
 
 import qualified Generic.OnChainHelpers as OnChainHelpers
 import qualified Protocol.Types         as T
+import qualified Ledger
+import qualified Protocol.Constants as T
 
 --------------------------------------------------------------------------------2
 -- Module
@@ -30,13 +32,13 @@ oracleReIdxDataToBBS :: T.OracleReIdx_Data -> BuiltinByteString
 oracleReIdxDataToBBS T.OracleReIdx_Data {..} =
     let
         valueToBBS :: (LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer) -> BuiltinByteString
-        valueToBBS (cs, tn, amt) = LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn <> OnChainHelpers.intToBBS amt
+        valueToBBS (!cs, !tn, !amt) = LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn <> OnChainHelpers.intToBBS amt
 
         investUnitToBBS :: T.InvestUnit -> BuiltinByteString
-        investUnitToBBS investUnit  = foldl (<>) emptyByteString (valueToBBS <$> T.iuValues investUnit)
+        investUnitToBBS !investUnit  = foldl (<>) emptyByteString (valueToBBS <$> T.iuValues investUnit)
 
-        oridTokensPriceADABBS = investUnitToBBS oridTokensPriceADA
-        oridTimeBBS = OnChainHelpers.pOSIXTimeToBBS oridTime
+        !oridTokensPriceADABBS = investUnitToBBS oridTokensPriceADA
+        !oridTimeBBS = OnChainHelpers.pOSIXTimeToBBS oridTime
 
     in  oridTokensPriceADABBS <> oridTimeBBS
 
@@ -46,20 +48,63 @@ oracleDataToBBS :: T.Oracle_Data -> BuiltinByteString
 oracleDataToBBS T.Oracle_Data {..} =
     let
         valueToBBS :: (LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer) -> BuiltinByteString
-        valueToBBS (cs, tn, amt) = LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn <> OnChainHelpers.intToBBS amt
+        valueToBBS (!cs, !tn, !amt) = LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn <> OnChainHelpers.intToBBS amt
 
         investUnitToBBS :: T.InvestUnit -> BuiltinByteString
-        investUnitToBBS investUnit  = foldl (<>) emptyByteString (valueToBBS <$> T.iuValues investUnit)
+        investUnitToBBS !investUnit  = foldl (<>) emptyByteString (valueToBBS <$> T.iuValues investUnit)
 
-        oridTokensPriceADABBS = investUnitToBBS odFTPriceADA1xe6
-        oridTimeBBS = OnChainHelpers.pOSIXTimeToBBS odTime
+        !oridTokensPriceADABBS = investUnitToBBS odFTPriceADA1xe6
+        !oridTimeBBS = OnChainHelpers.pOSIXTimeToBBS odTime
 
     in  oridTokensPriceADABBS <> oridTimeBBS
 
+{-# INLINEABLE isCorrect_Oracle_Signature #-}
+-- NOTE: very important not to use bang patterns here, because it will cause a runtime error when compiling plutus template of smart contracts
+isCorrect_Oracle_Signature :: LedgerApiV2.BuiltinByteString -> Ledger.PaymentPubKey -> Ledger.Signature -> Bool
+isCorrect_Oracle_Signature priceData oraclePaymentPubKey oracle_Signature =
+    let
+        ------------------
+        checkSignature ::
+            Ledger.PaymentPubKey ->
+            -- \^ The public key of the signatory
+            LedgerApiV2.BuiltinByteString ->
+            -- \^ The message
+            Ledger.Signature ->
+            -- \^ The signed message
+            Bool
+        checkSignature paymentPubKey signedMsgBBS signature =
+            let
+                pubKey = Ledger.unPaymentPubKey paymentPubKey
+                lb = Ledger.getPubKey pubKey
+                bbs = LedgerApiV2.getLedgerBytes lb
+                sig = Ledger.getSignature signature
+            in
+                verifyEd25519Signature bbs signedMsgBBS sig
+    in
+        ------------------
+        checkSignature oraclePaymentPubKey priceData oracle_Signature
+
+{-# INLINEABLE isCorrect_Oracle_InRangeTime #-}
+isCorrect_Oracle_InRangeTime :: LedgerApiV2.TxInfo -> LedgerApiV2.POSIXTime -> Bool
+isCorrect_Oracle_InRangeTime !info !oracle_Time =
+    let
+        ------------------
+        !validRange = LedgerApiV2.txInfoValidRange info
+        ------------------
+        newLowerLimitValue :: LedgerApiV2.POSIXTime
+        !newLowerLimitValue = case Ledger.ivFrom validRange of
+            Ledger.LowerBound (Ledger.Finite a) True -> a - T.oracleData_Valid_Time
+            _                                        -> traceError "Interval has no lower bound"
+        ------------------
+        !newInterval = Ledger.Interval (Ledger.LowerBound (Ledger.Finite newLowerLimitValue) True) (Ledger.ivTo validRange )
+    in
+        oracle_Time `Ledger.member` newInterval
+
+--------------------------------------------------------------------------------
 
 {-# INLINEABLE getDecimalsInInvestUnit #-}
 getDecimalsInInvestUnit :: [T.InvestUnitToken] -> Integer
-getDecimalsInInvestUnit tokens = go tokens 1
+getDecimalsInInvestUnit !tokens = go tokens 1
     where
         ------------------
         go [] acc = acc
@@ -73,4 +118,3 @@ getDecimalsInInvestUnit tokens = go tokens 1
             | otherwise = 100
 
 --------------------------------------------------------------------------------2
-

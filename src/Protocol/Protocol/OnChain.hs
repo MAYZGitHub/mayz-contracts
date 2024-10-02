@@ -70,7 +70,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
         !isMintingID = OnChainHelpers.getUnsafeOwnMintingValue ctx `OnChainHelpers.isEqValue` valueFor_Mint_ProtocolID
         -----------------
         !outputs_txOuts =
-            [ txOut | txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
+            [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
             ]
         ------------------
         !outputs_txOuts_index0 =
@@ -226,12 +226,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                     !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
                     !protocol_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
                      ------------------
-                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                         in  OnChainHelpers.isScriptAddress address && address == protocol_Validator_Address]
                     ------------------
                     !outputs_txOuts =
-                        [ txOut | txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
+                        [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
                         ]
                     ------------------
                     !outputs_txOuts_index0 =

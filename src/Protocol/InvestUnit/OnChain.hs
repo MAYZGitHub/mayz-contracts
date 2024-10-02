@@ -19,7 +19,6 @@ module Protocol.InvestUnit.OnChain where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Ledger
 import qualified Ledger.Ada                  as LedgerAda
 import qualified Ledger.Value                as LedgerValue
 import qualified Plutonomy
@@ -143,13 +142,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 (T.ValidatorRedeemerReIndexing (T.ValidatorRedeemerReIndexingType !riuriTokensToAdd !riuriTokensToRemove !riuriOracleReIdx_Data !riuriOracleSignature)) ->
                                         ------------------
                                         -- it runs along with FundHolding Validator (ValidatorRedeemerReIndexing)
-                                            -- traceIfFalse "not isCorrect_Output_FundHolding_Datum_NotChanged" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Control_NotChanged)
-                                            -- && traceIfFalse "not isCorrect_Output_FundHolding_Value_WithTokensExchanged" (isCorrect_Output_FundHolding_Value valueFor_FundHoldingDatum_Control_WithTokensExchanged)
-                                            -- && traceIfFalse "not isCorrect_Redeemer_InvestUnit" isCorrect_Redeemer_InvestUnit
                                         ------------------
                                         traceIfFalse "not isCorrect_Redeemer_FundHolding" isCorrect_Redeemer_FundHolding
-                                        && traceIfFalse "not isCorrect_Oracle_Signature" isCorrect_Oracle_Signature
-                                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" isCorrect_Oracle_InRangeTime
+                                        && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey riuriOracleSignature)
+                                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.oridTime riuriOracleReIdx_Data))
                                         && traceIfFalse "not isCorrect_Exchange_WithSamePriceADA" isCorrect_Exchange_WithSamePriceADA
                                         && traceIfFalse "not isCorrect_Output_InvestUnit_Datum_WithTokensExchanged" isCorrect_Output_InvestUnit_Datum_WithTokensExchanged
                                         && traceIfFalse "not isCorrect_Output_InvestDatum_Value_NotChanged" isCorrect_Output_InvestDatum_Value_NotChanged
@@ -229,44 +225,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                                 if not swAcceptZero && price == 0
                                                     then traceError "Price is zero"
                                                     else amt * price
+                                        ------------------
+                                        !priceData = OnChainHelpers.oracleReIdxDataToBBS riuriOracleReIdx_Data
+                                        ------------------
+                                        !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey protocolDatum_In
                                         -------------------
-                                        isCorrect_Oracle_Signature :: Bool
-                                        !isCorrect_Oracle_Signature =
-                                             let !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey protocolDatum_In
-                                                 !priceData = OnChainHelpers.oracleReIdxDataToBBS riuriOracleReIdx_Data
-                                                  ------------------
-                                                 checkSignature :: Ledger.PaymentPubKey
-                                                     -- ^ The public key of the signatory
-                                                     -> LedgerApiV2.BuiltinByteString
-                                                     -- ^ The message
-                                                     -> Ledger.Signature
-                                                     -- ^ The signed message
-                                                     -> Bool
-                                                 checkSignature !paymentPubKey !signedMsgBBS !signature =
-                                                         let
-                                                             !pubKey= Ledger.unPaymentPubKey paymentPubKey
-                                                             !lb = Ledger.getPubKey pubKey
-                                                             !bbs = LedgerApiV2.getLedgerBytes lb
-                                                             !sig = Ledger.getSignature signature
-                                                         in  verifyEd25519Signature bbs signedMsgBBS sig
-                                                 ------------------
-                                             in  checkSignature oraclePaymentPubKey priceData riuriOracleSignature
-                                        ------------------
-                                        isCorrect_Oracle_InRangeTime :: Bool
-                                        !isCorrect_Oracle_InRangeTime =
-                                            let
-                                                ------------------
-                                                !validRange = LedgerApiV2.txInfoValidRange info
-                                                ------------------
-                                                newLowerLimitValue :: LedgerApiV2.POSIXTime
-                                                !newLowerLimitValue = case Ledger.ivFrom validRange of
-                                                    Ledger.LowerBound (Ledger.Finite a) True -> a - T.oracleData_Valid_Time
-                                                    _                                        -> traceError "Interval has no lower bound"
-                                                ------------------
-                                                !newInterval = Ledger.Interval (Ledger.LowerBound (Ledger.Finite newLowerLimitValue) True) (Ledger.ivTo validRange )
-                                            in
-                                                T.oridTime riuriOracleReIdx_Data `Ledger.member` newInterval
-                                        ------------------
                                         isCorrect_Exchange_WithSamePriceADA :: Bool
                                         !isCorrect_Exchange_WithSamePriceADA =
                                             -- NOTE: Se espera que el precio de los tokens a agregar sea mayor o igual al precio de los tokens a quitar

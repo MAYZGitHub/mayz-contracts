@@ -56,7 +56,7 @@ testContext getValidator getPolicy getValidatorRedeemerTxSpec getPolicyRedeemerT
         txInfoOutputs = LedgerApiV2.txInfoOutputs txInfo
         -----------------
         inputsFromScripts =
-            [ LedgerApiV2.txInInfoOutRef txInfoInput | txInfoInput <- txInfoInputs, let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+            [ LedgerApiV2.txInInfoOutRef txInfoInput | !txInfoInput <- txInfoInputs, let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                                                                                      in OnChainHelpers.isScriptAddress address
             ]
         -----------------

@@ -81,14 +81,14 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !buyOrder_Validator_Hash !token
                         ---------------------
                     where
                         ------------------
-                        !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoReferenceInputs info ,
+                        !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoReferenceInputs info ,
                                         OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput )]
                         ------------------
-                        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+                        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                                         in  OnChainHelpers.isScriptAddress address && address == buyOrder_Validator_Address]
                         ------------------
-                        !outputs_Own_TxOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                        !outputs_Own_TxOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                                         let address = LedgerApiV2.txOutAddress txOut
                                         in  OnChainHelpers.isScriptAddress address && address == buyOrder_Validator_Address ]
                         ------------------
@@ -125,10 +125,10 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !buyOrder_Validator_Hash !token
                         !valueOf_RequiredMAYZ = LedgerValue.assetClassValue tokenMAYZ_AC requiredMAYZ
                         ---------------------
                         isMintingBuyOrderID :: Bool
-                        isMintingBuyOrderID = OnChainHelpers.getUnsafeOwnMintingValue ctx `OnChainHelpers.isEqValue` valueFor_Mint_BuyOrder_ID
+                        !isMintingBuyOrderID = OnChainHelpers.getUnsafeOwnMintingValue ctx `OnChainHelpers.isEqValue` valueFor_Mint_BuyOrder_ID
                         -----------------
                         isCorrect_Output_BuyOrder_Datum :: Bool
-                        isCorrect_Output_BuyOrder_Datum =
+                        !isCorrect_Output_BuyOrder_Datum =
                             let !buyOrder_Datum_Out_Control =
                                     T.mkBuyOrder_DatumType
                                         buyOrderPolicyID_CS
@@ -144,7 +144,7 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !buyOrder_Validator_Hash !token
                                 && traceIfFalse "not isInRange commissionBuyOrder_InBPx1e3" (ProtocolT.isInRange commissionBuyOrder_InBPx1e3 (T.bodOfferedCommission_InBPx1e3 buyOrder_Datum_Out))
                         ------------------
                         isCorrect_Output_BuyOrder_Value :: Bool
-                        isCorrect_Output_BuyOrder_Value =
+                        !isCorrect_Output_BuyOrder_Value =
                             let
                                 !minADA_For_BuyOrder_Datum = T.bodMinADA buyOrder_Datum_Out
                                 !value_MinADA_For_BuyOrder_Datum = LedgerAda.lovelaceValueOf minADA_For_BuyOrder_Datum
@@ -198,7 +198,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
         !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
         !buyOrder_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
         ------------------
-        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                         in  OnChainHelpers.isScriptAddress address && address == buyOrder_Validator_Address]
         ------------------
@@ -212,13 +212,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
         ------------------
         !admin = T.bodBuyerPaymentPKH buyOrder_Datum_In
         ------------------
-        redeemerUpdateStatus = 1
-        redeemerUpdateOfferedCommissionRate = 2
-        redeemerUpdateMinADA = 3
-        redeemerDeposit = 4
-        redeemerWithdraw = 5
-        redeemerFillOrder = 6
-        redeemerDelete = 7
+        !redeemerUpdateStatus = 1
+        !redeemerUpdateOfferedCommissionRate = 2
+        !redeemerUpdateMinADA = 3
+        !redeemerDeposit = 4
+        !redeemerWithdraw = 5
+        !redeemerFillOrder = 6
+        !redeemerDelete = 7
         ------------------
         redeemerType :: Integer
         !redeemerType = case redeemer of
@@ -231,7 +231,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
             (T.ValidatorRedeemerDelete _)                      -> redeemerDelete
         ------------------
         validateRedeemerDeleteAndOthers :: Bool
-        validateRedeemerDeleteAndOthers
+        !validateRedeemerDeleteAndOthers
             | redeemerType == redeemerDelete = validateAdminAction && validateRedeemerDelete
             | otherwise = validateAllRedeemersButDelete
         ------------------
@@ -263,10 +263,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 ------------------
             where
                 ------------------
-                !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoReferenceInputs info,
+                !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoReferenceInputs info,
                         OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput )]
                 ------------------
-                !outputs_Own_TxOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                !outputs_Own_TxOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                                         let address = LedgerApiV2.txOutAddress txOut
                                         in  OnChainHelpers.isScriptAddress address && address == buyOrder_Validator_Address ]
                 ------------------
@@ -442,13 +442,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 validateRedeemerWithdraw _   = False
                 ------------------
                 validateRedeemerFillOrder ::  T.ValidatorRedeemer  -> Bool
-                validateRedeemerFillOrder (T.ValidatorRedeemerFillOrder (T.ValidatorRedeemerFillOrderType  rfoAmount_Tokens !rfoAmount_FT !rfoCommission_FT !rfoOracle_Data !rfoOracle_Signature))  =
+                validateRedeemerFillOrder (T.ValidatorRedeemerFillOrder (T.ValidatorRedeemerFillOrderType !rfoAmount_Tokens !rfoAmount_FT !rfoCommission_FT !rfoOracle_Data !rfoOracle_Signature))  =
                         ---------------------
                         -- it runs alone
                         ---------------------
                         traceIfFalse "not isOrderOpen" isOrderOpen
-                        && traceIfFalse "not isCorrect_Oracle_Signature" (isCorrect_Oracle_Signature rfoOracle_Data rfoOracle_Signature)
-                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" (isCorrect_Oracle_InRangeTime rfoOracle_Data )
+                        && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rfoOracle_Signature)
+                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rfoOracle_Data) )
                         && traceIfFalse "not isCorrect_Conversion" (isCorrect_Conversion rfoOracle_Data rfoAmount_Tokens rfoAmount_FT )
                         && traceIfFalse "not isCorrect_Commission" (isCorrect_Commission rfoAmount_FT rfoCommission_FT)
                         && traceIfFalse "not isAmount_Tokens_Available" (isAmount_Tokens_Available rfoAmount_Tokens)
@@ -469,47 +469,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                             ------------------
                                 !valueFor_BuyOrder_Out_Control = LedgerApiV2.txOutValue input_TxOut_BeingValidated <> value_Amount_FT <> negate value_FillOrder_Tokens
                             in  valueOf_BuyOrder_Out `OnChainHelpers.isEqValue` valueFor_BuyOrder_Out_Control
+                        ------------------
+                        !priceData = OnChainHelpers.oracleDataToBBS rfoOracle_Data
+                        ------------------
+                        !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey getLazyProtocolDatum_In
                         ----------------
-                        isCorrect_Oracle_Signature :: T.Oracle_Data -> Ledger.Signature ->  Bool
-                        isCorrect_Oracle_Signature oracle_Data oracle_Signature =
-                            let
-                                ------------------
-                                !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey getLazyProtocolDatum_In
-                                ------------------
-                                !priceData = OnChainHelpers.oracleDataToBBS oracle_Data
-                                ------------------
-                                checkSignature :: Ledger.PaymentPubKey
-                                    -- ^ The public key of the signatory
-                                    -> LedgerApiV2.BuiltinByteString
-                                    -- ^ The message
-                                    -> Ledger.Signature
-                                    -- ^ The signed message
-                                    -> Bool
-                                checkSignature !paymentPubKey !signedMsgBBS !signature =
-                                        let
-                                            !pubKey= Ledger.unPaymentPubKey paymentPubKey
-                                            !lb = Ledger.getPubKey pubKey
-                                            !bbs = LedgerApiV2.getLedgerBytes lb
-                                            !sig = Ledger.getSignature signature
-                                        in  verifyEd25519Signature bbs signedMsgBBS sig
-                                ------------------
-                            in checkSignature oraclePaymentPubKey priceData oracle_Signature
-                        ------------------
-                        isCorrect_Oracle_InRangeTime :: T.Oracle_Data -> Bool
-                        isCorrect_Oracle_InRangeTime oracle_Data =
-                            let
-                                ------------------
-                                validRange = LedgerApiV2.txInfoValidRange info
-                                ------------------
-                                newLowerLimitValue :: LedgerApiV2.POSIXTime
-                                newLowerLimitValue = case Ledger.ivFrom validRange of
-                                    Ledger.LowerBound (Ledger.Finite a) True -> a - T.oracleData_Valid_Time
-                                    _                                        -> traceError "Interval has no lower bound"
-                                ------------------
-                                newInterval = Ledger.Interval (Ledger.LowerBound (Ledger.Finite newLowerLimitValue) True) (Ledger.ivTo validRange )
-                            in
-                                T.odTime oracle_Data `Ledger.member` newInterval
-                        ------------------
                         -- Calculates the total price of swapTokens based on oraclePrices
                         totalSwapPrice :: TxAssocMap.Map LedgerApiV2.CurrencySymbol (TxAssocMap.Map LedgerApiV2.TokenName Integer) -- ^ Oracle prices
                                     -> TxAssocMap.Map LedgerApiV2.CurrencySymbol (TxAssocMap.Map LedgerApiV2.TokenName Integer) -- ^ Swap tokens

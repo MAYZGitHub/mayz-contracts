@@ -75,7 +75,7 @@ investUnit_Validator_Redeemer_ReIndexing_Tests tp =
                                 ctx' = ctx
                                 -- NOTE: asi es como hay que hacer para probar las cosas si algo no funciona
                                 -- !info = LedgerContextsV2.scriptContextTxInfo ctx
-                                -- !outputs_txOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                                -- !outputs_txOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                                 --             OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)  ]
                                 -- !investUnitID_AC = LedgerValue.AssetClass (tpFundPolicy_CS tp, T.investUnitID_TN)
                                 -- !output_Own_TxOut_And_InvestUnitDatum =

@@ -73,11 +73,11 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash !tok
                         ---------------------
                     where
                         ------------------
-                        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+                        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                                         in  OnChainHelpers.isScriptAddress address && address == delegation_Validator_Address]
                         ------------------
-                        !outputs_Own_TxOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                        !outputs_Own_TxOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                                         let address = LedgerApiV2.txOutAddress txOut
                                         in  OnChainHelpers.isScriptAddress address && address == delegation_Validator_Address ]
                         ------------------
@@ -162,7 +162,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenMAYZ_AC) !datumRaw !re
         !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
         !delegation_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
         ------------------
-        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+        !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                         let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                         in  OnChainHelpers.isScriptAddress address && address == delegation_Validator_Address]
         ------------------
@@ -215,7 +215,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenMAYZ_AC) !datumRaw !re
                 ------------------
             where
                 ------------------
-                !outputs_Own_TxOuts = [ txOut | txOut <- LedgerApiV2.txInfoOutputs info,
+                !outputs_Own_TxOuts = [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info,
                                         let address = LedgerApiV2.txOutAddress txOut
                                         in  OnChainHelpers.isScriptAddress address && address == delegation_Validator_Address ]
                 ------------------

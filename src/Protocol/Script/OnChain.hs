@@ -140,10 +140,10 @@ mkValidator (T.ValidatorParams !scriptPolicyID_CS !protocolPolicyID_CS)  _ !redR
                     && traceIfFalse "not Correct Withdraw Amount_SendBackToAdmin" isCorrectAmount_SendBackToAdmin
                 where
                     ------------------
-                    !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoReferenceInputs info,
+                    !inputsRef_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoReferenceInputs info,
                         OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput )]
                     ------------------
-                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | txInfoInput <- LedgerApiV2.txInfoInputs info,
+                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
                                     let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
                                     in  OnChainHelpers.isScriptAddress address && address == script_Validator_Address]
                     ------------------
