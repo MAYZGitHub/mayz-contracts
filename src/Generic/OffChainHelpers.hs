@@ -32,7 +32,7 @@ import qualified Cardano.Ledger.Keys                             as LedgerKeys (
 import qualified Codec.Binary.Bech32                             as CodecBinaryBech32
 import qualified Codec.Serialise                                 as CodecSerialise
 import qualified Control.Lens                                    as ControlLens
-import qualified Data.Aeson                                      as DataAeson (decode, encode, FromJSON)
+import qualified Data.Aeson                                      as DataAeson (FromJSON, decode, encode)
 import qualified Data.ByteString                                 as DataByteString
 import qualified Data.ByteString.Base16                          as DataByteStringBase16
 import qualified Data.ByteString.Base64.Lazy                     as DataByteStringLazyBase64
@@ -67,11 +67,9 @@ import qualified Plutus.Script.Utils.V1.Typed.Scripts.Validators as UtilsTypedSc
 import qualified Plutus.Script.Utils.V2.Scripts                  as UtilsScriptsV2
 import qualified Plutus.V1.Ledger.Api                            as LedgerApiV1
 import qualified Plutus.V1.Ledger.Credential                     as LedgerCredentialV1
-import qualified Plutus.V1.Ledger.ProtocolVersions               as LedgerProtocolVersionsV1
 import qualified Plutus.V1.Ledger.Scripts                        as LedgerScriptsV1
 import qualified Plutus.V1.Ledger.Value                          as LedgerValueV1 (TokenName (..))
 import qualified Plutus.V2.Ledger.Api                            as LedgerApiV2
-import qualified Plutus.V2.Ledger.EvaluationContext              as LedgerEvaluationContextV2
 import qualified PlutusTx
 import qualified PlutusTx.Builtins                               as TxBuiltins (toBuiltin)
 import qualified PlutusTx.Builtins.Class                         as TxBuiltinsClass
@@ -85,7 +83,6 @@ import qualified Text.Hex                                        as TextHex
 import qualified Text.Printf                                     as TextPrintf (printf)
 import qualified Wallet.Emulator.Wallet                          as WalletEmulator (WalletId (..))
 import qualified Wallet.Types                                    as WalletTypes (ContractInstanceId (..))
-
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
@@ -197,8 +194,10 @@ lazyTextToStrictText = DataTextLazy.toStrict
 stringToBuiltinByteString :: P.String -> TxBuiltinsInternal.BuiltinByteString
 stringToBuiltinByteString = TxBuiltinsInternal.BuiltinByteString . stringToStrictByteString
 
--- builtinByteStringToString :: TxBuiltinsInternal.BuiltinByteString -> P.String
--- builtinByteStringToString = TxBuiltinsInternal.BuiltinByteString
+builtinByteStringToString :: TxBuiltinsInternal.BuiltinByteString -> P.String
+builtinByteStringToString bbstr =
+    let bstr = LedgerApiV2.fromBuiltin bbstr
+    in strictByteStringToString bstr
 
 --------------------------------------------------------------------------------2
 
@@ -275,11 +274,12 @@ readDecodedFromFile filePath = do
             fileContent <- DataByteStringLazy.readFile filePath
             case DataAeson.decode fileContent of
                 Just dataValue -> return dataValue
-                Nothing -> P.error "Could not decode JSON"
+                Nothing        -> P.error "Could not decode JSON"
         else P.error "File does not exist"
-        
+
 --------------------------------------------------------------------------------2
 
+{-
 -- lee archivos exportados con OffChainHelpers.writeEncodedToFile
 -- :set -XOverloadedStrings -XTypeApplications
 -- readFileDecodedAsDatum "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/StakePlusV2/FundDatum-HEX.json"
@@ -287,7 +287,7 @@ readDecodedFromFile filePath = do
 -- contents of file: {"getDatum":"d87a9fd8799fd8799f581c9925b87688572c90085d2a6bcaa7e8f4d1e631fc18a4439ea998ce3f5820d793c0edc6b088fbd76e749658a27a7cad242ec4fb63f9547bffccf2bfcbda41ff9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e1a002dc96600ffff800000ffff"}
 -- readFileDecodedAsRedeemer
 -- contents of file: {"getRedeemer":"d87a9fd8799fd8799f581c9925b87688572c90085d2a6bcaa7e8f4d1e631fc18a4439ea998ce3f5820d793c0edc6b088fbd76e749658a27a7cad242ec4fb63f9547bffccf2bfcbda41ff9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e1a002dc96600ffff800000ffff"}
-
+-}
 readFileDecodedAsDatum :: P.String -> P.IO LedgerApiV2.Datum
 readFileDecodedAsDatum filepath = do
     !file <- readFile filepath
@@ -300,13 +300,14 @@ readFileDecodedAsRedeemer filepath = do
 
 --------------------------------------------------------------------------------2
 
+{-
 -- lee archivos exportados con OffChainHelpers.writeEncodedToFile
 -- :set -XOverloadedStrings -XTypeApplications
 -- @TIPO puede ser @LedgerApiV2.Datum o cualquiera creado internamente
 -- readFileDecodedAsTypedDatum @LedgerApiV2.Datum "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/StakePlusV2/FundDatum-HEX.json"
 -- readFileDecodedAsTypedDatum @LedgerApiV2.Datum "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/exampleDatum-HEX.json"
 -- contents of file: {"getDatum":"d87a9fd8799fd8799f581c9925b87688572c90085d2a6bcaa7e8f4d1e631fc18a4439ea998ce3f5820d793c0edc6b088fbd76e749658a27a7cad242ec4fb63f9547bffccf2bfcbda41ff9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e1a002dc96600ffff800000ffff"}
-
+-}
 readFileDecodedAsTypedDatum :: forall a. (LedgerApiV2.UnsafeFromData a, P.Show a) => P.String -> P.IO a
 readFileDecodedAsTypedDatum filepath = do
     !file <- readFile filepath
@@ -319,6 +320,7 @@ readFileDecodedAsTypedRedeemer filepath = do
 
 --------------------------------------------------------------------------------2
 
+{-
 -- :set -XOverloadedStrings -XTypeApplications
 -- readStringDecodedAsDatum "{\"getDatum\":\"d87a9fd8799fd8799f581c9925b87688572c90085d2a6bcaa7e8f4d1e631fc18a4439ea998ce3f5820d793c0edc6b088fbd76e749658a27a7cad242ec4fb63f9547bffccf2bfcbda41ff9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e1a002dc96600ffff800000ffff\"}"
 -- readStringDecodedAsDatum "{\"getDatum\":\"d905019fd8799f0180ffff\"}"
@@ -326,16 +328,10 @@ readFileDecodedAsTypedRedeemer filepath = do
 -- readStringDecodedAsDatum "{\"getDatum\":\"d8799fd8799f0180581c786139173b79832ace8b3a55c04d8e43586724fcd497cd286bf27345581c3afcf1924a5ee2cfe4c11c642dcdcf97ed7436648f431175ba3664a100009f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff9fd8799f1901bc183719029affffffff\"}"
 -- readStringDecodedAsDatum "{\"getDatum\":\"d8799fd8799f0180581c786139173b79832ace8b3a55c04d8e43586724fcd497cd286bf27345581c3afcf1924a5ee2cfe4c11c642dcdcf97ed7436648f431175ba3664a100009f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff9fd8799f030405ffffd8799f000000ff0000d8799f000000ffd8799f000000ffd8799f000000ff0000008000ffff\"}"
 
-
-
 -- Datum {getDatum = Constr 0 [Constr 0 [I 1,List [],B "|;\128\201\192\174\254,\221(\225q\129\249E\233z\172\203p\162\194\205\172\&6p\177\ESC",B "Ap{\145\253-\NULT\203f\SOHR\NAK\188\236\170\170\162\226\SYN\172\174cT|?\206\250",I 0,I 0,List [B "\128\164\244[V\184\141\DC19\218#\188L<u\236m2\148<\b\DEL%\v\134\EM<\167",B "\162\194\fw\136z\206\FS\217\134\EM>Nu\186\189\137\147\207\213i\149\205\\\252\230\t\194"],List [Constr 0 [I 122,I 123,I 3232],
-
--- Constr 0 [I 21211,I 222,I 222]],Constr 0 [I 0,I 0,I 0],I 0,I 0,Constr 0 [I 0,I 0,I 0],Constr 0 [I 0,I 0,I 0],Constr 0 [I 0,I 0,I 0],I 22,I 33,I 55,List [B "\128\164\244[V\184\141\DC19\218#\188L<u\236m2\148<\b\DEL%\v\134\EM<\167",B "\162\194\fw\136z\206\FS\217\134\EM>Nu\186\189\137\147\207\213i\149\205\\\252\230\t\194"],I 0,I 2062023]]}
-
 -- Datum {getDatum = Constr 0 [Constr 0 [I 1,List [],B "xa9\ETB;y\131*\206\139:U\192M\142CXg$\252\212\151\205(k\242sE",B ":\252\241\146J^\226\207\228\193\FSd-\205\207\151\237t6d\143C\DC1u\186\&6d\161",I 0,I 0,List [B "\228Lg\197>Y6qy,\194\DEL\t[\188\198\154\174\226\255\ESCM\135[\219\255\\\171"],List [Constr 0 [I 444,I 55,I 666]]]]}
 -- Datum {getDatum = Constr 8 [Constr 0 [I 1,List [],B "xa9\ETB;y\131*\206\139:U\192M\142CXg$\252\212\151\205(k\242sE",B ":\252\241\146J^\226\207\228\193\FSd-\205\207\151\237t6d\143C\DC1u\186\&6d\161",I 0,I 0]]}
-
-
+-}
 readStringDecodedAsDatum :: P.String -> P.IO LedgerApiV1.Datum
 readStringDecodedAsDatum encoded = do
     P.putStrLn $ "encoded: " ++ P.show encoded
@@ -343,9 +339,10 @@ readStringDecodedAsDatum encoded = do
         Nothing      -> P.error $ "Could not decode As Datum " ++ encoded
         Just decoded -> return decoded
 
+{-
 -- :set -XOverloadedStrings -XTypeApplications
 -- readStringDecodedAsRedeemer "{\"getRdeemer\":\"d87a9fd8799fd8799f581c9925b87688572c90085d2a6bcaa7e8f4d1e631fc18a4439ea998ce3f5820d793c0edc6b088fbd76e749658a27a7cad242ec4fb63f9547bffccf2bfcbda41ff9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e1a002dc96600ffff800000ffff\"}"
-
+-}
 readStringDecodedAsRedeemer :: P.String -> P.IO LedgerApiV2.Redeemer
 readStringDecodedAsRedeemer encoded = do
     P.putStrLn $ "encoded: " ++ P.show encoded
@@ -355,12 +352,13 @@ readStringDecodedAsRedeemer encoded = do
 
 --------------------------------------------------------------------------------2
 
+{-
 -- :set -XOverloadedStrings -XTypeApplications
 
 -- @TIPO puede ser @LedgerApiV2.Datum o cualquiera creado internamente
 -- readStringDecodedAsTypedDatum @TIPO "{\"getDatum\":\"d87b9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16ed8799f581c026c6fbd39eae18dabbe11021b5b9901635e015bf3df6f83798fde09ff011b000001869f0b4afc0000d87a801a003e81cdffff\"}"
 -- readStringDecodedAsTypedDatum @LedgerApiV2.Datum "{\"getDatum\":\"d87b9fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16ed8799f581c026c6fbd39eae18dabbe11021b5b9901635e015bf3df6f83798fde09ff011b000001869f0b4afc0000d87a801a003e81cdffff\"}"
-
+-}
 readStringDecodedAsTypedDatum :: forall a. (LedgerApiV2.UnsafeFromData a, P.Show a) => P.String -> P.IO a
 readStringDecodedAsTypedDatum stringCbor = do
     !raw <- readStringDecodedAsDatum stringCbor
@@ -369,14 +367,12 @@ readStringDecodedAsTypedDatum stringCbor = do
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
---------------------------------------------------------------------------------2
-
+{-
 -- :set -XOverloadedStrings -XTypeApplications
-
 -- @TIPO puede ser LedgerApiV2.Redeemer o cualquiera creado internamente
 -- readEncodedStringAsRedeemer @TIPO "{\"getRedeemer\":\"d87a9fd8799fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16ed8799fd8799f43aaccffff0affffffff\"}"
 -- readEncodedStringAsRedeemer @LedgerApiV2.Redeemer  IPO "{\"getRedeemer\":\"d87a9fd8799fd8799f581cabfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16ed8799fd8799f43aaccffff0affffffff\"}"
-
+-}
 readStringDecodedAsTypedRedeemer :: forall a. (LedgerApiV2.UnsafeFromData a, P.Show a) => P.String -> P.IO a
 readStringDecodedAsTypedRedeemer stringCbor = do
     !raw <- readStringDecodedAsRedeemer stringCbor
@@ -408,34 +404,27 @@ writePlutusDataToFile filepath dataToWrite = do
     let !toWrite = getEncodedJsonFromData (PlutusTx.toData dataToWrite)
     writeFile filepath toWrite
 
---------------------------------------------------------------------------------2
-
--- lee archivos exportados con OffChainHelpers.writePlutusDataToFile
+{-
+lee archivos exportados con OffChainHelpers.writePlutusDataToFile
 
 -- :set -XOverloadedStrings -XTypeApplications
 -- readFileToPlutusData "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/exampleDatum.json"
 -- contents of file: {"constructor":0,"fields":[{"bytes":"abfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e"},{"constructor":0,"fields":[{"bytes":"4353"},{"bytes":"4d616e75"}]},{"int":5000000}]}
-
+-}
 readFileToPlutusData :: P.String -> P.IO PlutusTx.Data
 readFileToPlutusData filepath = do
     !file <- readFile filepath
     return $ getDataFromEncodedJson file
-    -- case DataAeson.decode file of
-    --     Nothing -> P.error "Could not decode from file"
-    --     Just decoded -> case CardanoApi.scriptDataFromJson CardanoApi.ScriptDataJsonDetailedSchema decoded of
-    --         Right scriptData -> return $ scriptDataToData scriptData
-    --         _                -> P.error "Could not scriptDataFromJson"
 
---------------------------------------------------------------------------------2
-
--- lee archivos exportados con OffChainHelpers.writePlutusDataToFile
+{-
+lee archivos exportados con OffChainHelpers.writePlutusDataToFile
 -- :set -XOverloadedStrings -XTypeApplications
 
 -- @TIPO puede ser LedgerApiV2.Datum o LedgerApiV2.Redeemer o cualquiera creado internamente
 -- readFileToPlutusDataAsTyped @TIPO "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/exampleDatum.json"
 -- readFileToPlutusDataAsTyped @LedgerApiV2.Datum "/home/manuelpadilla/source/copyRepos/RATS-DAO/cardano-devs-scripts/files/validators/V2/exampleDatum.json"
 -- contents of file: {"constructor":0,"fields":[{"bytes":"abfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e"},{"constructor":0,"fields":[{"bytes":"4353"},{"bytes":"4d616e75"}]},{"int":5000000}]}
-
+-}
 readFileToPlutusDataAsTyped :: forall a. (LedgerApiV2.UnsafeFromData a, P.Show a) => P.String -> P.IO a
 readFileToPlutusDataAsTyped filepath = do
     !raw <- readFileToPlutusData filepath
@@ -640,8 +629,6 @@ pkhFromStr s =
         Right (LedgerBytes.LedgerBytes bytes) -> LedgerApiV1.PubKeyHash bytes
         Left msg                              -> P.error $ "Could not convert from hex to bytes: " ++ P.show msg
 
-
-
 --------------------------------------------------------------------------------2
 
 hashValidator :: LedgerApiV2.Validator -> LedgerApiV2.ValidatorHash
@@ -649,9 +636,6 @@ hashValidator = UtilsScriptsV2.validatorHash
 
 hashScriptValidator :: LedgerApiV2.Validator -> LedgerApiV2.ScriptHash
 hashScriptValidator = UtilsScriptsV2.scriptHash . LedgerApiV2.getValidator
-
--- addressValidator :: LedgerApiV2.ValidatorHash -> LedgerAddress.Address
--- addressValidator = Ledger.scriptHashAddress
 
 addressValidator :: LedgerApiV2.ValidatorHash -> LedgerAddress.Address
 addressValidator = Ledger.scriptHashAddress
@@ -680,11 +664,11 @@ getScriptSerialisedV1 = ApiShelley.PlutusScriptSerialised
 
 writeValidatorV1 :: P.String -> P.String -> LedgerScriptsV1.Validator -> P.IO (Either (CardanoApi.FileError ()) ())
 writeValidatorV1 path file codeValidator = do
-    let -- v1dir = "V1"
+    let
         !scriptUnValidatorV1 = getScriptUnValidatorV1 codeValidator
         !scriptShortBsV1 = getScriptShortBsV1 scriptUnValidatorV1
         !scriptSerialisedV1 = getScriptSerialisedV1 scriptShortBsV1
-    SystemDirectory.createDirectoryIfMissing True path -- SystemFilePathPosix.</> v1dir
+    SystemDirectory.createDirectoryIfMissing True path
     CardanoApi.writeFileTextEnvelope (path SystemFilePathPosix.</> file) Nothing scriptSerialisedV1
 
 --------------------------------------------------------------------------------2
@@ -702,11 +686,11 @@ getScriptSerialised = ApiShelley.PlutusScriptSerialised
 
 writeValidator :: P.String -> P.String -> LedgerScriptsV1.Validator -> P.IO (Either (CardanoApi.FileError ()) ())
 writeValidator path file codeValidator = do
-    let -- v1dir = "V2"
+    let
         !scriptUnValidatorV2 = getScriptUnValidator codeValidator
         !scriptShortBsV2 = getScriptShortBs scriptUnValidatorV2
         !scriptSerialisedV2 = getScriptSerialised scriptShortBsV2
-    SystemDirectory.createDirectoryIfMissing True path -- SystemFilePathPosix.</> V2dir
+    SystemDirectory.createDirectoryIfMissing True path
     CardanoApi.writeFileTextEnvelope (path SystemFilePathPosix.</> file) Nothing scriptSerialisedV2
 
 --------------------------------------------------------------------------------2
@@ -716,7 +700,6 @@ readValidator  path file = do
     CardanoApi.readFileTextEnvelope (ApiShelley.AsPlutusScript ApiShelley.AsPlutusScriptV2) (path SystemFilePathPosix.</> file)
         >>= \case
             Right key' -> do
-                -- let des = ApiShelley.deserialiseFromRawBytes (ApiShelley.AsPlutusScript ApiShelley.AsPlutusScriptV2) key' -- CodecSerialise.deserialise  key'
                 let des = LedgerApiV2.Validator $ LedgerTxCardanoAPI.fromCardanoPlutusScript key'
                 return $ Right des
             Left message -> return $ Left message
@@ -727,11 +710,11 @@ getScriptMintingPolicyV1 = LedgerScriptsV1.getMintingPolicy
 
 writeMintingPolicyV1 :: P.String -> P.String -> LedgerScriptsV1.MintingPolicy -> P.IO (Either (CardanoApi.FileError ()) ())
 writeMintingPolicyV1 path file policy = do
-    let -- v1dir = "V1"
+    let
         !scriptMintingPolicyV1 = getScriptMintingPolicyV1 policy
         !scriptShortBsV1 = getScriptShortBsV1 scriptMintingPolicyV1
         !scriptSerialisedV1 = getScriptSerialisedV1 scriptShortBsV1
-    SystemDirectory.createDirectoryIfMissing True path -- SystemFilePathPosix.</> v1dir
+    SystemDirectory.createDirectoryIfMissing True path
     CardanoApi.writeFileTextEnvelope (path SystemFilePathPosix.</> file) Nothing scriptSerialisedV1
 
 --------------------------------------------------------------------------------2
@@ -741,11 +724,11 @@ getScriptMintingPolicy = LedgerApiV2.getMintingPolicy
 
 writeMintingPolicy :: P.String -> P.String -> LedgerApiV2.MintingPolicy -> P.IO (Either (CardanoApi.FileError ()) ())
 writeMintingPolicy path file policy = do
-    let -- v1dir = "V1"
+    let
         !scriptMintingPolicyV2 = getScriptMintingPolicy policy
         !scriptShortBsV2 = getScriptShortBs scriptMintingPolicyV2
         !scriptSerialisedV2 = getScriptSerialised scriptShortBsV2
-    SystemDirectory.createDirectoryIfMissing True path -- SystemFilePathPosix.</> v1dir
+    SystemDirectory.createDirectoryIfMissing True path
     CardanoApi.writeFileTextEnvelope (path SystemFilePathPosix.</> file) Nothing scriptSerialisedV2
 
 --------------------------------------------------------------------------------2
@@ -759,30 +742,6 @@ readMintingPolicy path file = do
                 let des = LedgerApiV2.MintingPolicy $ LedgerTxCardanoAPI.fromCardanoPlutusScript key'
                 return $ Right des
             Left message -> return $ Left message
-
--- let types = --CardanoApiSerialiseTextEnvelope.FromSomeType (ApiShelley.AsVerificationKey ApiShelley.AsByronKey) (VerificationKey ByronKey)
---         [ CardanoApiSerialiseTextEnvelope.FromSomeType ApiShelley.AsPlutusScriptV2 Right]
-
--- --scriptSerialisedV2 <- CardanoApi.readFileTextEnvelopeAnyOf types (path SystemFilePathPosix.</> file)
--- textEnv <- CardanoApi.readFileTextEnvelope (CardanoApiSerialiseTextEnvelope.FromSomeType ApiShelley.PlutusScript ApiShelley.PlutusScriptV2) (path SystemFilePathPosix.</> file)
-
--- return ()
--- case scriptSerialisedV2 of
---     -- Left err -> P.return $ Left err
---     Right (Right (LedgerScriptsV1.Script l)) -> do
---         let !scriptMintingPolicyV2 = CodecSerialise.deserialise s
---         --     !scriptSerialisedV2 = DataByteStringLazy.fromStrict $ DataByteStringShort.fromShort scriptShortBsV2
---         --     !scriptMintingPolicyV2 = CodecSerialise.deserialise scriptSerialisedV2
---         -- P.return $ Right scriptMintingPolicyV2
---         P.return scriptMintingPolicyV2
---     -- Right _ -> P.return $ Left $ ApiShelley.TextEnvelopeAesonDecodeError  "Not a Plutus Script V2"
-
--- return scriptSerialisedV2
--- let ApiShelley.PlutusScript ApiShelley.PlutusScriptV2   [ApiShelley.FromSomeType ApiShelley.PlutusScriptV2]
---     !scriptMintingPolicyV2 = getScriptMintingPolicy policy
---     !scriptShortBsV2 = getScriptShortBs scriptMintingPolicyV2
---     !scriptSerialisedV2 = getScriptSerialised scriptShortBsV2
--- SystemDirectory.createDirectoryIfMissing True path --SystemFilePathPosix.</> v1dir
 
 --------------------------------------------------------------------------------2
 -- Create Script Address
@@ -828,7 +787,6 @@ validatorHashToBinary headerNetworkTag vhash = do
 Prefix for Testnet: "addr_test" and Mainnet: "addr"
 These prefixes are imported from Cardano.Codec.Bech32.Prefixes
 -}
-
 addrBech32DataPart :: P.String -> LedgerApiV2.ValidatorHash -> CodecBinaryBech32.DataPart
 addrBech32DataPart headerNetworkTag vhash = CodecBinaryBech32.dataPartFromBytes (validatorHashToBinary headerNetworkTag vhash)
 
@@ -840,7 +798,6 @@ The bech32 representation is derived in 2 steps:
 - bech32 = prefix + dataPart
 - and where dataPart = header + validatorHash
 -}
-
 validatorAddrToAddrBech32Testnet :: LedgerAddress.Address -> DataByteStringLazy.ByteString
 validatorAddrToAddrBech32Testnet addr = do
     let !vhash = validatorAddrToHash addr
@@ -861,54 +818,9 @@ validatorAddrToAddrBech32Mainnet addr = do
 
 --------------------------------------------------------------------------------2
 
-evaluateScriptValidator :: LedgerApiV2.Validator -> [PlutusTx.Data] -> PlutusTx.Data -> PlutusTx.Data -> PlutusTx.Data -> (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Integer)
-evaluateScriptValidator validator params datum redeemer ctx =
-    let datas :: [PlutusTx.Data]
-        datas = params ++ [datum, redeemer, ctx]
-        ----------------------
-        !pv = LedgerProtocolVersionsV1.vasilPV
-        !scriptUnValidatorV2 = getScriptUnValidator validator
-        !scriptShortBsV2 = getScriptShortBs scriptUnValidatorV2
-        ----------------------
-        exBudget :: LedgerApiV2.ExBudget
-        exBudget = LedgerApiV2.ExBudget 10000000000 14000000
-        ----------------------
-        -- !(logout, e) = LedgerApiV2.evaluateScriptCounting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting scriptShortBsV2 datas
-        !(logout, e) = LedgerApiV2.evaluateScriptRestricting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting exBudget scriptShortBsV2 datas
-        ----------------------
-        !size = LedgerScriptsV1.scriptSize scriptUnValidatorV2
-    in  (logout, e, size)
-
---------------------------------------------------------------------------------2
-
-evaluateScriptMint :: LedgerApiV2.MintingPolicy -> [PlutusTx.Data] -> PlutusTx.Data -> PlutusTx.Data -> (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Integer)
-evaluateScriptMint policy params redeemer ctx =
-    let datas :: [PlutusTx.Data]
-        datas = params ++ [redeemer, ctx]
-        ----------------------
-        !pv = LedgerProtocolVersionsV1.vasilPV
-        !scriptMintingPolicyV2 = getScriptMintingPolicy policy
-        !scriptShortBsV2 = getScriptShortBs scriptMintingPolicyV2
-        ----------------------
-        exBudget :: LedgerApiV2.ExBudget
-        exBudget = LedgerApiV2.ExBudget 10000000000 14000000
-        ----------------------
-        -- !(logout, e) = Ledge rApiV2.evaluateScriptCounting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting scriptShortBsV2 datas
-        !(logout, e) = LedgerApiV2.evaluateScriptRestricting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting exBudget scriptShortBsV2 datas
-        ----------------------
-        !size = LedgerScriptsV1.scriptSize scriptMintingPolicyV2
-    in  (logout, e, size)
-
---------------------------------------------------------------------------------2
-
 -- | Try to get the Type from a DecoratedTxOut.
 getDatumFromDecoratedTxOut :: forall datum. PlutusTx.FromData datum => LedgerTx.DecoratedTxOut -> Maybe datum
 getDatumFromDecoratedTxOut decoratedTxOut =
-    -- lens: puedo hacer directamente el getter y luego no tengo que chekear por maybe... ya este simbolo lo hace todo
-    -- en lugar de esto:
-    -- DataMaybe.fromJust $ decoratedTxOut ControlLens.^? LedgerTx.decoratedTxOutDatum
-    -- pongo esto:
-    -- (decoratedTxOut ControlLens.^?! LedgerTx.decoratedTxOutDatum)
     let (_, mdatum) = (decoratedTxOut ControlLens.^?! LedgerTx.decoratedTxOutDatum)
         datum = (mdatum ControlLens.^?! LedgerTx.datumInDatumFromQuery)
         LedgerApiV2.Datum datumBuiltinData = datum
@@ -919,17 +831,10 @@ getDatumFromDecoratedTxOut decoratedTxOut =
 -- | Try to get the Datum from a DecoratedTxOut.
 getUnsafeDatumFromDecoratedTxOut :: forall datum. PlutusTx.UnsafeFromData datum => LedgerTx.DecoratedTxOut -> datum
 getUnsafeDatumFromDecoratedTxOut decoratedTxOut =
-    -- lens: puedo hacer directamente el getter y luego no tengo que chekear por maybe... ya este simbolo lo hace todo
-    -- en lugar de esto:
-    -- DataMaybe.fromJust $ decoratedTxOut ControlLens.^? LedgerTx.decoratedTxOutDatum
-    -- pongo esto:
-    -- (decoratedTxOut ControlLens.^?! LedgerTx.decoratedTxOutDatum)
     let (_, mdatum) = (decoratedTxOut ControlLens.^?! LedgerTx.decoratedTxOutDatum)
         datum = (mdatum ControlLens.^?! LedgerTx.datumInDatumFromQuery)
         LedgerApiV2.Datum datumBuiltinData = datum
     in  LedgerApiV2.unsafeFromBuiltinData @datum datumBuiltinData
-
-
 
 --------------------------------------------------------------------------------2
 
@@ -957,7 +862,7 @@ getUnsafe_LedgerApiV2Datum_From_TxOutOutputDatum :: LedgerApiV2.TxOut -> LedgerA
 getUnsafe_LedgerApiV2Datum_From_TxOutOutputDatum !txOut =
     case LedgerApiV2.txOutDatum txOut of
             LedgerApiV2.OutputDatum datum -> datum
-            _ -> P.error "getUnsafe_LedgerApiV2Datum_From_TxOutOutputDatum"
+            _                             -> P.error "getUnsafe_LedgerApiV2Datum_From_TxOutOutputDatum"
 
 -- Function to extract datum unsafely from TxOut
 getUnsafe_Datum_From_TxOutOutputDatum :: forall datum. PlutusTx.UnsafeFromData datum => LedgerApiV2.TxOut -> datum
@@ -969,7 +874,6 @@ getUnsafe_DatumType_From_TxOutOutputDatum !txOut !getDatumTypeFromDatum = getDat
 
 --------------------------------------------------------------------------------
 
-
 isTxValid :: ChainIndexTypes.TxStatus -> Bool
 isTxValid txStatus =
     case txStatus of
@@ -980,44 +884,6 @@ isTxValid txStatus =
         ChainIndexTypes.TentativelyConfirmed _ ChainIndexTypes.UnknownValidity _ -> False
         ChainIndexTypes.TentativelyConfirmed _ ChainIndexTypes.TxInvalid _       -> False
         ChainIndexTypes.TentativelyConfirmed _ ChainIndexTypes.TxValid _         -> True
-
---------------------------------------------------------------------------------2
-
--- mintNFT_With_TxOut ::
---     DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut ->
---     LedgerApiV2.MintingPolicy ->
---     LedgerApiV2.TxOutRef ->
---     Maybe LedgerApiV2.Redeemer ->
---     LedgerValue.Value ->
---     LedgerValidityInterval.ValidityInterval LedgerApiV2.POSIXTime ->
---     --    -> LedgerIntervalV1.Interval LedgerApiV2.POSIXTime
---     Ledger.PaymentPubKeyHash ->
---     (LedgerConstraints.ScriptLookups a0, LedgerTxConstraints.TxConstraints (UtilsTypedScriptsValidatorsV1.RedeemerType DataVoid.Void) (UtilsTypedScriptsValidatorsV1.DatumType DataVoid.Void))
--- mintNFT_With_TxOut uTxOs policy txOutRef redeemerMint valueForMint validityRange pPKH = do
---     let use = head [(t, ci) | (t, ci) <- DataMap.toList uTxOs, t == txOutRef]
---         -- map = zip (fst use) (snd use)
---         mapz = DataMap.fromList [use]
-
---         lookupsTxMint =
---             -- This script is goint to use see all the uTxO from master or user walllet
---             -- LedgerConstraints.unspentOutputs uTxOs P.<>
---             LedgerConstraints.unspentOutputs mapz
---                 P.<>
---                 -- Is going to Mint the NFT
---                 LedgerConstraints.plutusV2MintingPolicy policy
-
---         txMint =
---             -- Is going to spend the user uTxO assinged to the TxID
---             LedgerConstraints.mustSpendPubKeyOutput txOutRef
---                 P.<>
---                 -- Is going to Mint the NFT
---                 case redeemerMint of
---                     Nothing -> LedgerConstraints.mustMintValue valueForMint
---                     Just r  -> LedgerConstraints.mustMintValueWithRedeemer r valueForMint
---                 P.<> LedgerConstraints.mustValidateInTimeRange validityRange
---                 P.<> LedgerConstraints.mustBeSignedBy pPKH
-
---     (lookupsTxMint, txMint)
 
 --------------------------------------------------------------------------------2
 
@@ -1139,57 +1005,6 @@ mustSpendScriptOutput_With_RefPolicy uTxO_To_Consume redeemer scriptRef = do
 
 --------------------------------------------------------------------------------2
 
--- burnToken_With_Policy ::
---     DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut ->
---     Maybe LedgerApiV2.MintingPolicy ->
---     Maybe LedgerApiV2.Redeemer ->
---     LedgerValue.Value ->
---     LedgerValidityInterval.ValidityInterval LedgerApiV2.POSIXTime ->
---     Ledger.PaymentPubKeyHash ->
---     (LedgerConstraints.ScriptLookups a0, LedgerTxConstraints.TxConstraints (UtilsTypedScriptsValidatorsV1.RedeemerType DataVoid.Void) (UtilsTypedScriptsValidatorsV1.DatumType DataVoid.Void))
--- burnToken_With_Policy uTxOs policy' redeemerBurn valueForBurn validityRange pPKH = do
---     let lookupsTxBurn' =
---             LedgerConstraints.unspentOutputs uTxOs
-
---         lookupsTxBurn = case policy' of
---             Just policy -> lookupsTxBurn' P.<> LedgerConstraints.plutusV2MintingPolicy policy
---             Nothing     -> lookupsTxBurn'
-
---         txBurn =
---             case redeemerBurn of
---                 Nothing -> LedgerConstraints.mustMintValue valueForBurn
---                 Just r  -> LedgerConstraints.mustMintValueWithRedeemer r valueForBurn
---                 P.<> LedgerConstraints.mustValidateInTimeRange validityRange
---                 P.<> LedgerConstraints.mustBeSignedBy pPKH
-
---     (lookupsTxBurn, txBurn)
-
--- --------------------------------------------------------------------------------2
-
--- burnToken_With_RefPolicy ::
---     DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut ->
---     (LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut) ->
---     Maybe LedgerApiV2.Redeemer ->
---     LedgerValue.Value ->
---     LedgerValidityInterval.ValidityInterval LedgerApiV2.POSIXTime ->
---     Ledger.PaymentPubKeyHash ->
---     (LedgerConstraints.ScriptLookups a0, LedgerTxConstraints.TxConstraints (UtilsTypedScriptsValidatorsV1.RedeemerType DataVoid.Void) (UtilsTypedScriptsValidatorsV1.DatumType DataVoid.Void))
--- burnToken_With_RefPolicy uTxOs uTxOAtScriptWithScript redeemerBurn valueForBurn validityRange pPKH = do
---     let lookupsTxBurn =
---             LedgerConstraints.unspentOutputs uTxOs
---                 P.<> LedgerConstraints.unspentOutputs (DataMap.fromList [uTxOAtScriptWithScript])
-
---         txBurn =
---             case redeemerBurn of
---                 Nothing -> LedgerTxConstraints.mustMintValueWithReference (fst uTxOAtScriptWithScript) valueForBurn
---                 Just r  -> LedgerTxConstraints.mustMintValueWithRedeemerAndReference r (Just $ fst uTxOAtScriptWithScript) valueForBurn
---                 P.<> LedgerConstraints.mustValidateInTimeRange validityRange
---                 P.<> LedgerConstraints.mustBeSignedBy pPKH
-
---     (lookupsTxBurn, txBurn)
-
---------------------------------------------------------------------------------2
-
 createValueAddingTokensOfCurrencySymbolOffChain :: (DataString.IsString e) => LedgerValue.AssetClass -> LedgerApiV2.CurrencySymbol -> Bool -> LedgerApiV2.Value -> Integer -> PlutusContract.Contract w s e LedgerApiV2.Value
 createValueAddingTokensOfCurrencySymbolOffChain ac cs acIsWithoutTokenName value cantidad = do
     if not acIsWithoutTokenName
@@ -1248,6 +1063,13 @@ getBalanceOfUTXOs uTxO = do
 
 --------------------------------------------------------------------------------22
 
+{-
+No pude hacerlo funcionar... pero en teria:
+-- entonces dentro de un contrato deberia poner esto antes de todo y el handlker se ocuparia del error
+-- ControlMonadErrorLens.handling PlutusContract._ContractError handleContractError $ do
+-- PlutusContract.handleError (\err -> PlutusContract.logError $ "Caught error: " ++ DataText.unpack err) $ do
+-- PlutusContract.handleError handleContractError $ do
+-}
 handleContractError :: DataText.Text -> PlutusContract.Contract w s DataText.Text ()
 handleContractError err = do
     PlutusContract.logInfo @P.String $ TextPrintf.printf "--------------------------------------------------------------------------------2"
@@ -1256,11 +1078,6 @@ handleContractError err = do
     -- PlutusContract.logError $ "Caught error: " ++ DataText.unpack err
     PlutusContract.logInfo @P.String $ TextPrintf.printf "--------------------------------------------------------------------------------2"
     PlutusContract.logInfo @P.String $ TextPrintf.printf "--------------------------------------------------------------------------------2"
-
--- entonces dentro de un contrato deberia poner esto antes de todo y el handlker se ocuparia del error
--- ControlMonadErrorLens.handling PlutusContract._ContractError handleContractError $ do
--- PlutusContract.handleError (\err -> PlutusContract.logError $ "Caught error: " ++ DataText.unpack err) $ do
--- PlutusContract.handleError handleContractError $ do
 
 --------------------------------------------------------------------------------2
 
@@ -1305,10 +1122,6 @@ printSmallSeparator = do
 
 get_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_CS :: forall datum datumType w s e. (PlutusTx.FromData datum) => LedgerApiV2.CurrencySymbol -> DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut -> (datum -> datumType) -> PlutusContract.Contract w s e [(LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut, Maybe datumType)]
 get_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_CS !cs !uTxOs !getDatumTypeFromDatum = do
-    -- HLINT ME SUGIERE CAMBIAR:
-    -- P.maybe Nothing (Just . getDatumTypeFromDatum) (getDatumFromDecoratedTxOut @datum decoratedTxOut)
-    -- POR
-    -- (Just . getDatumTypeFromDatum) P.=<< getDatumFromDecoratedTxOut @datum decoratedTxOut
     let uTxOs' = [(txOutRef, decoratedTxOut, (Just . getDatumTypeFromDatum) P.=<< getDatumFromDecoratedTxOut @datum decoratedTxOut) | (txOutRef, decoratedTxOut) <- DataMap.toList uTxOs, OnChainHelpers.isNFT_With_CS_InValue (getValueFromDecoratedTxOut decoratedTxOut) cs && isJust (getDatumFromDecoratedTxOut @datum decoratedTxOut)]
     return uTxOs'
 --------------------------------------------------------------------------------2
@@ -1321,10 +1134,6 @@ getUnsafe_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_CS !cs !uTxOs !getDatumTy
 
 get_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_AC :: forall datum datumType w s e. (PlutusTx.FromData datum) => LedgerValue.AssetClass -> DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut -> (datum -> datumType) -> PlutusContract.Contract w s e [(LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut, Maybe datumType)]
 get_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_AC !ac !uTxOs !getDatumTypeFromDatum = do
-    -- HLINT ME SUGIERE CAMBIAR:
-    -- P.maybe Nothing (Just . getDatumTypeFromDatum) (getDatumFromDecoratedTxOut @datum decoratedTxOut)
-    -- POR
-    -- (Just . getDatumTypeFromDatum) P.=<< getDatumFromDecoratedTxOut @datum decoratedTxOut
     let uTxOs' = [(txOutRef, decoratedTxOut, (Just . getDatumTypeFromDatum) P.=<< getDatumFromDecoratedTxOut @datum decoratedTxOut) | (txOutRef, decoratedTxOut) <- DataMap.toList uTxOs, OnChainHelpers.isNFT_With_AC_InValue (getValueFromDecoratedTxOut decoratedTxOut) ac && isJust (getDatumFromDecoratedTxOut @datum decoratedTxOut)]
     return uTxOs'
 
@@ -1333,48 +1142,4 @@ getUnsafe_TxOutRefs_DecoratedTxOuts_And_DatumsTypes_By_AC !ac !uTxOs !getDatumTy
     let uTxOs' = [(txOutRef, decoratedTxOut, getDatumTypeFromDatum $ getUnsafeDatumFromDecoratedTxOut @datum decoratedTxOut) | (txOutRef, decoratedTxOut) <- DataMap.toList uTxOs, OnChainHelpers.isNFT_With_AC_InValue (getValueFromDecoratedTxOut decoratedTxOut) ac ]
     return uTxOs'
 
---------------------------------------------------------------------------------2
-
-
-
-
-
--- getUTxO_With_Datum_From_AC ::  LedgerValue.AssetClass ->  DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut -> PlutusContract.Contract w s e (Maybe (LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut))
--- getUTxO_With_Datum_From_AC coreID_AC uTxOs = do
---     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "getUTxO_With_Datum_From_AC : uTxOs: %s" (P.show  uTxOs)
---     let
---         !uTxOsWithProtocolDatum = [ (txOutRef, scriptDecoratedTxOut) | (txOutRef, scriptDecoratedTxOut) <- DataMap.toList uTxOs, isNFTInDecoratedTxOut scriptDecoratedTxOut coreID_AC]
---     case uTxOsWithProtocolDatum of
---         [x] -> return $ Just x
---         _ -> return Nothing
-
---------------------------------------------------------------------------------2
-
--- getUTxOs_With_Datums_From_AC ::  LedgerValue.AssetClass -> DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut -> PlutusContract.Contract w s e [(LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut)]
--- getUTxOs_With_Datums_From_AC depositsID_AC uTxOs = do
---     let
---         uTxOsWithDepositsDatum = [ (txOutRef, scriptDecoratedTxOut) | (txOutRef, scriptDecoratedTxOut) <- DataMap.toList uTxOs, isNFTInDecoratedTxOut scriptDecoratedTxOut depositsID_AC]
---         --PlutusContract.logInfo @P.String $ TextPrintf.printf "UTxOs List with Valid DepositsDatum: %s" (P.show $ fst <$> uTxOsWithDepositsDatumAnd_Token)
---     return uTxOsWithDepositsDatum
-
---------------------------------------------------------------------------------2
-
--- getUTxO_With_ScriptDatum :: LedgerValue.AssetClass -> LedgerValue.AssetClass -> DataMap.Map LedgerApiV2.TxOutRef LedgerTx.DecoratedTxOut -> PlutusContract.Contract w s e (Maybe (LedgerApiV2.TxOutRef, LedgerTx.DecoratedTxOut))
--- getUTxO_With_ScriptDatum scriptID_AC script_AC uTxOs = do
---     let
---         !uTxOsWithScriptDatum = [ (txOutRef, scriptDecoratedTxOut) | (txOutRef, scriptDecoratedTxOut) <- DataMap.toList uTxOs, isNFTInDecoratedTxOut scriptDecoratedTxOut scriptID_AC && isNFTInDecoratedTxOut scriptDecoratedTxOut script_AC ]
---     case uTxOsWithScriptDatum of
---         [x] -> return $ Just x
---         (x:_) -> return $ Just x
---         _ -> return Nothing
-
---------------------------------------------------------------------------------2
-
--- {-# INLINEABLE getUnsafe_TxOuts_And_DatumTypes_from_Outputs_By_CS #-}
--- getUnsafe_TxOuts_And_DatumTypes_from_Outputs_By_CS :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.CurrencySymbol -> (datum -> datumType) -> [(LedgerApiV2.TxOut, datumType)]
--- getUnsafe_TxOuts_And_DatumTypes_from_Outputs_By_CS !ctx !cs !getDatumTypeFromDatum =
---     let !txOuts = LedgerApiV2.txInfoOutputs (LedgerContextsV2.scriptContextTxInfo ctx)
---     in  getUnsafe_TxOuts_And_DatumTypes_From_TxOuts_By_CS @datum @datumType txOuts ctx cs getDatumTypeFromDatum
-
---  [(txOut, getDatumTypeFromDatum $ getUnsafe_Datum_From_TxOut @datum txOut ctx) | txOut <- txOuts, isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs]
 --------------------------------------------------------------------------------2

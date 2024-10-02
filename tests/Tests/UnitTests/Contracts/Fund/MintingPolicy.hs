@@ -34,6 +34,7 @@ import qualified Protocol.Fund.Types                as FundT
 import qualified Protocol.OnChainHelpers            as OnChainHelpers
 import qualified Protocol.Protocol.Types            as ProtocolT
 import qualified Protocol.Types                     as T
+import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxContext.Fund
 import           TestUtils.HelpersMAYZ
@@ -41,7 +42,6 @@ import           TestUtils.TestContext.Asserts
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Constants
 
 --------------------------------------------------------------------------------
 
@@ -544,7 +544,7 @@ fund_Policy_Redeemer_MintFT_Tests tp =
                 in
                     [
                         Tasty.testCase "Minting FT correctly must succeed" $ do
-                            let ctx' = ctx 
+                            let ctx' = ctx
                             results <- testContextWrapper tp ctx'
                             (Nothing, results)
                                 `assertResultsContainAnyOf` []

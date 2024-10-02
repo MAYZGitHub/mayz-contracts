@@ -12,14 +12,14 @@ module Helpers.Validator where
 -- External Imports
 ------------------------------------------------------------------------------------------
 
-import qualified GHC.Generics            as Generics
+import qualified GHC.Generics         as Generics
 import qualified Ledger
-import qualified Ledger.Address          as LedgerAddress
-import qualified Ledger.Crypto           as Crypto
-import qualified Plutus.V2.Ledger.Api    as LedgerApiV2
+import qualified Ledger.Address       as LedgerAddress
+import qualified Ledger.Crypto        as Crypto
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified PlutusTx
+import           PlutusTx.Prelude     (check, traceIfFalse, verifyEd25519Signature)
 import           Prelude
-import           PlutusTx.Prelude        (check, traceIfFalse, verifyEd25519Signature)
 
 ------------------------------------------------------------------------------------------
 

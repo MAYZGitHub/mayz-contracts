@@ -50,7 +50,7 @@ investUnit_UpdateMinADA_TxContext tp newMinADA =
         -----------------
         input_InvestUnit_UTxO = investUnit_UTxO_MockData tp
         -----------------
-        input_Datum = InvestUnitT.getInvestUnit_DatumType_From_UTxO input_InvestUnit_UTxO 
+        input_Datum = InvestUnitT.getInvestUnit_DatumType_From_UTxO input_InvestUnit_UTxO
         input_Value = LedgerApiV2.txOutValue input_InvestUnit_UTxO
         -----------------
         output_Datum = InvestUnit.mkUpdated_InvestUnit_Datum_With_MinADAChanged

@@ -10,30 +10,30 @@ module TestUtils.TestContext.Evaluate where
 
 -- Non-IOG imports
 
-import qualified Data.ByteString as BS
-import qualified Data.List as DataList
-import qualified Data.Maybe as DataMaybe
-import qualified Data.Text as DataText
-import qualified Text.Read as TextRead
-import Prelude as P
+import qualified Data.ByteString                   as BS
+import qualified Data.List                         as DataList
+import qualified Data.Maybe                        as DataMaybe
+import qualified Data.Text                         as DataText
+import           Prelude                           as P
+import qualified Text.Read                         as TextRead
 
 -- IOG imports
 
-import qualified Ledger.Value as LedgerValue
+import qualified Ledger.Value                      as LedgerValue
 import qualified Plutus.V1.Ledger.ProtocolVersions as LedgerProtocolVersionsV1
-import qualified Plutus.V1.Ledger.Scripts as LedgerScriptsV1
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
-import qualified PlutusCore (defaultCostModelParams)
-import qualified PlutusTx.AssocMap as TxAssocMap
-import qualified PlutusTx.Builtins as PlutusTx
+import qualified Plutus.V1.Ledger.Scripts          as LedgerScriptsV1
+import qualified Plutus.V2.Ledger.Api              as LedgerApiV2
+import qualified PlutusCore                        (defaultCostModelParams)
+import qualified PlutusTx.AssocMap                 as TxAssocMap
+import qualified PlutusTx.Builtins                 as PlutusTx
 
 -- Project imports
 
-import qualified Generic.OffChainHelpers as OffChainHelpers
-import qualified Generic.OnChainHelpers as OnChainHelpers
-import TestUtils.Constants
-import TestUtils.Helpers
-import TestUtils.TypesMAYZ
+import qualified Generic.OffChainHelpers           as OffChainHelpers
+import qualified Generic.OnChainHelpers            as OnChainHelpers
+import           TestUtils.Constants
+import           TestUtils.Helpers
+import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ testContext getValidator getPolicy getValidatorRedeemerTxSpec getPolicyRedeemerT
                 ( any
                     ( \(purpose, _) -> case purpose of
                         LedgerApiV2.Spending ref' -> ref' == ref
-                        _ -> False
+                        _                         -> False
                     )
                     porpuseAndRedeemers
                 )
@@ -110,7 +110,7 @@ testContext getValidator getPolicy getValidatorRedeemerTxSpec getPolicyRedeemerT
                 ( any
                     ( \(purpose, _) -> case purpose of
                         LedgerApiV2.Minting cs' -> cs' == cs
-                        _ -> False
+                        _                       -> False
                     )
                     porpuseAndRedeemers
                 )
@@ -166,12 +166,12 @@ testContext getValidator getPolicy getValidatorRedeemerTxSpec getPolicyRedeemerT
                 (memExceeded, cpuExceeded) =
                     case (memIntMaybe, cpuIntMaybe) of
                         (Just memInt, Just cpuInt) -> (memInt > adjustedMaxMem, cpuInt > adjustedMaxCPU)
-                        _ -> (False, False)
+                        _                          -> (False, False)
                 -------------
                 sizeExceededCheck =
                     case sizeMaybe of
                         Just size -> size > adjustedMaxSize
-                        Nothing -> False
+                        Nothing   -> False
                 -------------
                 -- Helper to calculate percentage
                 percentageOverMax :: Integer -> Integer -> P.Double
@@ -376,7 +376,7 @@ testRedeemer getValidator _ ctx (LedgerApiV2.Spending txOutRef, redeemer) _ = do
             let filtered = filter (\txInInfo' -> LedgerApiV2.txInInfoOutRef txInInfo' == txOutRef') list
              in case filtered of
                     (x : _) -> Just x
-                    [] -> Nothing
+                    []      -> Nothing
         !txInfoInputs = LedgerApiV2.txInfoInputs $ LedgerApiV2.scriptContextTxInfo ctx
         !txInInfo = findTxInInfo txOutRef txInfoInputs
     case txInInfo of
@@ -385,7 +385,7 @@ testRedeemer getValidator _ ctx (LedgerApiV2.Spending txOutRef, redeemer) _ = do
                 !address = LedgerApiV2.txOutAddress txOut
                 !scriptHashMaybe = case LedgerApiV2.addressCredential address of
                     LedgerApiV2.ScriptCredential (LedgerApiV2.ValidatorHash hash) -> Just (LedgerApiV2.ScriptHash hash)
-                    _ -> Nothing
+                    _                                                             -> Nothing
             case scriptHashMaybe of
                 Nothing -> return (Nothing, ["NO SCRIPT HASH FOUND"], Left P.undefined, Nothing)
                 Just scriptHash ->
@@ -507,7 +507,7 @@ evaluateScriptValidatorEX validator datum redeemer context =
                         Left _ ->
                             case logout of
                                 [] -> (["ERROR EVALUATING SCRIPT"], ev, Just size)
-                                _ -> (logout, ev, Just size)
+                                _  -> (logout, ev, Just size)
             Nothing -> (["COST MODEL NOT FOUND"], Left P.undefined, Just size)
 
 ------------------------------------------------------------------------------
@@ -540,7 +540,7 @@ evaluateScriptPolicyEX policy redeemer context =
                         Left _ ->
                             case logout of
                                 [] -> (["ERROR EVALUATING SCRIPT"], ev, Just size)
-                                _ -> (logout, ev, Just size)
+                                _  -> (logout, ev, Just size)
             Nothing -> (["COST MODEL NOT FOUND"], Left P.undefined, Just size)
 
 ---------------------------------------------------------------------------------

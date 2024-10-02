@@ -39,7 +39,7 @@ import qualified Protocol.InvestUnit.Types      as InvestUnitT
 import qualified Protocol.PABTypes              as T
 import qualified Protocol.Protocol.Types        as ProtocolT
 import qualified Protocol.Script.Types          as ScriptT
-import qualified Protocol.SellOffer.Types       as SellOfferT
+import qualified Protocol.SwapOffer.Types       as SwapOfferT
 import qualified Protocol.Types                 as T
 import           TestUtils.Constants
 import           TestUtils.Helpers
@@ -102,7 +102,7 @@ generateTestParams deployAllParams = do
         protocolAdmins = ["0000000000000000000000000000000000000000000000000000000000000004"]
         fundAdmins = ["0000000000000000000000000000000000000000000000000000000000000005"]
         delegatorsAdmins = ["0000000000000000000000000000000000000000000000000000000000000006"]
-        sellOfferAdmin = "0000000000000000000000000000000000000000000000000000000000000007"
+        swapOfferAdmin = "0000000000000000000000000000000000000000000000000000000000000007"
         ------------
         tokenEmergencyAdminPolicy_CS = "0000000000000000000000000000000000000000000000000000000000000003"
         tokenAdminPolicy_CS = "0000000000000000000000000000000000000000000000000000000000000002"
@@ -115,10 +115,10 @@ generateTestParams deployAllParams = do
                 (LedgerApiV2.POSIXTime ((1 * 30 * 24 * 60 * 60 * 1000) :: Integer)) -- min
                 (LedgerApiV2.POSIXTime ((24 * 30 * 24 * 60 * 60 * 1000) :: Integer)) -- max
                 (LedgerApiV2.POSIXTime ((12 * 30 * 24 * 60 * 60 * 1000) :: Integer)) -- def
-        requiredMAYZForSellOffer = 1_000
+        requiredMAYZForSwapOffer = 1_000
         requiredMAYZForBuyOrder = 1_000
         minMaxDef_CommissionFund_PerYear_InBPx1e3 = ProtocolT.MinMaxDef 0 10_000_000 120_000 :: ProtocolT.MinMaxDef Integer
-        minMaxDef_CommissionSellOffer_InBPx1e3 = ProtocolT.MinMaxDef 0 10_000_000 120_000 :: ProtocolT.MinMaxDef Integer
+        minMaxDef_CommissionSwapOffer_InBPx1e3 = ProtocolT.MinMaxDef 0 10_000_000 120_000 :: ProtocolT.MinMaxDef Integer
         minMaxDef_CommissionBuyOrder_InBPx1e3 = ProtocolT.MinMaxDef 0 10_000_000 120_000 :: ProtocolT.MinMaxDef Integer
         share_InBPx1e2_Protocol = 300_000
         share_InBPx1e2_Delegators = 300_000
@@ -223,34 +223,34 @@ generateTestParams deployAllParams = do
         scriptValidator_Hash = OffChainHelpers.hashValidator scriptValidator
 
     let
-        sellOfferValidator =
+        swapOfferValidator =
             do
                 let
-                    code = tccsSellOfferValidator_Pre testCompiledCodeScripts
-                    -- params = exampleSellOfferValidParams
+                    code = tccsSwapOfferValidator_Pre testCompiledCodeScripts
+                    -- params = exampleSwapOfferValidParams
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     param2 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenEmergencyAdminPolicy_CS
                     appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2
                 LedgerApiV2.mkValidatorScript appliedCode
     let
-        sellOfferValidator_Hash = OffChainHelpers.hashValidator sellOfferValidator
+        swapOfferValidator_Hash = OffChainHelpers.hashValidator swapOfferValidator
 
     let
-        sellOfferPolicyID =
+        swapOfferPolicyID =
             do
                 let
-                    code = tccsSellOfferPolicyID_Pre testCompiledCodeScripts
-                    -- params = exampleSellOfferPolicyParams
-                    -- protocolPolicyID_CS sellOffer_Validator_Hash tokenMAYZ_CS tokenMAYZ_TN
+                    code = tccsSwapOfferPolicyID_Pre testCompiledCodeScripts
+                    -- params = exampleSwapOfferPolicyParams
+                    -- protocolPolicyID_CS swapOffer_Validator_Hash tokenMAYZ_CS tokenMAYZ_TN
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
-                    (LedgerApiV2.ValidatorHash hash) = sellOfferValidator_Hash
+                    (LedgerApiV2.ValidatorHash hash) = swapOfferValidator_Hash
                     param2 = TxBuiltins.mkB hash
                     param3 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
                     param4 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
                     appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 `PlutusTx.applyCode` PlutusTx.liftCode param3 `PlutusTx.applyCode` PlutusTx.liftCode param4
                 LedgerApiV2.mkMintingPolicyScript appliedCode
     let
-        sellOfferPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy sellOfferPolicyID
+        swapOfferPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy swapOfferPolicyID
 
     let
         buyOrderValidator =
@@ -269,7 +269,7 @@ generateTestParams deployAllParams = do
             do
                 let
                     code = tccsBuyOrderPolicyID_Pre testCompiledCodeScripts
-                    -- params = exampleSellOfferPolicyParams
+                    -- params = exampleSwapOfferPolicyParams
                     -- protocolPolicyID_CS buyOrder_Validator_Hash tokenMAYZ_CS tokenMAYZ_TN
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     (LedgerApiV2.ValidatorHash hash) = buyOrderValidator_Hash
@@ -300,7 +300,7 @@ generateTestParams deployAllParams = do
             do
                 let
                     code = tccsDelegationPolicyID_Pre testCompiledCodeScripts
-                    -- params = exampleSellOfferPolicyParams
+                    -- params = exampleSwapOfferPolicyParams
                     --  protocolPolicyID_CS delegation_Validator_Hash tokenMAYZ_CS tokenMAYZ_TN
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     (LedgerApiV2.ValidatorHash hash) = delegationValidator_Hash
@@ -400,10 +400,10 @@ generateTestParams deployAllParams = do
             , tpScriptPolicyID_CS = scriptPolicyID_CS
             , tpScriptValidator = scriptValidator
             , tpScriptValidator_Hash = scriptValidator_Hash
-            , tpSellOfferPolicyID = sellOfferPolicyID
-            , tpSellOfferPolicyID_CS = sellOfferPolicyID_CS
-            , tpSellOfferValidator = sellOfferValidator
-            , tpSellOfferValidator_Hash = sellOfferValidator_Hash
+            , tpSwapOfferPolicyID = swapOfferPolicyID
+            , tpSwapOfferPolicyID_CS = swapOfferPolicyID_CS
+            , tpSwapOfferValidator = swapOfferValidator
+            , tpSwapOfferValidator_Hash = swapOfferValidator_Hash
             , tpBuyOrderPolicyID = buyOrderPolicyID
             , tpBuyOrderPolicyID_CS = buyOrderPolicyID_CS
             , tpBuyOrderValidator = buyOrderValidator
@@ -432,15 +432,15 @@ generateTestParams deployAllParams = do
             , tpProtocolAdmins = protocolAdmins
             , tpFundAdmins = fundAdmins
             , tpDelegatorsAdmins = delegatorsAdmins
-            , tpSellOfferAdmin = sellOfferAdmin
+            , tpSwapOfferAdmin = swapOfferAdmin
             , tpOraclePrivateKey = oraclePrivateKey
             , tpOraclePaymentPubKey = oraclePPK
             , tpFundCategory = exampleFundCategory
             , tpFundLifeTime = fundLifeTime
-            , tpRequiredMAYZForSellOffer = requiredMAYZForSellOffer
+            , tpRequiredMAYZForSwapOffer = requiredMAYZForSwapOffer
             , tpRequiredMAYZForBuyOrder = requiredMAYZForBuyOrder
             , tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 = minMaxDef_CommissionFund_PerYear_InBPx1e3
-            , tp_MinMaxDef_CommissionSellOffer_InBPx1e3 = minMaxDef_CommissionSellOffer_InBPx1e3
+            , tp_MinMaxDef_CommissionSwapOffer_InBPx1e3 = minMaxDef_CommissionSwapOffer_InBPx1e3
             , tp_MinMaxDef_CommissionBuyOrder_InBPx1e3 = minMaxDef_CommissionBuyOrder_InBPx1e3
             , tpShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol
             , tpShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators
@@ -470,8 +470,8 @@ generateScripts deployAllParams = do
                 , tccsProtocolValidator_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapProtocolValidator_Pre_CborHex deployAllParams
                 , tccsScriptPolicyID_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapScriptPolicyID_Pre_CborHex deployAllParams
                 , tccsScriptValidator_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapScriptValidator_Pre_CborHex deployAllParams
-                , tccsSellOfferPolicyID_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapSellOfferPolicyID_Pre_CborHex deployAllParams
-                , tccsSellOfferValidator_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapSellOfferValidator_Pre_CborHex deployAllParams
+                , tccsSwapOfferPolicyID_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapSwapOfferPolicyID_Pre_CborHex deployAllParams
+                , tccsSwapOfferValidator_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapSwapOfferValidator_Pre_CborHex deployAllParams
                 , tccsBuyOrderPolicyID_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapBuyOrderPolicyID_Pre_CborHex deployAllParams
                 , tccsBuyOrderValidator_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapBuyOrderValidator_Pre_CborHex deployAllParams
                 , tccsDelegationPolicyID_Pre = DeployHelpers.readCompiledCodeFromJsonString $ T.dapDelegationPolicyID_Pre_CborHex deployAllParams
@@ -512,7 +512,7 @@ findValidator :: TestParams -> LedgerApiV2.ScriptHash -> Maybe LedgerApiV2.Valid
 findValidator tp scriptHash
     | scriptHash == OffChainHelpers.hashScriptValidator (tpProtocolValidator tp) = Just (tpProtocolValidator tp)
     | scriptHash == OffChainHelpers.hashScriptValidator (tpScriptValidator tp) = Just (tpScriptValidator tp)
-    | scriptHash == OffChainHelpers.hashScriptValidator (tpSellOfferValidator tp) = Just (tpSellOfferValidator tp)
+    | scriptHash == OffChainHelpers.hashScriptValidator (tpSwapOfferValidator tp) = Just (tpSwapOfferValidator tp)
     | scriptHash == OffChainHelpers.hashScriptValidator (tpBuyOrderValidator tp) = Just (tpBuyOrderValidator tp)
     | scriptHash == OffChainHelpers.hashScriptValidator (tpDelegationValidator tp) = Just (tpDelegationValidator tp)
     | scriptHash == OffChainHelpers.hashScriptValidator (tpInvestUnitValidator tp) = Just (tpInvestUnitValidator tp)
@@ -524,7 +524,7 @@ findMintingPolicy :: TestParams -> LedgerApiV2.ScriptHash -> Maybe LedgerApiV2.M
 findMintingPolicy tp scriptHash
     | scriptHash == OffChainHelpers.hashScriptMinting (tpProtocolPolicyID tp) = Just (tpProtocolPolicyID tp)
     | scriptHash == OffChainHelpers.hashScriptMinting (tpScriptPolicyID tp) = Just (tpScriptPolicyID tp)
-    | scriptHash == OffChainHelpers.hashScriptMinting (tpSellOfferPolicyID tp) = Just (tpSellOfferPolicyID tp)
+    | scriptHash == OffChainHelpers.hashScriptMinting (tpSwapOfferPolicyID tp) = Just (tpSwapOfferPolicyID tp)
     | scriptHash == OffChainHelpers.hashScriptMinting (tpBuyOrderPolicyID tp) = Just (tpBuyOrderPolicyID tp)
     | scriptHash == OffChainHelpers.hashScriptMinting (tpDelegationPolicyID tp) = Just (tpDelegationPolicyID tp)
     | scriptHash == OffChainHelpers.hashScriptMinting (tpFundPolicy tp) = Just (tpFundPolicy tp)
@@ -549,9 +549,9 @@ findValidatorRedeemerName tp scriptHash (LedgerApiV2.Redeemer redeemer)
         getValidatorTestRedeemer (case ScriptT.getValidatorRedeemerName (PlutusTx.fromBuiltinData @ScriptT.ValidatorRedeemer redeemer) of
                     Just x  -> Just $ "Script_" ++ x
                     Nothing -> Nothing)
-    | scriptHash == OffChainHelpers.hashScriptValidator (tpSellOfferValidator tp) =
-        getValidatorTestRedeemer (case SellOfferT.getValidatorRedeemerName (PlutusTx.fromBuiltinData @SellOfferT.ValidatorRedeemer redeemer) of
-                    Just x  -> Just $ "SellOffer_" ++ x
+    | scriptHash == OffChainHelpers.hashScriptValidator (tpSwapOfferValidator tp) =
+        getValidatorTestRedeemer (case SwapOfferT.getValidatorRedeemerName (PlutusTx.fromBuiltinData @SwapOfferT.ValidatorRedeemer redeemer) of
+                    Just x  -> Just $ "SwapOffer_" ++ x
                     Nothing -> Nothing)
     | scriptHash == OffChainHelpers.hashScriptValidator (tpBuyOrderValidator tp) =
         getValidatorTestRedeemer (case BuyOrderT.getValidatorRedeemerName (PlutusTx.fromBuiltinData @BuyOrderT.ValidatorRedeemer redeemer) of
@@ -591,9 +591,9 @@ findMintingPolicyRedeemerName tp scriptHash (LedgerApiV2.Redeemer redeemer)
         getPolicyTestRedeemer (case ScriptT.getPolicyRedeemerName (PlutusTx.fromBuiltinData @ScriptT.PolicyRedeemer redeemer) of
                     Just x  -> Just $ "Script_" ++ x
                     Nothing -> Nothing)
-    | scriptHash == OffChainHelpers.hashScriptMinting (tpSellOfferPolicyID tp) =
-        getPolicyTestRedeemer (case SellOfferT.getPolicyRedeemerName (PlutusTx.fromBuiltinData @SellOfferT.PolicyRedeemer redeemer) of
-                    Just x  -> Just $ "SellOffer_" ++ x
+    | scriptHash == OffChainHelpers.hashScriptMinting (tpSwapOfferPolicyID tp) =
+        getPolicyTestRedeemer (case SwapOfferT.getPolicyRedeemerName (PlutusTx.fromBuiltinData @SwapOfferT.PolicyRedeemer redeemer) of
+                    Just x  -> Just $ "SwapOffer_" ++ x
                     Nothing -> Nothing)
     | scriptHash == OffChainHelpers.hashScriptMinting (tpBuyOrderPolicyID tp) =
         getPolicyTestRedeemer (case BuyOrderT.getPolicyRedeemerName (PlutusTx.fromBuiltinData @BuyOrderT.PolicyRedeemer redeemer) of

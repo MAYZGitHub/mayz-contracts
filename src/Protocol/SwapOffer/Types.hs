@@ -14,29 +14,29 @@
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------3
 
-module Protocol.SellOffer.Types where
+module Protocol.SwapOffer.Types where
 
 --------------------------------------------------------------------------------2
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema
-import qualified GHC.Generics         as GHCGenerics
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Data.Aeson             as DataAeson
+import qualified Data.OpenApi.Schema    as DataOpenApiSchema
+import qualified GHC.Generics           as GHCGenerics
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Prelude              as P
+import qualified Prelude                as P
 import qualified Schema
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Ledger
-import qualified Protocol.Types       as T
 import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Generic.Types          as T
+import qualified Ledger
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -49,7 +49,7 @@ import qualified Generic.OnChainHelpers as OnChainHelpers
 data PolicyParams
     = PolicyParams
           { ppProtocolPolicyID_CS      :: T.CS
-          , ppSellOffer_Validator_Hash :: LedgerApiV2.ValidatorHash
+          , ppSwapOffer_Validator_Hash :: LedgerApiV2.ValidatorHash
           , ppTokenMAYZ_AC             :: Ledger.AssetClass
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
@@ -58,7 +58,7 @@ instance Eq PolicyParams where
     {-# INLINEABLE (==) #-}
     p1 == p2 =
         ppProtocolPolicyID_CS p1 == ppProtocolPolicyID_CS p2
-            && ppSellOffer_Validator_Hash p1 == ppSellOffer_Validator_Hash p2
+            && ppSwapOffer_Validator_Hash p1 == ppSwapOffer_Validator_Hash p2
             && ppTokenMAYZ_AC p1 == ppTokenMAYZ_AC p2
 
 PlutusTx.makeLift ''PolicyParams
@@ -84,9 +84,9 @@ PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
 -- Datums
 --------------------------------------------------------------------------------2
 
-data SellOffer_DatumType
-    = SellOffer_DatumType
-          { sodSellOfferPolicyID_CS     :: T.CS
+data SwapOffer_DatumType
+    = SwapOffer_DatumType
+          { sodSwapOfferPolicyID_CS     :: T.CS
           , sodFundPolicy_CS            :: T.CS
           , sodSellerPaymentPKH         :: T.WalletPaymentPKH
           , sodSellerStakePKH           :: Maybe T.WalletPaymentPKH
@@ -103,10 +103,10 @@ data SellOffer_DatumType
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
-instance Eq SellOffer_DatumType where
+instance Eq SwapOffer_DatumType where
     {-# INLINEABLE (==) #-}
     sd1 == sd2 =
-        sodSellOfferPolicyID_CS sd1 == sodSellOfferPolicyID_CS sd2
+        sodSwapOfferPolicyID_CS sd1 == sodSwapOfferPolicyID_CS sd2
             && sodFundPolicy_CS sd1 == sodFundPolicy_CS sd2
             && sodSellerPaymentPKH sd1 == sodSellerPaymentPKH sd2
             && sodSellerStakePKH sd1 == sodSellerStakePKH sd2
@@ -121,27 +121,27 @@ instance Eq SellOffer_DatumType where
             && sodMAYZ sd1 == sodMAYZ sd2
             && sodMinADA sd1 == sodMinADA sd2
 
-PlutusTx.makeIsDataIndexed ''SellOffer_DatumType [('SellOffer_DatumType, 0)]
+PlutusTx.makeIsDataIndexed ''SwapOffer_DatumType [('SwapOffer_DatumType, 0)]
 
 newtype ValidatorDatum
-    = SellOffer_Datum SellOffer_DatumType
+    = SwapOffer_Datum SwapOffer_DatumType
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
 instance Eq ValidatorDatum where
     {-# INLINEABLE (==) #-}
-    SellOffer_Datum sd1 == SellOffer_Datum sd2 = sd1 == sd2
+    SwapOffer_Datum sd1 == SwapOffer_Datum sd2 = sd1 == sd2
 
-PlutusTx.makeIsDataIndexed ''ValidatorDatum [('SellOffer_Datum, 0)]
+PlutusTx.makeIsDataIndexed ''ValidatorDatum [('SwapOffer_Datum, 0)]
 
-{-# INLINEABLE getSellOffer_DatumType #-}
-getSellOffer_DatumType :: ValidatorDatum -> SellOffer_DatumType
-getSellOffer_DatumType (SellOffer_Datum sdType) = sdType
+{-# INLINEABLE getSwapOffer_DatumType #-}
+getSwapOffer_DatumType :: ValidatorDatum -> SwapOffer_DatumType
+getSwapOffer_DatumType (SwapOffer_Datum sdType) = sdType
 
-{-# INLINEABLE getSellOffer_DatumType_From_UTxO #-}
-getSellOffer_DatumType_From_UTxO :: LedgerApiV2.TxOut -> SellOffer_DatumType
-getSellOffer_DatumType_From_UTxO utxo = case OnChainHelpers.getInlineDatum_From_TxOut @ValidatorDatum utxo of
-                    Nothing     -> P.error "No SellOffer Datum found"
-                    Just datum' -> getSellOffer_DatumType datum'
+{-# INLINEABLE getSwapOffer_DatumType_From_UTxO #-}
+getSwapOffer_DatumType_From_UTxO :: LedgerApiV2.TxOut -> SwapOffer_DatumType
+getSwapOffer_DatumType_From_UTxO utxo = case OnChainHelpers.getInlineDatum_From_TxOut @ValidatorDatum utxo of
+                    Nothing     -> P.error "No SwapOffer Datum found"
+                    Just datum' -> getSwapOffer_DatumType datum'
 
 instance T.ShowDatum ValidatorDatum where
     showCborAsDatumType cbor = case LedgerApiV2.fromBuiltinData @ValidatorDatum cbor of
@@ -150,14 +150,14 @@ instance T.ShowDatum ValidatorDatum where
 
 --------------------------------------------------------------------------------2
 
-{-# INLINEABLE mkSellOffer_DatumType #-}
-mkSellOffer_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> SellOffer_DatumType
-mkSellOffer_DatumType = SellOffer_DatumType
+{-# INLINEABLE mkSwapOffer_DatumType #-}
+mkSwapOffer_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> SwapOffer_DatumType
+mkSwapOffer_DatumType = SwapOffer_DatumType
 
-{-# INLINEABLE mkSellOffer_Datum #-}
-mkSellOffer_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> ValidatorDatum
-mkSellOffer_Datum
-    sellOfferPolicyID_CS
+{-# INLINEABLE mkSwapOffer_Datum #-}
+mkSwapOffer_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> ValidatorDatum
+mkSwapOffer_Datum
+    swapOfferPolicyID_CS
     fundPolicy_CS
     sellerPaymentPKH
     sellerStakePKH
@@ -171,9 +171,9 @@ mkSellOffer_Datum
     order_Status
     amountMAYZ
     minADA =
-        SellOffer_Datum $
-            mkSellOffer_DatumType
-                sellOfferPolicyID_CS
+        SwapOffer_Datum $
+            mkSwapOffer_DatumType
+                swapOfferPolicyID_CS
                 fundPolicy_CS
                 sellerPaymentPKH
                 sellerStakePKH
@@ -188,8 +188,8 @@ mkSellOffer_Datum
                 amountMAYZ
                 minADA
 
-mkDatum :: SellOffer_DatumType -> LedgerApiV2.Datum
-mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . SellOffer_Datum
+mkDatum :: SwapOffer_DatumType -> LedgerApiV2.Datum
+mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . SwapOffer_Datum
 
 --------------------------------------------------------------------------------2
 -- PolicyRedeemer

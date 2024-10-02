@@ -160,7 +160,7 @@ investUnit_Validator_Redeemer_ReIndexing_Tests tp =
                             "Add other prices in the list does not bother and must succeed" $ do
                             let
                                 wrongAdaPrice =
-                                    T.InvestUnit [("AF23", "tokenA", 20), ("4E8D", "tokenB", 10), ("4E8Dddde", "tokenC", 10)] 
+                                    T.InvestUnit [("AF23", "tokenA", 20), ("4E8D", "tokenB", 10), ("4E8Dddde", "tokenC", 10)]
                                 wrongOracleData = T.OracleReIdx_Data wrongAdaPrice (tpReIdxDate tp)
                                 wrongPriceData = OnChainHelpers.oracleReIdxDataToBBS wrongOracleData
                                 wrongRedeemer =

@@ -74,7 +74,7 @@ In the investment unit (IU), token values are stored as numbers multiplied by 10
 
 However, real tokens in the blockchain cannot be fractional. Cardano tokens are always required to be whole, integer values (e.g., you can't hold 0.5 or 0.75 of a token). This limitation means that when performing deposits, withdrawals, or any operations performed with real tokens must always result in whole integer values of tokens.
 
-TODO: explicar que hay fracciones pero son solo metadatos y de como se muestran los valores integers.
+TODO: explicar que hay fracciones y decimales pero son solo metadatos y de como se muestran los valores integers.
 
 This creates the following requirement:
 - If the token value in the IU contains 1 decimal place, it implies that deposits or withdrawals must be made in multiples of 10 IUs so final resulting amount is integer:

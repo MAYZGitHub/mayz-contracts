@@ -31,6 +31,7 @@ import           PlutusTx.Prelude                          (divide)
 import qualified Generic.Constants                         as T
 import qualified Protocol.Fund.Helpers                     as FundHelpers
 import qualified Protocol.Fund.Holding.Types               as FundHoldingT
+import qualified Protocol.Fund.Types                       as FundT
 import qualified Protocol.InvestUnit.Types                 as InvestUnitT
 import qualified Protocol.OnChainHelpers                   as OnChainHelpers
 import qualified Protocol.PABTypes                         as T
@@ -42,7 +43,6 @@ import           TestUtils.TestContext.Asserts
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified Protocol.Fund.Types as FundT
 --------------------------------------------------------------------------------
 
 fundHolding_Validator_Tests :: TestParams -> Tasty.TestTree
@@ -598,13 +598,13 @@ fundHolding_Validator_Redeemer_Delete_Tests tp =
                             let
                                 ctx' = ctx
                                         |> setInputsAndAddRedeemers [
-                                            (fund_UTxO_With_Added_FundHolding_MockData tp, FundT.mkFundHoldingDeleteRedeemer), 
+                                            (fund_UTxO_With_Added_FundHolding_MockData tp, FundT.mkFundHoldingDeleteRedeemer),
                                             (fundHolding_UTxO_With_Deposits_MockData tp, FundHoldingT.mkDeleteRedeemer)
                                             ]
                             results <- testContextWrapper tp ctx'
                             (Just (RedeemerLogPolicy (Just FundHolding_BurnID_TestRedeemer)), results)
                                     `assertResultsContainAnyOf`["not isZeroAssets"]
-                        , 
+                        ,
                             Tasty.testCase "Not including fund admin sign must fail" $ do
                             let
                                 ctx' = ctx

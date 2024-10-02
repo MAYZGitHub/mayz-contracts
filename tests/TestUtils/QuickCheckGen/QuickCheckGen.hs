@@ -158,7 +158,6 @@ instance QC.Arbitrary RandomSingleton where
             randomIndex <- QC.chooseInteger (0, 2)
             let randomValue = case randomIndex of
                     0 -> do
-                        -- TODO: no tiene el valor abs el value final
                         randomAmount <-
                             QC.chooseInteger (-200_000, 200_000)
                                 `QC.suchThat` (/= 0)

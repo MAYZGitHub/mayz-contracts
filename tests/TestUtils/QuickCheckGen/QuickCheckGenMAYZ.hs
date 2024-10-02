@@ -30,9 +30,9 @@ import qualified Protocol.OnChainHelpers               as OnChainHelpers
 import qualified Protocol.Protocol.Types               as ProtocolT
 import qualified Protocol.Types                        as T
 import           TestUtils.Contracts.InitialData
+import           TestUtils.Helpers
 import           TestUtils.QuickCheckGen.QuickCheckGen
 import           TestUtils.TypesMAYZ
-import TestUtils.Helpers
 
 
 ----------------------------------------------------------------------------------------
@@ -242,10 +242,10 @@ getRandomPrice iu1 iu2 = do
 --             <*> QC.arbitrary -- pdTokenAdminPolicy_CS
 --             <*> (do sort <$> QC.arbitrary) -- pdFundCategories
 --             <*> QC.arbitrary -- pdFundLifeTime
---             <*> QC.arbitrary -- pdRequiredMAYZForSellOffers
+--             <*> QC.arbitrary -- pdRequiredMAYZForSwapOffers
 --             <*> QC.arbitrary -- pdRequiredMAYZForBuyOrders
 --             <*> QC.arbitrary -- pdCommissionFund_PerYear_InBPx1e3
---             <*> QC.arbitrary -- pdCommissionSellOffer_InBPx1e3
+--             <*> QC.arbitrary -- pdCommissionSwapOffer_InBPx1e3
 --             <*> QC.arbitrary -- pdCommissionBuyOrder_InBPx1e3
 --             <*> QC.arbitrary -- pdShare_InBPx1e2_Protocol
 --             <*> QC.arbitrary -- pdShare_InBPx1e2_Delegators
@@ -808,9 +808,9 @@ calculateCVT _swTrace tokens prices totalFTMinted = do
 
 genReIndexParamsWithoutDivisibility :: Bool -> Integer -> LedgerApiV2.TxOut -> [LedgerApiV2.TxOut] -> Integer -> T.InvestUnit -> [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)] -> QC.Gen ReIndexParams
 genReIndexParamsWithoutDivisibility swTrace maxQtyTokensToAddOrRemove input_Fund_UTxO input_FundHolding_UTxOs totalFTMinted input_InvestUnit@(T.InvestUnit tokens) tokenPrices = do
-    tokensToRemove <- genTokensToRemoveWithoutDivisibility tokens
+    tokensToRemove <- genTokensToRemoveWithoutDivisibility maxQtyTokensToAddOrRemove tokens 
     valueToRemove <- calculateCVT swTrace tokensToRemove tokenPrices totalFTMinted
-    tokensToAdd <- genTokensToAddWithoutDivisibility tokens valueToRemove
+    tokensToAdd <- genTokensToAddWithoutDivisibility maxQtyTokensToAddOrRemove tokens valueToRemove
     updatedTokenPrices <- updateTokenPrices tokenPrices tokensToAdd
     return $ ReIndexParams
         input_Fund_UTxO
@@ -821,17 +821,17 @@ genReIndexParamsWithoutDivisibility swTrace maxQtyTokensToAddOrRemove input_Fund
         (T.InvestUnit tokensToRemove)
         (T.InvestUnit updatedTokenPrices)
 
-genTokensToRemoveWithoutDivisibility :: [T.InvestUnitToken] -> QC.Gen [T.InvestUnitToken]
-genTokensToRemoveWithoutDivisibility tokens = do
-    numToRemove <- QC.choose (1, length tokens - 1)
+genTokensToRemoveWithoutDivisibility :: Integer -> [T.InvestUnitToken] -> QC.Gen [T.InvestUnitToken]
+genTokensToRemoveWithoutDivisibility maxQtyTokensToAddOrRemove tokens = do
+    numToRemove <- QC.choose (1, P.min (length tokens - 1) (fromIntegral maxQtyTokensToAddOrRemove))
     tokensToRemove <- QC.sublistOf tokens >>= \sublist -> return (take numToRemove sublist)
     ControlMonad.forM tokensToRemove $ \(cs, tn, maxAmount) -> do
         amount <- QC.choose (1, maxAmount)
         return (cs, tn, amount)
 
-genTokensToAddWithoutDivisibility :: [T.InvestUnitToken] -> Integer -> QC.Gen [T.InvestUnitToken]
-genTokensToAddWithoutDivisibility originalTokens valueToRemove = do
-    numToAdd <- QC.choose (1, length originalTokens + 2)  -- Allow for new tokens
+genTokensToAddWithoutDivisibility :: Integer ->  [T.InvestUnitToken] -> Integer -> QC.Gen [T.InvestUnitToken]
+genTokensToAddWithoutDivisibility maxQtyTokensToAddOrRemove originalTokens valueToRemove = do
+    numToAdd <- QC.choose (1, P.min (length originalTokens + 2) (fromIntegral maxQtyTokensToAddOrRemove))  -- Allow for new tokens
     tokensToAdd <- ControlMonad.replicateM numToAdd $ do
         useExisting <- QC.arbitrary
         if useExisting && not (null originalTokens)

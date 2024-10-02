@@ -28,13 +28,13 @@ import qualified Protocol.Fund.Helpers       as FundT
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
 import qualified Protocol.Fund.Types         as FundT
 import qualified Protocol.InvestUnit.Types   as InvestUnitT
+import qualified Protocol.OffChainHelpers    as OffChainHelpers
 import qualified Protocol.OnChainHelpers     as OnChainHelpers
 import qualified Protocol.Protocol.Types     as ProtocolT
-import qualified Protocol.SellOffer.Types    as SellOfferT
+import qualified Protocol.SwapOffer.Types    as SwapOfferT
 import qualified Protocol.Types              as T
 import           TestUtils.HelpersMAYZ
 import           TestUtils.TypesMAYZ
-import qualified Protocol.OffChainHelpers as OffChainHelpers
 
 --------------------------------------------------------------------------------
 -- Constants
@@ -55,8 +55,8 @@ minAdaIUDatum = 3_400_000
 minAdaFundHoldingDatum :: Integer
 minAdaFundHoldingDatum = 20_000_000
 
-minAdaSellOfferDatum :: Integer
-minAdaSellOfferDatum = 3_600_000
+minAdaSwapOfferDatum :: Integer
+minAdaSwapOfferDatum = 3_600_000
 
 minAdaScriptDatum :: Integer
 minAdaScriptDatum = 50_000_000
@@ -153,10 +153,10 @@ protocol_DatumType_MockData tp =
         (tpTokenAdminPolicy_CS tp) -- pdTokenAdminPolicy_CS
         [tpFundCategory tp] -- fundCategories
         (tpFundLifeTime tp)
-        (tpRequiredMAYZForSellOffer tp) -- pdRequiredMAYZForSellOffers
+        (tpRequiredMAYZForSwapOffer tp) -- pdRequiredMAYZForSwapOffers
         (tpRequiredMAYZForBuyOrder tp) -- pdRequiredMAYZForBuyOrders
         (tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) -- pdCommissionFund_PerYear_InBPx1e3
-        (tp_MinMaxDef_CommissionSellOffer_InBPx1e3 tp) -- pdCommissionSellOffer_InBPx1e3
+        (tp_MinMaxDef_CommissionSwapOffer_InBPx1e3 tp) -- pdCommissionSwapOffer_InBPx1e3
         (tp_MinMaxDef_CommissionBuyOrder_InBPx1e3 tp) -- pdCommissionBuyOrder_InBPx1e3
         (tpShare_InBPx1e2_Protocol tp) -- pdShare_InBPx1e2_Protocol
         (tpShare_InBPx1e2_Delegators tp) -- pdShare_InBPx1e2_Delegators
@@ -421,7 +421,7 @@ fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp fundDatum fundHoldingD
             --------------------
             (userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) = calculateDepositCommissionsUsingMonths_Parametrizable tp fundDatum depositDate deposit
             --------------------
-            fundHoldingDatum_Control_With_Deposit = 
+            fundHoldingDatum_Control_With_Deposit =
                     (FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Rate1e6_PerMonth)
                         {
                             FundHoldingT.hdFundHolding_Index = index
@@ -668,93 +668,93 @@ fundHolding_UTxO_After_Reidx_MockData tp investUnit_Initial' investUnit_AfterReI
 
 --------------------------------------------------------------------------------
 
-sellOffer_DatumType_MockData :: TestParams -> SellOfferT.SellOffer_DatumType
-sellOffer_DatumType_MockData tp =
-    SellOfferT.mkSellOffer_DatumType
-        (tpSellOfferPolicyID_CS tp) -- sellOfferPolicyID_CS
+swapOffer_DatumType_MockData :: TestParams -> SwapOfferT.SwapOffer_DatumType
+swapOffer_DatumType_MockData tp =
+    SwapOfferT.mkSwapOffer_DatumType
+        (tpSwapOfferPolicyID_CS tp) -- swapOfferPolicyID_CS
         (tpFundPolicy_CS tp) -- fundPolicy_CS
-        (tpSellOfferAdmin tp) -- sellerPaymentPKH
+        (tpSwapOfferAdmin tp) -- sellerPaymentPKH
         Nothing -- sellerStakePKH
-        (ProtocolT.mmdDef $ ProtocolT.pdCommissionSellOffer_InBPx1e3 $ protocol_DatumType_MockData tp) -- askedCommission_Rate_InBPx1e3
+        (ProtocolT.mmdDef $ ProtocolT.pdCommissionSwapOffer_InBPx1e3 $ protocol_DatumType_MockData tp) -- askedCommission_Rate_InBPx1e3
         50_000_000 -- amount_FT_Available
         50_000_000 -- amount_ADA_Available
         0 -- total_FT_Earned
         0 -- total_ADA_Earned
-        T.sellOffer_AllowSell
-        T.sellOffer_AllowSell
-        T.sellOffer_Status_Open -- order_Status
-        (ProtocolT.pdRequiredMAYZForSellOffer $ protocol_DatumType_MockData tp)
-        minAdaSellOfferDatum -- minADA
+        T.swapOffer_AllowSell
+        T.swapOffer_AllowSell
+        T.swapOffer_Status_Open -- order_Status
+        (ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp)
+        minAdaSwapOfferDatum -- minADA
 
-sellOffer_Datum_MockData :: TestParams -> LedgerApiV2.Datum
-sellOffer_Datum_MockData tp = SellOfferT.mkDatum $ sellOffer_DatumType_MockData tp
+swapOffer_Datum_MockData :: TestParams -> LedgerApiV2.Datum
+swapOffer_Datum_MockData tp = SwapOfferT.mkDatum $ swapOffer_DatumType_MockData tp
 
-sellOffer_UTxO_MockData :: TestParams -> LedgerApiV2.TxOut
-sellOffer_UTxO_MockData tp =
+swapOffer_UTxO_MockData :: TestParams -> LedgerApiV2.TxOut
+swapOffer_UTxO_MockData tp =
     let
-        !requiredMAYZ = ProtocolT.pdRequiredMAYZForSellOffer $ protocol_DatumType_MockData tp
+        !requiredMAYZ = ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp
         ---------------------
         !valueOf_RequiredMAYZ = LedgerApiV2.singleton (tpTokenMAYZ_CS tp) (tpTokenMAYZ_TN tp) requiredMAYZ
     in
         ---------------------
         LedgerApiV2.TxOut
-            (OffChainHelpers.addressValidator $ tpSellOfferValidator_Hash tp)
-            ( LedgerAda.lovelaceValueOf minAdaSellOfferDatum
-                <> LedgerApiV2.singleton (tpSellOfferPolicyID_CS tp) T.sellOfferID_TN 1
+            (OffChainHelpers.addressValidator $ tpSwapOfferValidator_Hash tp)
+            ( LedgerAda.lovelaceValueOf minAdaSwapOfferDatum
+                <> LedgerApiV2.singleton (tpSwapOfferPolicyID_CS tp) T.swapOfferID_TN 1
                 <> LedgerApiV2.singleton
                     (tpFundPolicy_CS tp)
                     (tpFundFT_TN tp)
-                    (SellOfferT.sodAmount_FT_Available $ sellOffer_DatumType_MockData tp)
+                    (SwapOfferT.sodAmount_FT_Available $ swapOffer_DatumType_MockData tp)
                 <> valueOf_RequiredMAYZ
                 <> LedgerAda.lovelaceValueOf
-                    (SellOfferT.sodAmount_ADA_Available $ sellOffer_DatumType_MockData tp)
+                    (SwapOfferT.sodAmount_ADA_Available $ swapOffer_DatumType_MockData tp)
             )
-            (LedgerApiV2.OutputDatum $ sellOffer_Datum_MockData tp)
+            (LedgerApiV2.OutputDatum $ swapOffer_Datum_MockData tp)
             Nothing
 
 
-sellOffer_DatumType_MockData_Parametrizable :: TestParams -> Integer -> Integer -> SellOfferT.SellOffer_DatumType
-sellOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available =
-    SellOfferT.mkSellOffer_DatumType
-        (tpSellOfferPolicyID_CS tp) -- sellOfferPolicyID_CS
+swapOffer_DatumType_MockData_Parametrizable :: TestParams -> Integer -> Integer -> SwapOfferT.SwapOffer_DatumType
+swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available =
+    SwapOfferT.mkSwapOffer_DatumType
+        (tpSwapOfferPolicyID_CS tp) -- swapOfferPolicyID_CS
         (tpFundPolicy_CS tp) -- fundPolicy_CS
-        (tpSellOfferAdmin tp) -- sellerPaymentPKH
+        (tpSwapOfferAdmin tp) -- sellerPaymentPKH
         Nothing -- sellerStakePKH
-        (ProtocolT.mmdDef $ ProtocolT.pdCommissionSellOffer_InBPx1e3 $ protocol_DatumType_MockData tp) -- askedCommission_Rate_InBPx1e3
+        (ProtocolT.mmdDef $ ProtocolT.pdCommissionSwapOffer_InBPx1e3 $ protocol_DatumType_MockData tp) -- askedCommission_Rate_InBPx1e3
         amount_FT_Available
         amount_ADA_Available
         0 -- total_FT_Earned
         0 -- total_ADA_Earned
-        T.sellOffer_AllowSell
-        T.sellOffer_AllowSell
-        T.sellOffer_Status_Open -- order_Status
-        (ProtocolT.pdRequiredMAYZForSellOffer $ protocol_DatumType_MockData tp)
-        minAdaSellOfferDatum -- minADA
+        T.swapOffer_AllowSell
+        T.swapOffer_AllowSell
+        T.swapOffer_Status_Open -- order_Status
+        (ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp)
+        minAdaSwapOfferDatum -- minADA
 
-sellOffer_Datum_MockData_Parametrizable :: TestParams -> Integer -> Integer -> LedgerApiV2.Datum
-sellOffer_Datum_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available = SellOfferT.mkDatum $ sellOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available
+swapOffer_Datum_MockData_Parametrizable :: TestParams -> Integer -> Integer -> LedgerApiV2.Datum
+swapOffer_Datum_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available = SwapOfferT.mkDatum $ swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available
 
-sellOffer_UTxO_MockData_Parametrizable :: TestParams -> Integer -> Integer -> LedgerApiV2.TxOut
-sellOffer_UTxO_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available =
+swapOffer_UTxO_MockData_Parametrizable :: TestParams -> Integer -> Integer -> LedgerApiV2.TxOut
+swapOffer_UTxO_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available =
     let
-        !requiredMAYZ = ProtocolT.pdRequiredMAYZForSellOffer $ protocol_DatumType_MockData tp
+        !requiredMAYZ = ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp
         ---------------------
         !valueOf_RequiredMAYZ = LedgerApiV2.singleton (tpTokenMAYZ_CS tp) (tpTokenMAYZ_TN tp) requiredMAYZ
     in
         ---------------------
         LedgerApiV2.TxOut
-            (OffChainHelpers.addressValidator $ tpSellOfferValidator_Hash tp)
-            ( LedgerAda.lovelaceValueOf minAdaSellOfferDatum
-                <> LedgerApiV2.singleton (tpSellOfferPolicyID_CS tp) T.sellOfferID_TN 1
+            (OffChainHelpers.addressValidator $ tpSwapOfferValidator_Hash tp)
+            ( LedgerAda.lovelaceValueOf minAdaSwapOfferDatum
+                <> LedgerApiV2.singleton (tpSwapOfferPolicyID_CS tp) T.swapOfferID_TN 1
                 <> LedgerApiV2.singleton
                     (tpFundPolicy_CS tp)
                     (tpFundFT_TN tp)
-                    (SellOfferT.sodAmount_FT_Available $ sellOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
+                    (SwapOfferT.sodAmount_FT_Available $ swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
                 <> valueOf_RequiredMAYZ
                 <> LedgerAda.lovelaceValueOf
-                    (SellOfferT.sodAmount_ADA_Available $ sellOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
+                    (SwapOfferT.sodAmount_ADA_Available $ swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
             )
-            (LedgerApiV2.OutputDatum $ sellOffer_Datum_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
+            (LedgerApiV2.OutputDatum $ swapOffer_Datum_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available)
             Nothing
 
 --------------------------------------------------------------------------------

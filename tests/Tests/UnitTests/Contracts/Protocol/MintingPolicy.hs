@@ -100,15 +100,15 @@ protocol_Policy_Redeemer_MintID_Tests tp =
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
                                 `assertResultsContainAnyOf` ["not fundCategories have unique and sequential category numbers"],
 
-                        -- Test case for "not requiredMAYZForSellOffer >= 0"
-                        Tasty.testCase "Invalid required MAYZ for sell offer must fail" $ do
+                        -- Test case for "not requiredMAYZForSwapOffer >= 0"
+                        Tasty.testCase "Invalid required MAYZ for SwapOffer must fail" $ do
                             let
-                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdRequiredMAYZForSellOffer = -1}
+                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdRequiredMAYZForSwapOffer = -1}
                                 outputProtocolUTxO = (protocol_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ ProtocolT.mkDatum outputDatum}
                                 ctx' = ctx |> setOutputs [outputProtocolUTxO]
                             results <- testContextWrapper tp ctx'
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
-                                `assertResultsContainAnyOf` ["not requiredMAYZForSellOffer >= 0"],
+                                `assertResultsContainAnyOf` ["not requiredMAYZForSwapOffer >= 0"],
 
                         -- Test case for "not requiredMAYZForBuyOrder >= 0"
                         Tasty.testCase "Invalid required MAYZ for buy order must fail" $ do
@@ -160,25 +160,25 @@ protocol_Policy_Redeemer_MintID_Tests tp =
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
                                 `assertResultsContainAnyOf` ["not Max commissionFund_PerYear_InBPx1e3 <= 100%"],
 
-                        -- Test case for "not Min commissionSellOffer_InBPx1e3 >= 0"
-                        Tasty.testCase "Invalid minimum commission for sell offer must fail" $ do
+                        -- Test case for "not Min commissionSwapOffer_InBPx1e3 >= 0"
+                        Tasty.testCase "Invalid minimum commission for SwapOffer must fail" $ do
                             let
-                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdCommissionSellOffer_InBPx1e3 = ProtocolT.MinMaxDef {ProtocolT.mmdMin = -1, ProtocolT.mmdMax = 1000, ProtocolT.mmdDef = 0}}
+                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdCommissionSwapOffer_InBPx1e3 = ProtocolT.MinMaxDef {ProtocolT.mmdMin = -1, ProtocolT.mmdMax = 1000, ProtocolT.mmdDef = 0}}
                                 outputProtocolUTxO = (protocol_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ ProtocolT.mkDatum outputDatum}
                                 ctx' = ctx |> setOutputs [outputProtocolUTxO]
                             results <- testContextWrapper tp ctx'
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
-                                `assertResultsContainAnyOf` ["not Min commissionSellOffer_InBPx1e3 >= 0"],
+                                `assertResultsContainAnyOf` ["not Min commissionSwapOffer_InBPx1e3 >= 0"],
 
-                        -- Test case for "not Max commissionSellOffer_InBPx1e3 <= 100%"
-                        Tasty.testCase "Invalid maximum commission for sell offer must fail" $ do
+                        -- Test case for "not Max commissionSwapOffer_InBPx1e3 <= 100%"
+                        Tasty.testCase "Invalid maximum commission for SwapOffer must fail" $ do
                             let
-                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdCommissionSellOffer_InBPx1e3 = ProtocolT.MinMaxDef {ProtocolT.mmdMin = 0, ProtocolT.mmdMax = 10_000_001, ProtocolT.mmdDef = 0}}
+                                outputDatum = (protocol_DatumType_MockData tp) {ProtocolT.pdCommissionSwapOffer_InBPx1e3 = ProtocolT.MinMaxDef {ProtocolT.mmdMin = 0, ProtocolT.mmdMax = 10_000_001, ProtocolT.mmdDef = 0}}
                                 outputProtocolUTxO = (protocol_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ ProtocolT.mkDatum outputDatum}
                                 ctx' = ctx |> setOutputs [outputProtocolUTxO]
                             results <- testContextWrapper tp ctx'
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
-                                `assertResultsContainAnyOf` ["not Max commissionSellOffer_InBPx1e3 <= 100%"],
+                                `assertResultsContainAnyOf` ["not Max commissionSwapOffer_InBPx1e3 <= 100%"],
 
                         -- Test case for "not Min commissionBuyOrder_InBPx1e3 >= 0"
                         Tasty.testCase "Invalid minimum commission for buy order must fail" $ do

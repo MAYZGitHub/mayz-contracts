@@ -19,6 +19,7 @@ import qualified Plutus.V2.Ledger.Api            as LedgerApiV2
 -- Project imports
 
 import qualified Generic.OnChainHelpers          as OnChainHelpers
+import qualified Generic.Types                   as T
 import qualified Protocol.Constants              as T
 import qualified Protocol.Protocol.Helpers       as ProtocolHelpers
 import qualified Protocol.Protocol.Types         as ProtocolT
@@ -27,7 +28,6 @@ import           TestUtils.Helpers
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified Generic.Types as T
 
 --------------------------------------------------------------------------------
 -- Protocol Contract

@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 --------------------------------------------------------------------------------3
 {- HLINT ignore "Use camelCase"          -}
 {- HLINT ignore "Reduce duplication"          -}
@@ -224,7 +223,7 @@ fundHolding_Validator_Redeemer_ReIndexing_Tests tp =
                     [
                         TastyQC.testProperty
                         "Valid add/remove assets should succeed"
-                        (prop_reIndex_varyAssets tp selectedRedeemer ctx)
+                        (prop_reIndex_varyAssets_succeed tp ctx)
                     ]
 
 --------------------------------------------------------------------------------
@@ -665,20 +664,20 @@ prop_commissions_delegator_moreThanAvailable tp selectedRedeemer ctx =
 
 --------------------------------------------------------------------------------
 
-prop_reIndex_varyAssets :: TestParams -> RedeemerLog -> LedgerApiV2.ScriptContext -> QC.Property
-prop_reIndex_varyAssets tp selectedRedeemer ctx =
-    QC.forAll (genReIndexParams False tp True) $ \(ReIndexParams riFund_UTXO riFundHolding_UTxOs riTotal_Deposits_IU riInvestUnit riTokensToAdd riTokensToRemove riTokensPrices) -> do
+prop_reIndex_varyAssets_succeed :: TestParams -> LedgerApiV2.ScriptContext -> QC.Property
+prop_reIndex_varyAssets_succeed tp ctx =
+    QC.forAll (genReIndexParams False tp True) $ \(ReIndexParams riFund_UTXO' riFundHolding_UTxOs riTotal_Deposits_IU' riInvestUnit' riTokensToAdd' riTokensToRemove' riTokensPrices') -> do
         let
             ----------------------------
-            input_Fund_UTxO = riFund_UTXO
+            input_Fund_UTxO = riFund_UTXO'
             input_FundHolding_UTxO = head riFundHolding_UTxOs
             inputsRef_FundHolding_UTxOs = tail riFundHolding_UTxOs
-            total_Deposits_IU = riTotal_Deposits_IU
-            tokensPrices = riTokensPrices
+            total_Deposits_IU = riTotal_Deposits_IU'
+            tokensPrices = riTokensPrices'
             ----------------------------
-            investUnit = riInvestUnit
-            tokensToAdd = riTokensToAdd
-            tokensToRemove = riTokensToRemove
+            investUnit = riInvestUnit'
+            tokensToAdd = riTokensToAdd'
+            tokensToRemove = riTokensToRemove'
             ----------------------------
             input_InvestUnit_Datum =
                 InvestUnitT.mkDatum $
@@ -689,8 +688,8 @@ prop_reIndex_varyAssets tp selectedRedeemer ctx =
             ----------------------------
             input_InvestUnit_UTxO = (investUnit_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum input_InvestUnit_Datum}
             ----------------------------
-            valueOf_TotalTokensToAdd = OnChainHelpers.flattenValueToValue [(cs, tn, (am * total_Deposits_IU) `divide` 100) | (cs, tn, am) <- T.iuValues riTokensToAdd]
-            valueOf_TotalTokensToRemove = OnChainHelpers.flattenValueToValue [(cs, tn, (am * total_Deposits_IU) `divide` 100) | (cs, tn, am) <- T.iuValues riTokensToRemove]
+            valueOf_TotalTokensToAdd = OnChainHelpers.flattenValueToValue [(cs, tn, (am * total_Deposits_IU) `divide` 100) | (cs, tn, am) <- T.iuValues riTokensToAdd']
+            valueOf_TotalTokensToRemove = OnChainHelpers.flattenValueToValue [(cs, tn, (am * total_Deposits_IU) `divide` 100) | (cs, tn, am) <- T.iuValues riTokensToRemove']
             ----------------------------
             output_FundHolding_UTxO =
                 input_FundHolding_UTxO
@@ -718,9 +717,9 @@ prop_reIndex_varyAssets tp selectedRedeemer ctx =
             ----------------------------
             ctx' = ctx
                     |> setInputsRef (protocol_UTxO_MockData tp : input_Fund_UTxO : uTxOForValidatorAsReference tp (tpFundHoldingValidator tp) : uTxOForValidatorAsReference tp (tpInvestUnitValidator tp) :  inputsRef_FundHolding_UTxOs)
-                    |> setInputsAndAddRedeemers [(input_FundHolding_UTxO, FundHoldingT.mkReIndexingRedeemer riTokensToAdd riTokensToRemove), (input_InvestUnit_UTxO, InvestUnitT.mkReIndexingRedeemer
-                            riTokensToAdd
-                            riTokensToRemove
+                    |> setInputsAndAddRedeemers [(input_FundHolding_UTxO, FundHoldingT.mkReIndexingRedeemer riTokensToAdd' riTokensToRemove'), (input_InvestUnit_UTxO, InvestUnitT.mkReIndexingRedeemer
+                            riTokensToAdd'
+                            riTokensToRemove'
                             oracleData
                             oracleSignature)]
                     |> setOutputs [output_FundHolding_UTxO, output_InvestUnit_UTxO]

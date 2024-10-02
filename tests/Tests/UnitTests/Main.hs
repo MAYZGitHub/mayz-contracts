@@ -25,8 +25,8 @@ import           Contracts.Fund.Validator
 import           Contracts.InvestUnit.Validator
 import           Contracts.Protocol.MintingPolicy
 import           Contracts.Protocol.Validator
-import           Contracts.SellOffer.MintingPolicy
-import           Contracts.SellOffer.Validator   
+import           Contracts.SwapOffer.MintingPolicy
+import           Contracts.SwapOffer.Validator
 import           TestTree.Commissions
 import           TestTree.ScaleAndRunding
 import           TestTree.Values
@@ -58,9 +58,9 @@ main = do
                         ]
                     , Tasty.testGroup "InvestUnit Tests"
                         [investUnit_Validator_Tests tp]
-                    , Tasty.testGroup "SellOffer Tests"
-                        [ sellOffer_Policy_Tests tp
-                        , sellOffer_Validator_Tests tp
+                    , Tasty.testGroup "SwapOffer Tests"
+                        [ swapOffer_Policy_Tests tp
+                        , swapOffer_Validator_Tests tp
                         ]
                     ]
                 , Tasty.testGroup "Helpers Tests"

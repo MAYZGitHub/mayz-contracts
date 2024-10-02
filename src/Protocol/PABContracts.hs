@@ -203,35 +203,35 @@ instance PABEffectsContractBuiltin.HasDefinitions PABContracts where
 
         ]
 
-    getContract (PABSplitUtxO mcParams)                     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointSplitUtxO @() @PABEffectsContractBuiltin.Empty mcParams
-    getContract (PABMintFT mcParams)                        = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintFT @() @PABEffectsContractBuiltin.Empty mcParams
-    getContract (PABMintNFT mcParams)                       = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintNFT @() @PABEffectsContractBuiltin.Empty mcParams
+    getContract (PABSplitUtxO mcParams)                       = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointSplitUtxO @() @PABEffectsContractBuiltin.Empty mcParams
+    getContract (PABMintFT mcParams)                          = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintFT @() @PABEffectsContractBuiltin.Empty mcParams
+    getContract (PABMintNFT mcParams)                         = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintNFT @() @PABEffectsContractBuiltin.Empty mcParams
 
-    getContract (PABMintFundTokens mcParams)                = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintFundTokens @() @PABEffectsContractBuiltin.Empty mcParams
+    getContract (PABMintFundTokens mcParams)                  = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointMintFundTokens @() @PABEffectsContractBuiltin.Empty mcParams
 
-    getContract (PABProtocolPrepare params)                 = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolPrepare @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABProtocolUpdate params)                  = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolUpdate @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABProtocolScriptAdd params)               = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolScriptAdd @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABProtocolScriptDelete params)            = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolScriptDelete @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABProtocolPrepare params)                   = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolPrepare @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABProtocolUpdate params)                    = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolUpdate @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABProtocolScriptAdd params)                 = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolScriptAdd @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABProtocolScriptDelete params)              = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolScriptDelete @() @PABEffectsContractBuiltin.Empty params
     -- getContract (PABProtocolEmergency params)     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointProtocolEmergency @() @PABEffectsContractBuiltin.Empty params
 
 
-    getContract (PABFundPrepare params)                     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundPrepare @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundUpdate params)                      = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundUpdate @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundScriptAdd params)                   = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundScriptAdd @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundScriptDelete params)                = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundScriptDelete @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundPrepare params)                       = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundPrepare @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundUpdate params)                        = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundUpdate @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundScriptAdd params)                     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundScriptAdd @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundScriptDelete params)                  = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundScriptDelete @() @PABEffectsContractBuiltin.Empty params
     -- getContract (PABFundEmergency params)         = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundEmergency @() @PABEffectsContractBuiltin.Empty params
 
-    getContract (PABFundHoldingAdd params)                  = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundHoldingAdd @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundHoldingDelete params)               = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundHoldingDelete @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundHoldingAdd params)                    = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundHoldingAdd @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundHoldingDelete params)                 = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundHoldingDelete @() @PABEffectsContractBuiltin.Empty params
 
-    getContract (PABFundDeposit params)                     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundDeposit @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundWithdraw params)                    = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundWithdraw @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundDeposit params)                       = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundDeposit @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundWithdraw params)                      = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundWithdraw @() @PABEffectsContractBuiltin.Empty params
 
-    getContract (PABFundReIndexing params)                  = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundReIndexing @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundReIndexing params)                    = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundReIndexing @() @PABEffectsContractBuiltin.Empty params
 
-    getContract (PABFundCollect_Protocol_Commission params) = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundCollect_Protocol_Commission @() @PABEffectsContractBuiltin.Empty params
-    getContract (PABFundCollect_Delegators_Commission params)     = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundCollect_Delegators_Commission @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundCollect_Protocol_Commission params)   = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundCollect_Protocol_Commission @() @PABEffectsContractBuiltin.Empty params
+    getContract (PABFundCollect_Delegators_Commission params) = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundCollect_Delegators_Commission @() @PABEffectsContractBuiltin.Empty params
     getContract (PABFundCollect_Managers_Commission params)   = PABEffectsContractBuiltin.SomeBuiltin $ OffChain.endPointFundCollect_Managers_Commission @() @PABEffectsContractBuiltin.Empty params
 
     getSchema = const $ PABEffectsContractBuiltin.endpointsToSchemas @PABEffectsContractBuiltin.Empty

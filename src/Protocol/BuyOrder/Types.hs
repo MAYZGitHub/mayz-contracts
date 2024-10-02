@@ -49,9 +49,9 @@ import qualified Protocol.Types       as T
 
 data PolicyParams
     = PolicyParams
-          { ppProtocolPolicyID_CS           :: T.CS
+          { ppProtocolPolicyID_CS     :: T.CS
           , ppBuyOrder_Validator_Hash :: LedgerApiV2.ValidatorHash
-          , ppTokenMAYZ_AC :: Ledger.AssetClass
+          , ppTokenMAYZ_AC            :: Ledger.AssetClass
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
@@ -82,15 +82,15 @@ PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
 
 data BuyOrder_DatumType
     = BuyOrder_DatumType
-          { bodBuyOrderPolicyID_CS                   :: T.CS
-          , bodFundPolicy_CS                   :: T.CS
-          , bodBuyerPaymentPKH                 :: T.WalletPaymentPKH
-          , bodBuyerStakePKH                   :: Maybe T.WalletPaymentPKH
-          , bodOfferedCommission_InBPx1e3       :: Integer
-          , bodFT_Received                     :: Integer
-          , bodFT_PayedAsCommission            :: Integer
-          , bodOrder_Status                    :: Integer
-          , bodMinADA                          :: Integer
+          { bodBuyOrderPolicyID_CS        :: T.CS
+          , bodFundPolicy_CS              :: T.CS
+          , bodBuyerPaymentPKH            :: T.WalletPaymentPKH
+          , bodBuyerStakePKH              :: Maybe T.WalletPaymentPKH
+          , bodOfferedCommission_InBPx1e3 :: Integer
+          , bodFT_Received                :: Integer
+          , bodFT_PayedAsCommission       :: Integer
+          , bodOrder_Status               :: Integer
+          , bodMinADA                     :: Integer
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
@@ -158,7 +158,7 @@ mkBuyOrder_Datum
 {-# INLINEABLE mkBuyOrder_DatumType #-}
 mkBuyOrder_DatumType :: T.CS ->T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer ->  Integer -> Integer -> Integer -> Integer  -> BuyOrder_DatumType
 mkBuyOrder_DatumType = BuyOrder_DatumType
-            
+
 mkDatum :: BuyOrder_DatumType -> LedgerApiV2.Datum
 mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . BuyOrder_Datum
 
@@ -205,7 +205,7 @@ PlutusTx.makeIsDataIndexed
 getPolicyRedeemerName :: Maybe PolicyRedeemer -> Maybe P.String
 getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = Just "MintID"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
-getPolicyRedeemerName _ = Nothing
+getPolicyRedeemerName _                                                      = Nothing
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
@@ -232,9 +232,7 @@ instance Eq ValidatorRedeemerUpdateOfferedCommissionRateType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateOfferedCommissionRateType [('ValidatorRedeemerUpdateOfferedCommissionRateType, 0)]
 
-data ValidatorRedeemerUpdateMinADAType
-    = ValidatorRedeemerUpdateMinADAType 
-    deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
+data ValidatorRedeemerUpdateMinADAType = ValidatorRedeemerUpdateMinADAType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateMinADAType where
     {-# INLINEABLE (==) #-}
@@ -328,12 +326,12 @@ PlutusTx.makeIsDataIndexed
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateStatus (ValidatorRedeemerUpdateStatusType _))) = Just "UpdateStatus"
-getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {})) = Just "Deposit"
-getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {})) = Just "Withdraw"
-getValidatorRedeemerName (Just (ValidatorRedeemerFillOrder ValidatorRedeemerFillOrderType {})) = Just "FillOrder"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType)) = Just "Delete"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType))     = Just "UpdateMinADA"
+getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {}))            = Just "Deposit"
+getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {}))          = Just "Withdraw"
+getValidatorRedeemerName (Just (ValidatorRedeemerFillOrder ValidatorRedeemerFillOrderType {}))        = Just "FillOrder"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType))                 = Just "Delete"
+getValidatorRedeemerName _                                                                            = Nothing
 
 --------------------------------------------------------------------------------2
 

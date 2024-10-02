@@ -10,7 +10,6 @@ Description :
 module TestUtils.Contracts.TxContext.Fund where
 
 -- Non-IOG imports
-import qualified Prelude                                   as P
 
 -- IOG imports
 import qualified Plutus.V2.Ledger.Api                      as LedgerApiV2
@@ -18,6 +17,7 @@ import           PlutusTx.Prelude
 
 -- Project imports
 import qualified Generic.OnChainHelpers                    as OnChainHelpers
+import qualified Generic.Types                             as T
 import qualified Protocol.Constants                        as T
 import qualified Protocol.Fund.Helpers                     as FundHelpers
 import qualified Protocol.Fund.Types                       as FundT
@@ -27,7 +27,6 @@ import           TestUtils.Helpers
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified Generic.Types as T
 
 --------------------------------------------------------------------------------
 -- Fund Contract
@@ -94,7 +93,7 @@ fund_DatumUpdate_TxContext tp admins tokenAdminPolicy_CS =
                 LedgerApiV2.OutputDatum $
                     FundT.mkDatum output_Fund_Datum
             }
-    in 
+    in
         mkContext
             |> setInputsAndAddRedeemers [(input_Fund_UTxO, FundT.mkDatumUpdateRedeemer)]
             |> setOutputs [output_Fund_UTxO]
@@ -151,13 +150,13 @@ fund_Finish_TxContext tp closedAt =
         -----------------
         output_Fund_Datum = FundHelpers.mkUpdated_Fund_Datum_With_ClosedAt
                 input_Fund_Datum
-                closedAt 
+                closedAt
         output_Fund_UTxO = input_Fund_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $
                     FundT.mkDatum output_Fund_Datum
             }
-    in 
+    in
     mkContext
         |> setInputsAndAddRedeemers [(input_Fund_UTxO, FundT.mkFinishRedeemer closedAt)]
         |> setOutputs [output_Fund_UTxO]

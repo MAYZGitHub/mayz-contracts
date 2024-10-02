@@ -2,28 +2,26 @@ cradle:
   cabal:
 
     - path: "./src"
-      component: "lib:mayz-protocol"
+      component: "lib:mayz-protocol-contracts"
 
     - path: "./app"
-      component: "mayz-protocol:exe:cli"
+      component: "mayz-protocol-contracts:exe:cli"
 
     - path: "./tests/Tests/UnitTests"
-      component: "mayz-protocol:test:UnitTests"
+      component: "mayz-protocol-contracts:test:UnitTests"
 
     - path: "./tests"
-      component: "mayz-protocol:test:UnitTests"
+      component: "mayz-protocol-contracts:test:UnitTests"
 
     - path: "./tests/Tests/PropertyBasedTests"
-      component: "mayz-protocol:test:PropertyBasedTests"
+      component: "mayz-protocol-contracts:test:PropertyBasedTests"
 
     - path: "./tests/Tests/AutomaticTests"
-      component: "mayz-protocol:test:AutomaticTests"
+      component: "mayz-protocol-contracts:test:AutomaticTests"
 
     - path: "./tests"
-      component: "mayz-protocol:test:UnitTests"
+      component: "mayz-protocol-contracts:test:UnitTests"
 
     - path: "./tests/Tests/PerformanceTests"
-      component: "mayz-protocol:test:PerformanceTests"
+      component: "mayz-protocol-contracts:test:PerformanceTests"
 
-    - path: "./tests/Tests/TransactionsTests"
-      component: "mayz-protocol:test:TransactionsTests"

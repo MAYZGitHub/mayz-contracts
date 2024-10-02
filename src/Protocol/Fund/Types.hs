@@ -20,24 +20,24 @@ module Protocol.Fund.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson (FromJSON, ToJSON)
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema (ToSchema)
-import qualified GHC.Generics         as GHCGenerics (Generic)
+import qualified Data.Aeson             as DataAeson (FromJSON, ToJSON)
+import qualified Data.OpenApi.Schema    as DataOpenApiSchema (ToSchema)
+import qualified GHC.Generics           as GHCGenerics (Generic)
 import qualified Ledger
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Prelude              as P
+import qualified Prelude                as P
 import qualified Schema
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Protocol.Constants   as T
-import qualified Protocol.Types       as T
 import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Generic.Types          as T
+import qualified Protocol.Constants     as T
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -94,25 +94,25 @@ PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
 
 data FundDatumType
     = FundDatumType
-          { fdFundFactoryVersion           :: Integer
-          , fdFundPolicy_CS                :: T.CS
-          , fdFundFT_TN                    :: T.TN
-          , fdFundValidator_Hash           :: LedgerApiV2.ValidatorHash
-          , fdFundHoldingPolicyID_CS       :: T.CS
-          , fdFundHoldingValidator_Hash    :: LedgerApiV2.ValidatorHash
-          , fdInvestUnitValidator_Hash     :: LedgerApiV2.ValidatorHash
-          , fdAdmins                       :: [T.WalletPaymentPKH]
-          , fdTokenAdminPolicy_CS          :: LedgerApiV2.CurrencySymbol
-          , fdFundCategoryNumber           :: Integer
-          , fdBeginAt                      :: LedgerApiV2.POSIXTime
-          , fdDeadline                     :: LedgerApiV2.POSIXTime
-          , fdClosedAt                     :: Maybe LedgerApiV2.POSIXTime
-          , fdCommissionPerYearInBPx1e3    :: Integer
+          { fdFundFactoryVersion            :: Integer
+          , fdFundPolicy_CS                 :: T.CS
+          , fdFundFT_TN                     :: T.TN
+          , fdFundValidator_Hash            :: LedgerApiV2.ValidatorHash
+          , fdFundHoldingPolicyID_CS        :: T.CS
+          , fdFundHoldingValidator_Hash     :: LedgerApiV2.ValidatorHash
+          , fdInvestUnitValidator_Hash      :: LedgerApiV2.ValidatorHash
+          , fdAdmins                        :: [T.WalletPaymentPKH]
+          , fdTokenAdminPolicy_CS           :: LedgerApiV2.CurrencySymbol
+          , fdFundCategoryNumber            :: Integer
+          , fdBeginAt                       :: LedgerApiV2.POSIXTime
+          , fdDeadline                      :: LedgerApiV2.POSIXTime
+          , fdClosedAt                      :: Maybe LedgerApiV2.POSIXTime
+          , fdCommissionPerYearInBPx1e3     :: Integer
           , fdCommissionsTable_Numerator1e6 :: [Integer]
-          , fdHoldingsCount                :: Integer
-          , fdHoldingsIndex                :: Integer
-          , fdMAYZ                   :: Integer
-          , fdMinADA                       :: Integer
+          , fdHoldingsCount                 :: Integer
+          , fdHoldingsIndex                 :: Integer
+          , fdMAYZ                          :: Integer
+          , fdMinADA                        :: Integer
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
@@ -380,7 +380,7 @@ getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = J
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
 getPolicyRedeemerName (Just (PolicyRedeemerMintFT PolicyRedeemerMintFTType)) = Just "MintFT"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnFT PolicyRedeemerBurnFTType)) = Just "BurnFT"
-getPolicyRedeemerName _ = Nothing
+getPolicyRedeemerName _                                                      = Nothing
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
@@ -506,14 +506,14 @@ PlutusTx.makeIsDataIndexed
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
-getValidatorRedeemerName (Just (ValidatorRedeemerDatumUpdate ValidatorRedeemerDatumUpdateType)) = Just "DatumUpdate"
-getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerFundHoldingAdd ValidatorRedeemerFundHoldingAddType)) = Just "FundHoldingAdd"
+getValidatorRedeemerName (Just (ValidatorRedeemerDatumUpdate ValidatorRedeemerDatumUpdateType))             = Just "DatumUpdate"
+getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType))           = Just "UpdateMinADA"
+getValidatorRedeemerName (Just (ValidatorRedeemerFundHoldingAdd ValidatorRedeemerFundHoldingAddType))       = Just "FundHoldingAdd"
 getValidatorRedeemerName (Just (ValidatorRedeemerFundHoldingDelete ValidatorRedeemerFundHoldingDeleteType)) = Just "FundHoldingDelete"
-getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType)) = Just "Emergency"
-getValidatorRedeemerName (Just (ValidatorRedeemerFinish ValidatorRedeemerFinishType {})) = Just "Finish"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType)) = Just "Delete"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))                 = Just "Emergency"
+getValidatorRedeemerName (Just (ValidatorRedeemerFinish ValidatorRedeemerFinishType {}))                    = Just "Finish"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType))                       = Just "Delete"
+getValidatorRedeemerName _                                                                                  = Nothing
 
 --------------------------------------------------------------------------------2
 

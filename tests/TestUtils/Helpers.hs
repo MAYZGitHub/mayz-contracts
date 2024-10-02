@@ -17,13 +17,13 @@ import qualified Control.Monad           as ControlMonad
 import qualified Data.List               as DataList
 import qualified Data.Maybe              as DataMaybe
 import qualified Debug.Trace             as DebugTrace
+import qualified GHC.IO                  as GHCIO
 import qualified Plutus.Model            as PlutusSimpleModel
 import           Prelude                 as P
 import qualified System.Environment      as SystemEnvironment
 import qualified Test.QuickCheck         as QC
 import qualified Test.Tasty              as Tasty
 import qualified Text.Read               as TextRead
-import qualified GHC.IO as GHCIO
 
 -- IOG imports
 import qualified Ledger.Ada              as LedgerAda
@@ -53,7 +53,7 @@ debugTraceIf swTrace msg = ControlMonad.when swTrace $ DebugTrace.trace msg (ret
 
 debugTraceIf_ :: Bool -> String -> a -> a
 debugTraceIf_ True msg val = DebugTrace.trace msg val
-debugTraceIf_ False _ val = val
+debugTraceIf_ False _ val  = val
 
 debugTraceIfM :: Bool -> String -> QC.Gen ()
 debugTraceIfM swTrace msg =

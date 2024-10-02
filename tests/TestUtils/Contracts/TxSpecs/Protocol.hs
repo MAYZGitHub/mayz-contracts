@@ -11,8 +11,6 @@ module TestUtils.Contracts.TxSpecs.Protocol where
 
 -- Non-IOG imports
 
-import qualified Prelude                              as P
-
 -- IOG imports
 import qualified Plutus.V2.Ledger.Api                 as LedgerApiV2
 import           PlutusTx.Prelude
@@ -24,12 +22,11 @@ import qualified Protocol.Protocol.Helpers            as Protocol
 import qualified Protocol.Protocol.Types              as ProtocolT
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.HelpersMAYZ
-import           TestUtils.Automatic.ParamsGenerators
 import           TestUtils.Automatic.Types
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Helpers
+import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Types
 
 --------------------------------------------------------------------------------
 -- Protocol Contract
@@ -95,10 +92,10 @@ protocol_DatumUpdate_TxSpecs tp =
                         tokenAdminPolicy_CS = ProtocolT.pdTokenAdminPolicy_CS input_Protocol_Datum
                         fundCategories = ProtocolT.pdFundCategories input_Protocol_Datum
                         fundLifeTime = ProtocolT.pdFundLifeTime input_Protocol_Datum
-                        requiredMAYZForSellOffer = ProtocolT.pdRequiredMAYZForSellOffer input_Protocol_Datum
+                        requiredMAYZForSwapOffer = ProtocolT.pdRequiredMAYZForSwapOffer input_Protocol_Datum
                         requiredMAYZForBuyOrder = ProtocolT.pdRequiredMAYZForBuyOrder input_Protocol_Datum
                         commissionFund_PerYear_InBPx1e3 = ProtocolT.pdCommissionFund_PerYear_InBPx1e3 input_Protocol_Datum
-                        commissionSellOffer_InBPx1e3 = ProtocolT.pdCommissionSellOffer_InBPx1e3 input_Protocol_Datum
+                        commissionSwapOffer_InBPx1e3 = ProtocolT.pdCommissionSwapOffer_InBPx1e3 input_Protocol_Datum
                         commissionBuyOrder_InBPx1e3 = ProtocolT.pdCommissionBuyOrder_InBPx1e3 input_Protocol_Datum
                         share_InBPx1e2_Protocol = ProtocolT.pdShare_InBPx1e2_Protocol input_Protocol_Datum
                         share_InBPx1e2_Delegators = ProtocolT.pdShare_InBPx1e2_Delegators input_Protocol_Datum
@@ -115,10 +112,10 @@ protocol_DatumUpdate_TxSpecs tp =
                             tokenAdminPolicy_CS
                             fundCategories
                             fundLifeTime
-                            requiredMAYZForSellOffer
+                            requiredMAYZForSwapOffer
                             requiredMAYZForBuyOrder
                             commissionFund_PerYear_InBPx1e3
-                            commissionSellOffer_InBPx1e3
+                            commissionSwapOffer_InBPx1e3
                             commissionBuyOrder_InBPx1e3
                             share_InBPx1e2_Protocol
                             share_InBPx1e2_Delegators

@@ -16,7 +16,7 @@
 │       │   ├── Fund
 │       │   ├── InvestUnit
 │       │   ├── Protocol
-│       │   └── SellOffer
+│       │   └── SwapOffer
 │       └── Helpers
 ├── TestUtils.hs
 └── ValidatorTester.hs
@@ -206,20 +206,20 @@ Currently, the result of these tests is the following:
           Not including FundHolding ReIndexing Redeemer should fail:                                           OK (0.01s)
           Not including Fund UTxO as InputRef should fail:                                                     OK
           Not including Fund Holding UTxO as Input should fail:                                                OK (0.01s)
-    SellOffer Tests
-      Testing SellOffer Minting Policy
-        Tests for SellOffer ID NFT minting
+    SwapOffer Tests
+      Testing SwapOffer Minting Policy
+        Tests for SwapOffer ID NFT minting
           Minting ID correctly must succeed:                                                                          OK (9.37s)
           Not having a Protocol input ref should fail:                                                         FAIL
-            tests/Tests/UnitTests/Contracts/SellOffer/MintingPolicy.hs:60:
+            tests/Tests/UnitTests/Contracts/SwapOffer/MintingPolicy.hs:60:
             expected: ["Expected exactly one Protocol input ref"]
              but got: []
-          Not having a SellOffer output should fail:                                                           OK
+          Not having a SwapOffer output should fail:                                                           OK
           Minting an asset with wrong token name should fail:                                                  OK
           Paying to a wrong address should fail:                                                               OK
-          SellOffer with initial total_FT_Earned different from 0 should fail:                                 OK
+          SwapOffer with initial total_FT_Earned different from 0 should fail:                                 OK
           Not paying Ada available amount specified in datum should fail:                                      OK
-        Tests for SellOffer ID NFT burning
+        Tests for SwapOffer ID NFT burning
           Burning ID correctly must succeed:                                                                          OK
           Burning an asset with wrong token name should fail:                                                  OK
   Helpers Tests
@@ -246,7 +246,7 @@ Currently, the result of these tests is the following:
 
 The two failing cases in the Fund Holding validator tests are due to the lack of signatory checks upon the collecting of commissions.
 
-The failing case in the SellOffer minting tests is due to a mismatch between the docs and the code: there is no check implemented for the Protocol input ref.
+The failing case in the SwapOffer minting tests is due to a mismatch between the docs and the code: there is no check implemented for the Protocol input ref.
 
 The failing cases in the Fund Holding ID NFT minting are due to the `isPolicyDifferent` check, which is the only `traceIfTrue` condition in the on-chain code.
 

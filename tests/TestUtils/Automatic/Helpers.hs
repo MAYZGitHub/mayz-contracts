@@ -15,8 +15,8 @@ import           Prelude                   as P hiding ((<>))
 -- IOG imports
 
 -- Project imports
+import qualified Data.Char                 as DataChar
 import           TestUtils.Automatic.Types
-import qualified Data.Char as DataChar
 
 ----------------------------------------------------------------------------------------
 

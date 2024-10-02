@@ -19,23 +19,23 @@ module Protocol.InvestUnit.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson (FromJSON, ToJSON)
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema (ToSchema)
-import qualified GHC.Generics         as GHCGenerics (Generic)
+import qualified Data.Aeson             as DataAeson (FromJSON, ToJSON)
+import qualified Data.OpenApi.Schema    as DataOpenApiSchema (ToSchema)
+import qualified GHC.Generics           as GHCGenerics (Generic)
 import qualified Ledger
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Prelude              as P
+import qualified Prelude                as P
 import qualified Schema
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Protocol.Types       as T
 import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Generic.Types          as T
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -138,9 +138,7 @@ mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . InvestUnitDatum
 -- ValidatorRedeemer
 --------------------------------------------------------------------------------2
 
-data ValidatorRedeemerUpdateMinADAType
-    = ValidatorRedeemerUpdateMinADAType 
-    deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
+data ValidatorRedeemerUpdateMinADAType = ValidatorRedeemerUpdateMinADAType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateMinADAType where
     {-# INLINEABLE (==) #-}
@@ -207,10 +205,10 @@ PlutusTx.makeIsDataIndexed
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
-getValidatorRedeemerName (Just (ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType {})) = Just "ReIndexing"
+getValidatorRedeemerName (Just (ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType {}))  = Just "ReIndexing"
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType)) = Just "Emergency"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))       = Just "Emergency"
+getValidatorRedeemerName _                                                                        = Nothing
 
 --------------------------------------------------------------------------------2
 

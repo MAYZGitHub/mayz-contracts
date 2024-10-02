@@ -130,7 +130,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 ------------------
                                 isAdminTokenPresent :: Bool
                                 isAdminTokenPresent = case LedgerApiV2.txInfoOutputs info of
-                                    [] -> False
+                                    []         -> False
                                     -- search admin token in output 0
                                     (output:_) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
                                     where
@@ -264,7 +264,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                                     _                                        -> traceError "Interval has no lower bound"
                                                 ------------------
                                                 !newInterval = Ledger.Interval (Ledger.LowerBound (Ledger.Finite newLowerLimitValue) True) (Ledger.ivTo validRange )
-                                                -- TODO: la valides de la transaccion hay que ponerla en 3 minutos
                                             in
                                                 T.oridTime riuriOracleReIdx_Data `Ledger.member` newInterval
                                         ------------------

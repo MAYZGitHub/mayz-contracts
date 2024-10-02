@@ -105,10 +105,10 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
         !oraclePaymentPubKey = ppppOraclePaymentPubKey
         !fundCategories = ppppFundCategories
         !fundLifeTime = ppppFundLifeTime
-        !requiredMAYZForSellOffer = ppppRequiredMAYZForSellOffer
+        !requiredMAYZForSwapOffer = ppppRequiredMAYZForSwapOffer
         !requiredMAYZForBuyOrder = ppppRequiredMAYZForBuyOrder
         !commissionFund_PerYear_InBPx1e3 = ppppCommissionFund_PerYear_InBPx1e3
-        !commissionSellOffer_InBPx1e3 = ppppCommissionSellOffer_InBPx1e3
+        !commissionSwapOffer_InBPx1e3 = ppppCommissionSwapOffer_InBPx1e3
         !commissionBuyOrder_InBPx1e3 = ppppCommissionBuyOrder_InBPx1e3
         !share_InBPx1e2_Protocol = ppppShare_InBPx1e2_Protocol
         !share_InBPx1e2_Delegators = ppppShare_InBPx1e2_Delegators
@@ -126,10 +126,10 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
                 tokenAdminPolicy_CS
                 fundCategories
                 fundLifeTime
-                requiredMAYZForSellOffer
+                requiredMAYZForSwapOffer
                 requiredMAYZForBuyOrder
                 commissionFund_PerYear_InBPx1e3
-                commissionSellOffer_InBPx1e3
+                commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
                 share_InBPx1e2_Delegators
@@ -202,10 +202,10 @@ endPointProtocolUpdate T.PABProtocolUpdateParams {..} = PlutusContract.handleErr
         !tokenAdminPolicy_CS = ppupTokenAdminPolicy_CS
         !fundCategories = ppupFundCategories
         !fundLifeTime = ppupFundLifeTime
-        !requiredMAYZForSellOffer = ppupRequiredMAYZForSellOffer
+        !requiredMAYZForSwapOffer = ppupRequiredMAYZForSwapOffer
         !requiredMAYZForBuyOrder = ppupRequiredMAYZForBuyOrder
         !commissionFund_PerYear_InBPx1e3 = ppupCommissionFund_PerYear_InBPx1e3
-        !commissionSellOffer_InBPx1e3 = ppupCommissionSellOffer_InBPx1e3
+        !commissionSwapOffer_InBPx1e3 = ppupCommissionSwapOffer_InBPx1e3
         !commissionBuyOrder_InBPx1e3 = ppupCommissionBuyOrder_InBPx1e3
         !share_InBPx1e2_Protocol = ppupShare_InBPx1e2_Protocol
         !share_InBPx1e2_Delegators = ppupShare_InBPx1e2_Delegators
@@ -220,10 +220,10 @@ endPointProtocolUpdate T.PABProtocolUpdateParams {..} = PlutusContract.handleErr
                 tokenAdminPolicy_CS
                 fundCategories
                 fundLifeTime
-                requiredMAYZForSellOffer
+                requiredMAYZForSwapOffer
                 requiredMAYZForBuyOrder
                 commissionFund_PerYear_InBPx1e3
-                commissionSellOffer_InBPx1e3
+                commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
                 share_InBPx1e2_Delegators

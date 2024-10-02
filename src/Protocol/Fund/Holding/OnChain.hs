@@ -27,7 +27,6 @@ import qualified Plutus.V2.Ledger.Api        as LedgerApiV2
 import qualified Plutus.V2.Ledger.Contexts   as LedgerContextsV2
 import           PlutusTx                    (CompiledCode)
 import qualified PlutusTx
-import qualified PlutusTx.AssocMap           as TxAssocMap
 import           PlutusTx.Prelude
 ----------------------------------------------------------------------------2
 -- Import Internos
@@ -57,17 +56,6 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
             (T.PolicyRedeemerMintID _) ->
                     ------------------
                     -- it runs along with Fund Validator (ValidatorRedeemerFundHoldingAdd)
-                        -- validateAdminAction
-                        -- traceIfFalse "not isCorrect_Output_Fund_Datum_With_HoldingAdded" isCorrect_Output_Fund_Datum_With_HoldingAdded
-                        -- && traceIfFalse "not isCorrect_Output_Fund_Value_NotChanged" isCorrect_Output_Fund_Value_NotChanged
-                        -- && traceIfFalse "not isMintingFundHoldingID" isMintingFundHoldingID
-                    ------------------
-                    -- Que se consuma FundDatum con redeemer correcto (AddHolding)
-                    -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
-                    -- Que se genere salida con nuevo HoldingDatum en Holding Val (Holding Val está indicada en FundDatum)
-                    -- Que el HoldingDatum sea correcto
-                    -- Que se mintee Holding ID con own póliza
-                    -- Que el HoldingDatum tenga el Holding ID
                     ------------------
                     traceIfFalse "not isMintingFundHoldingID" isMintingFundHoldingID &&
                     traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingAdd ) &&
@@ -148,18 +136,8 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
             (T.PolicyRedeemerBurnID _) ->
                     ------------------
                     -- it runs along with Fund Validator (ValidatorRedeemerFundHoldingDelete)
-                        -- validateAdminAction
-                        -- traceIfFalse "not isCorrect_Output_Fund_Datum_With_HoldingDeleted" isCorrect_Output_Fund_Datum_With_HoldingDeleted
-                        -- && traceIfFalse "not isCorrect_Output_Fund_Value_NotChanged" isCorrect_Output_Fund_Value_NotChanged
-                        -- && traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                     ------------------
                     -- it runs along with FundHolding Validator (ValidatorRedeemerDelete)
-                        -- traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
-                    ------------------
-                    -- Que se consuma FundDatum con redeemer correcto (DeleteHolding)
-                    -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
-                    -- Que se queme Holding ID con own póliza
-                    -- que no haya tokens en el FundHolding
                     ------------------
                     traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                     && traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingDelete)
@@ -299,7 +277,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                     then ()
                     else error ()
                 where
-                    -- && traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                     ------------------
                     !useThisToMakeScriptUnique = protocolPolicyID_CS /= LedgerApiV2.adaSymbol && fundPolicy_CS /= LedgerApiV2.adaSymbol
                     ------------------
@@ -347,20 +324,8 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                             validateDelete =
                                 ------------------
                                 -- it runs along with Fund Validator (ValidatorRedeemerFundHoldingDelete)
-                                    -- validateAdminAction
-                                    -- traceIfFalse "not isCorrect_Output_Fund_Datum_With_HoldingDeleted" isCorrect_Output_Fund_Datum_With_HoldingDeleted
-                                    -- && traceIfFalse "not isCorrect_Output_Fund_Value_NotChanged" isCorrect_Output_Fund_Value_NotChanged
-                                    -- && traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                                 ------------------
                                 -- it runs along with FundHolding ID Policy (PolicyRedeemerBurnID)
-                                    -- traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
-                                    -- && traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingDelete)
-                                    -- && traceIfFalse "not isZeroAssets" isZeroAssets
-                                ------------------
-                                -- que sea fund admin, eso lo controla la validacion del Fund
-                                -- Que se queme Holding ID con la correcta póliza indicada en FundDatum
-                                -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
-                                -- que no haya tokens en el fundHOlding. Se verifica en la poliza de PolicyRedeemerBurnID
                                 ------------------
                                 traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                 && traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
@@ -433,8 +398,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                     ------------------
                                     validateAdminAction :: [T.WalletPaymentPKH] -> LedgerValue.AssetClass -> Bool
                                     validateAdminAction !admins' !tokenAdmin_AC =
-                                            -- Que este el token de admin presente en output 1
-                                            -- o Que sea Protocol Admin
+                                            -- Que este el token de admin presente en output 1 o Que sea Protocol Admin
                                             traceIfFalse "not isSignedByAny admins nor isAdminTokenPresent" (OnChainHelpers.isSignedByAny admins' info || isAdminTokenPresent)
                                         where
                                             ------------------
@@ -459,10 +423,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                             ---------------------
                                             -- it runs alone
                                             ---------------------
-                                            -- Que sea Fund Admin
-                                            -- Que no se modifique datums ni la cantidad total de tokens en las entradas y salidas
-                                            -- Que cada datum luego contiene la misma cantidad de minADA que dice el datum y el funHoldingID corresponmdoente al indice en el datum
-                                            ------------------
                                             validateFundAdminAction fundDatum_In
                                             && traceIfFalse "not cantInputs == cantOutputs" (cantInputs == cantOutputs && length alterCommissionsFT == cantOutputs)
                                             && traceIfFalse "not isCorrect_Outputs_Commissions_SameTotal" isCorrect_Outputs_Commissions_SameTotal
@@ -531,14 +491,14 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                     --     -- !fundHoldingDatums_In = snd <$> inputs_Values_And_FundHoldingDatums
                                                     --     -- !fundHoldingDatums_Out = snd <$> outputs_Values_And_FundHoldingDatums
                                                     --     ------------------
-                                                    --     fundHoldingDatums_Control = zipWith3 FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved 
-                                                    --                                 fundHoldingDatums_In 
-                                                    --                                 fundHoldingDatums_Out 
+                                                    --     fundHoldingDatums_Control = zipWith3 FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved
+                                                    --                                 fundHoldingDatums_In
+                                                    --                                 fundHoldingDatums_Out
                                                     --                                 rbCommissionsFT
                                                     -- in
                                                     --     all (uncurry OnChainHelpers.isUnsafeEqDatums) (zip fundHoldingDatums_Control fundHoldingDatums_Out)
                                                     let
-                                                        {- 
+                                                        {-
                                                             Validate Fund Holding Datum updates:
                                                             1. Create control datum using input datum, new commission (commissionFT), and new rate from output datum
                                                             2. Check if control datum matches output datum
@@ -563,9 +523,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             in
                                                                 OnChainHelpers.isUnsafeEqDatums datumControl datumOut && isProportionalChange
                                                         validateAll :: [T.FundHoldingDatumType] -> [T.FundHoldingDatumType] -> [Integer] -> Bool
-                                                        validateAll [] [] [] = True
+                                                        validateAll [] [] []                    = True
                                                         validateAll (din:dis) (dout:dos) (c:cs) = validateDatum din dout c && validateAll dis dos cs
-                                                        validateAll _ _ _ = False
+                                                        validateAll _ _ _                       = False
                                                     in
                                                         validateAll fundHoldingDatums_In fundHoldingDatums_Out alterCommissionsFT
                                                 ------------------
@@ -649,13 +609,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                     (T.ValidatorRedeemerDeposit (T.ValidatorRedeemerDepositType !date !deposit)) ->
                                                             ------------------
                                                             -- it runs along with Fund Policy (PolicyRedeemerMintFT)
-                                                                -- traceIfFalse "not isFundOpen" isFundOpen
-                                                                -- traceIfFalse "not isMintingFT" isMintingFT &&
-                                                                -- traceIfFalse "not isCorrect_Redeemer_FundHolding" (isCorrect_Redeemer_FundHolding isFundHoldingValidatorRedeemerDeposit)
                                                             ------------------
                                                             traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
-                                                            && traceIfFalse "not Correct Deposit Amount" (isCorrectAmount deposit T.maxDepositAndWithdrawInFunds)
+                                                            && traceIfFalse "not Correct Deposit Amount" (FundHelpers.isCorrectAmount deposit T.maxDepositAndWithdrawInFunds investUnit_Granularity)
                                                             && traceIfFalse "not isMintingFT" isMintingFT
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Datum_With_Deposit" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Out fundHoldingDatum_Control_With_Deposit)
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Value_With_Tokens_And_FT" (isCorrect_Output_FundHolding_Value valueOf_FundHoldingDatum_Out valueFor_FundHoldingDatum_Control_With_Tokens_And_FT)
@@ -667,7 +624,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             !(userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) =
                                                                 FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
                                                             ------------------
-                                                            !valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value = createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In deposit True
+                                                            !valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In investUnitTokens deposit True
                                                             ------------------
                                                             !valueFor_FT_Commissions = LedgerValue.assetClassValue fundFT_AC commissionsFT
                                                             ------------------
@@ -681,15 +638,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                     (T.ValidatorRedeemerWithdraw (T.ValidatorRedeemerWithdrawType !date !withdraw !withdrawPlusComissions)) ->
                                                             ------------------
                                                             -- it runs along with Fund Policy (PolicyRedeemerBurnFT)
-                                                                -- traceIfFalse "not isBurningFT" isBurningFT &&
-                                                                -- traceIfFalse "not isCorrect_Redeemer_FundHolding" (isCorrect_Redeemer_FundHolding isFundHoldingValidatorRedeemerWithdraw)
                                                             ------------------
                                                             -- there are no temporal restritions for withdraw
                                                             ------------------
                                                             traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
-                                                            && traceIfFalse "not Correct Withdraw Amount" (isCorrectAmount withdraw T.maxDepositAndWithdrawInFunds)
-                                                            && traceIfFalse "not Correct Comissions" (isCorrectCommissionsAmount commissionsForUserFT commissionsForUserFT_calculated)
+                                                            && traceIfFalse "not Correct Withdraw Amount" (FundHelpers.isCorrectAmount withdraw T.maxDepositAndWithdrawInFunds investUnit_Granularity)
+                                                            && traceIfFalse "not Correct Comissions" (FundHelpers.isCorrectCommissionsAmount commissionsForUserFT commissionsForUserFT_calculated investUnit_Granularity)
                                                             && traceIfFalse "not isEnough_FT_ForComission" isEnough_FT_ForComission
                                                             && traceIfFalse "not isEnough_Commissions_RatePerMonth" isEnough_Commissions_RatePerMonth
                                                             && traceIfFalse "not isBurningFT" isBurningFT
@@ -706,7 +661,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             !commissionsForUserFT_calculated = FundHelpers.calculateWithdrawCommissionsAvailable commissionsTable_Numerator1e6 deadline date withdraw investUnit_Granularity
                                                             !commissions_FT_Rate1e6_PerMonth_calculated = FundHelpers.calculateWithdrawCommissionsRate deadline date commissionsForUserFT
                                                             ------------------
-                                                            !valueOf_TokensForWithdraw_Plus_FundHoldingDatum_Value = createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In (negate withdrawPlusComissions) False
+                                                            !valueOf_TokensForWithdraw_Plus_FundHoldingDatum_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In investUnitTokens (negate withdrawPlusComissions) False
                                                             !valueFor_FT_CommissionsToGetBack = LedgerValue.assetClassValue fundFT_AC commissionsForUserFT
                                                             !valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions = valueOf_TokensForWithdraw_Plus_FundHoldingDatum_Value <> negate valueFor_FT_CommissionsToGetBack
                                                             ------------------
@@ -741,247 +696,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                     !investUnit = InvestUnitT.iudInvestUnit investUnitDatum_In
                                                     !investUnitTokens = T.iuValues investUnit
                                                     ------------------
-                                                    !investUnit_Granularity = getDecimalsInInvestUnit investUnitTokens
-                                                    ------------------
-                                                    {-
-                                                    Function: isCorrectAmount
-
-                                                    Purpose:
-                                                    Validates deposit or withdrawal amounts based on predefined rules and invest unit granularity.
-
-                                                    Parameters:
-                                                    - amount: The deposit or withdrawal amount to validate.
-
-                                                    Checks:
-                                                    1. Amount is positive.
-                                                    2. Amount doesn't exceed maximum allowed for deposits/withdrawals.
-                                                    3. Amount is divisible by the smallest unit of granularity in the invest unit.
-
-                                                    Example:
-                                                    For an invest unit with tokens [455, 1000] (representing 4.55 and 10.00):
-                                                    - Valid amount: 200
-                                                        Because:
-                                                        (200 * 455) /100 = 910 (whole number)
-                                                        (200 * 1000) /100 = 2000 (whole number)
-                                                    - Invalid amount: 157
-                                                        Because:
-                                                        (157 * 455) /100 = 714.35 (fractional, not allowed)
-                                                        (157 * 1000) /100 = 1570 (whole number, but the other token fails)
-
-                                                    The function getDecimalsInInvestUnit would return 100 for this invest unit,
-                                                    because the smallest fraction is 0.01 (represented as 1 in the 455).
-                                                    isCorrectAmount then checks if the amount is divisible by 100, ensuring
-                                                    it can be evenly distributed across all tokens without creating fractions.
-
-                                                    In this case:
-                                                    200 is valid because 200 % 100 == 0
-                                                    157 is invalid because 157 % 100 != 0
-                                                    -}
-                                                    ------------------
-                                                    isCorrectAmount :: Integer -> Integer -> Bool
-                                                    isCorrectAmount !amount !max' =
-                                                            amount > 0
-                                                            && (amount <= max')
-                                                            && amount `remainder` investUnit_Granularity == 0
-                                                    ------------------
-                                                    isCorrectCommissionsAmount :: Integer -> Integer -> Bool
-                                                    isCorrectCommissionsAmount !amount !max' =
-                                                            amount >= 0
-                                                            && (amount <= max')
-                                                            && amount `remainder` investUnit_Granularity == 0
-                                                    ------------------
-                                                    {-
-                                                    Function: getDecimalsInInvestUnit
-
-                                                    Purpose:
-                                                    Determines the smallest fraction (highest precision) used in the invest unit.
-
-                                                    Parameters:
-                                                    - tokens: List of InvestUnitTokens to analyze.
-
-                                                    Process:
-                                                    1. Iterates through all tokens in the invest unit.
-                                                    2. For each token, checks if its amount (which is multiplied by 100) is divisible by 100, 10, or neither.
-                                                    3. Returns the smallest divisor found:
-                                                    - 100 if any token has a fraction (two decimal places)
-                                                    - 10 if the smallest fraction is 0.1 (one decimal place)
-                                                    - 1 if all tokens are whole numbers (no decimals)
-
-                                                    Importance:
-                                                    This function is crucial for ensuring that deposit/withdrawal amounts are compatible
-                                                    with the invest unit's highest precision, which in turn guarantees exact divisions
-                                                    in token amount calculations.
-
-                                                    Examples:
-
-                                                    1. Two decimal places:
-                                                    Invest unit tokens: [455, 1000, 10000]
-                                                    - 455 represents 4.55 (two decimal places)
-                                                    - 1000 represents 10.00 (whole number)
-                                                    - 10000 represents 100.00 (whole number)
-                                                    Result: Returns 100
-                                                    Explanation: The smallest fraction is 0.01 (in 4.55), so amounts must be divisible by 100.
-
-                                                    2. One decimal place:
-                                                    Invest unit tokens: [150, 1000, 2050]
-                                                    - 150 represents 1.5 (one decimal place)
-                                                    - 1000 represents 10.0 (whole number)
-                                                    - 2050 represents 20.5 (one decimal place)
-                                                    Result: Returns 10
-                                                    Explanation: The smallest fraction is 0.1, so amounts must be divisible by 10.
-
-                                                    3. No decimal places:
-                                                    Invest unit tokens: [100, 1000, 5000]
-                                                    - 100 represents 1 (whole number)
-                                                    - 1000 represents 10 (whole number)
-                                                    - 5000 represents 50 (whole number)
-                                                    Result: Returns 1
-                                                    Explanation: All numbers are whole, so amounts only need to be divisible by 1.
-
-                                                    4. Mixed precision:
-                                                    Invest unit tokens: [455, 150, 1000]
-                                                    - 455 represents 4.55 (two decimal places)
-                                                    - 150 represents 1.5 (one decimal place)
-                                                    - 1000 represents 10 (whole number)
-                                                    Result: Returns 100
-                                                    Explanation: The highest precision is two decimal places (0.01 in 4.55),
-                                                                    so amounts must be divisible by 100 to work with all tokens.
-
-                                                    Usage in isCorrectAmount:
-                                                    If getDecimalsInInvestUnit returns 100, then isCorrectAmount will check if
-                                                    the deposit/withdrawal amount is divisible by 100. This ensures that the amount
-                                                    can be evenly distributed across all tokens, including those with the highest precision.
-
-                                                    For example, with the result 100:
-                                                    - 200 is a valid amount (200 % 100 == 0)
-                                                    - 1100 is a valid amount (1100 % 100 == 0)
-                                                    - 155 is not a valid amount (155 % 100 != 0)
-                                                    -}
-                                                    ------------------
-                                                    getDecimalsInInvestUnit :: [T.InvestUnitToken] -> Integer
-                                                    getDecimalsInInvestUnit !tokens = go tokens 1
-                                                        where
-                                                            ------------------
-                                                            go [] !acc = acc
-                                                            go ((_, _, !amount):xs) acc =
-                                                                let !accNew = max acc (dividedBy amount)
-                                                                in go xs accNew
-                                                            ------------------
-                                                            dividedBy !amount
-                                                                | amount `remainder` 100 == 0 = 1
-                                                                | amount `remainder` 10 == 0 = 10
-                                                                | otherwise = 100
-                                                    ------------------
-                                                    {-
-                                                    Overall Function: createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value
-
-                                                    Purpose:
-                                                    Calculates the new value for a FundHolding after a deposit or withdrawal operation,
-                                                    considering the current value and the invest unit definition.
-
-                                                    Key Points:
-                                                    1. Invest Unit amounts are stored multiplied by 100 to handle two decimal places.
-                                                    Example: 4.55 tokens are stored as 455 in the invest unit.
-                                                    2. Processes each currency symbol (CS) and its associated tokens.
-                                                    3. Respects the granularity defined in the invest unit.
-                                                    4. Uses a round-up approach for robustness, despite guaranteed exactness due to granularity checks.
-
-                                                    Process:
-                                                    1. Converts input Value to a list of currency symbols and token maps.
-                                                    2. Updates or adds tokens based on the invest unit and deposit/withdrawal amount.
-                                                    3. Ensures accurate token amount calculations.
-                                                    4. Returns a new Value with updated token amounts.
-
-                                                    Example:
-                                                    For an invest unit with token A = 455 (4.55) and a deposit of 1000:
-                                                    New amount of token A = (455 * 1000) / 100 = 4550
-                                                    -}
-                                                    createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value :: LedgerValue.Value -> Integer -> Bool -> LedgerValue.Value
-                                                    createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value (LedgerValue.Value !mp) !amount !swRoundUp =
-                                                        LedgerValue.Value mapCSResult
-                                                        where
-                                                            !listMapCS = TxAssocMap.toList mp
-                                                            !listTokens =  investUnitTokens
-                                                            !mapCSResult = TxAssocMap.fromList (updateListMapCS listTokens listMapCS)
-                                                            ------------------
-                                                            updateListMapCS [] !restListMapCS = restListMapCS
-                                                            updateListMapCS ((!cs, !tn, !amt): restTokens) restListMapCS  =
-                                                                let
-                                                                    !(tokensFromSameCS, restTokensWithoutCS) = getOthersTokensFromSameCSAndDeleteFromList cs restTokens [] []
-                                                                    !(mapFromSameCS, restMapWithoutCS) = getMapFromSameCSAndDeleteFromList cs restListMapCS []
-                                                                    !mapFromSameCSWithTokensAdded = addTokensInMap cs mapFromSameCS ((tn, amt):tokensFromSameCS)
-                                                                    !resultMap = mapFromSameCSWithTokensAdded : updateListMapCS restTokensWithoutCS restMapWithoutCS
-                                                                in resultMap
-                                                            ------------------
-                                                            getOthersTokensFromSameCSAndDeleteFromList _ [] !accListFromSame !accListOthers = (accListFromSame, accListOthers)
-                                                            getOthersTokensFromSameCSAndDeleteFromList !cs ((!cs', !tn', !amt'): restTokens) accListFromSame accListOthers
-                                                                | cs == cs' = getOthersTokensFromSameCSAndDeleteFromList cs restTokens ( (tn', amt'): accListFromSame) accListOthers
-                                                                | otherwise = getOthersTokensFromSameCSAndDeleteFromList cs restTokens accListFromSame ( (cs', tn', amt'): accListOthers)
-                                                            ------------------
-                                                            getMapFromSameCSAndDeleteFromList _ [] !accListMapOthers = (Nothing, accListMapOthers)
-                                                            getMapFromSameCSAndDeleteFromList !cs ((!cs', !mapTN): restMap) accListOthers
-                                                                | cs == cs' = (Just mapTN, restMap ++ accListOthers)
-                                                                | otherwise = getMapFromSameCSAndDeleteFromList cs restMap ( (cs', mapTN): accListOthers)
-                                                            ------------------
-                                                            addTokensInMap !cs Nothing !tokens      = addTokensInMap' cs TxAssocMap.empty tokens
-                                                            addTokensInMap !cs (Just !mapTN) !tokens = addTokensInMap' cs mapTN tokens
-                                                            ------------------
-                                                        {-
-                                                            Function: addTokensInMap'
-
-                                                            Purpose:
-                                                            Adds or updates token amounts in a map based on invest unit definition and deposit/withdrawal amount.
-
-                                                            Parameters:
-                                                            - cs: Currency Symbol
-                                                            - mapTN: Existing map of TokenName to amounts
-                                                            - listTokensToAddInMap: List of tokens from the invest unit to process
-
-                                                            Process:
-                                                            1. Iterates through each token in the invest unit.
-                                                            2. Calculates new amount: (invest_unit_amount * deposit_amount) / 100
-                                                            Note: invest_unit_amount is already multiplied by 100, so this division brings it back to the correct scale.
-                                                            3. Updates the map with new amounts, adding new entries or updating existing ones.
-
-                                                            Note on Calculation:
-                                                            Despite granularity check ensuring exact divisions, we still use multiply_By_Scaled_1e2_And_RoundUp
-                                                            with round-up behavior as a safety measure
-
-                                                            Example:
-                                                            For an invest unit token of 455 (4.55) and a deposit of 1000:
-                                                            New amount = (455 * 1000) / 100 = 4550
-                                                            This would typically be exact, but the function would round up if there were any remainder.
-                                                            -}
-                                                            addTokensInMap' :: LedgerApiV2.CurrencySymbol -> LedgerApiV2.Map LedgerApiV2.TokenName Integer -> [(LedgerApiV2.TokenName, Integer)] -> (LedgerApiV2.CurrencySymbol, LedgerApiV2.Map LedgerApiV2.TokenName Integer)
-                                                            addTokensInMap' !cs !mapTN []                   = (cs, mapTN)
-                                                            addTokensInMap' !cs !mapTN !listTokensToAddInMap =
-                                                                (cs, foldl (\acc (!tn', !amt') ->
-                                                                    let
-                                                                        !roundedAmt =
-                                                                            -- NOTE: en depositos esta bien que redondee para arriba, en retiros redondea para abajo
-                                                                            if swRoundUp then
-                                                                                OnChainHelpers.multiply_By_Scaled_1e2_And_RoundUp amount amt'
-                                                                            else
-                                                                                OnChainHelpers.multiply_By_Scaled_1e2_And_RoundDown amount amt'
-                                                                    in mapElement acc tn' roundedAmt
-                                                                ) mapTN listTokensToAddInMap)
-                                                            mapElement !acc !tn !amt =
-                                                                case TxAssocMap.lookup tn acc of
-                                                                    Nothing   -> TxAssocMap.insert tn amt acc
-                                                                    Just !amt' -> TxAssocMap.insert tn (amt + amt') acc
+                                                    !investUnit_Granularity = FundHelpers.getDecimalsInInvestUnit investUnitTokens
                                             ------------------
                                             validateReIdx :: Bool
                                             validateReIdx =  case redeemer of
                                                 (T.ValidatorRedeemerReIndexing (T.ValidatorRedeemerReIndexingType (T.InvestUnit !tokensToAdd) (T.InvestUnit !tokensToRemove))) ->
                                                         ------------------
                                                         -- it runs along with Invest Unit Validator (ValidatorRedeemerReIndexing)
-                                                            -- validateAdminAction &&
-                                                            -- && traceIfFalse "not isCorrect_Oracle_Signature" isCorrect_Oracle_Signature
-                                                            -- && traceIfFalse "not isCorrect_Oracle_InRangeTime" isCorrect_Oracle_InRangeTime
-                                                            -- && traceIfFalse "not isCorrect_Exchange_WithSamePriceADA" isCorrect_Exchange_WithSamePriceADA
-                                                            -- && traceIfFalse "not isCorrect_Output_InvestUnit_Datum_WithTokensExchanged" isCorrect_Output_InvestUnit_Datum_WithTokensExchanged
-                                                            -- && traceIfFalse "not isCorrect_Output_InvestDatum_Value_NotChanged" isCorrect_Output_InvestDatum_Value_NotChanged
-                                                            -- && traceIfFalse "not isCorrect_Redeemer_FundHolding" isCorrect_Redeemer_FundHolding
                                                         ------------------
                                                         traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                         && traceIfFalse "not isCorrect_ReIdx_Amounts_And_Valid_Divisibility " isCorrect_ReIdx_Amounts_And_Valid_Divisibility
@@ -1039,10 +760,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             all (\(_, _, !am) -> am > 0 && (am * total_Deposits_IU) `remainder` 100  == 0  )  tokensToAdd
                                                             && all (\(_, _, !am) -> am > 0 && (am * total_Deposits_IU) `remainder` 100  == 0  )  tokensToRemove
                                                         ------------------
-                                                        -- TODO: no hace falta comprobar redeemerFor_InvestUnitDatum, solo controlo que haya alguna input de invest unit
-                                                        -- eso significa que es consumida y que el validador de InvestUnit se va a ejecutar. El validador solo acepta un redeemer
-                                                        -- en ese validador esta la logica que comprueba que los valores de token to add y remove del redeemer de invet unit y de FundHolding son iguales
-                                                        ------------------
                                                         isCorrect_Redeemer_InvestUnit :: Bool
                                                         !isCorrect_Redeemer_InvestUnit  =
                                                             let !redeemerFor_InvestUnitDatum' = OnChainHelpers.getRedeemerForConsumeInput ((\(!txOutRef, _, _) -> txOutRef ) input_TxOutRef_TxOut_And_InvestUnitDatum) info
@@ -1069,12 +786,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ---------------------
                                                             -- it runs alone
                                                             ---------------------
-                                                            -- Que sea Fund Admin
-                                                            -- Que el FundHoldingDatum regrese a FundHolding Val (se hace automaticamente al buscar outputs en same address)
-                                                            -- Que el FundHoldingDatum se actualiza correctamente
-                                                            -- Que el FundHoldingDatum value cambie con el min ADA nuevo
-                                                            -- no hay restricciones temporales
-                                                            ------------------
                                                             validateFundAdminAction fundDatum_In
                                                             && traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not min ADA > 0" (newMinADA > 0)

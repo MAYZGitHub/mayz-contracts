@@ -136,10 +136,10 @@ instance QC.Arbitrary ProtocolDatumType where
                 )
             <*> (do sort <$> QC.arbitrary) -- pdFundCategories
             <*> QC.arbitrary -- pdFundLifeTime
-            <*> QC.arbitrary -- pdRequiredMAYZForSellOffers
+            <*> QC.arbitrary -- pdRequiredMAYZForSwapOffers
             <*> QC.arbitrary -- pdRequiredMAYZForBuyOrders
             <*> QC.arbitrary -- pdCommissionFund_PerYear_InBPx1e3
-            <*> QC.arbitrary -- pdCommissionSellOffer_InBPx1e3
+            <*> QC.arbitrary -- pdCommissionSwapOffer_InBPx1e3
             <*> QC.arbitrary -- pdCommissionBuyOrder_InBPx1e3
             <*> QC.arbitrary -- pdShare_InBPx1e2_Protocol
             <*> QC.arbitrary -- pdShare_InBPx1e2_Delegators

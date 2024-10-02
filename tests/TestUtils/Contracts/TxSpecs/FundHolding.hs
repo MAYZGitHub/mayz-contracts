@@ -19,20 +19,20 @@ import qualified Generic.OnChainHelpers                 as OnChainHelpers
 import qualified Protocol.Fund.Helpers                  as FundHelpers
 import qualified Protocol.Fund.Holding.Types            as FundHoldingT
 import qualified Protocol.Fund.Types                    as FundT
+import qualified Protocol.InvestUnit.Types              as InvestUnitT
 import qualified Protocol.OnChainHelpers                as OnChainHelpers
+import qualified Protocol.Protocol.Types                as ProtocolT
 import qualified Protocol.Types                         as T
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.HelpersMAYZ
 import           TestUtils.Automatic.Types
+import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxSpecs.InvestUnit
 import           TestUtils.Helpers
 import           TestUtils.HelpersMAYZ
+import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Types
-import qualified Protocol.InvestUnit.Types as InvestUnitT
-import TestUtils.Constants
-import qualified Protocol.Protocol.Types as ProtocolT
 
 --------------------------------------------------------------------------------
 -- FundHolding Contract
@@ -428,7 +428,7 @@ fundHolding_Withdraw_TxSpecs tp txParams =
             case DataList.find P.snd extras of
                 Just ("Valid WithdrawDate on BeginAt", _)  -> beginDate + T.validTimeRange
                 Just ("Valid WithdrawDate on Deadline", _) -> deadlineDate - T.validTimeRange
-                _                                         -> withdrawDate_
+                _                                          -> withdrawDate_
         -----------------
         input_Fund_UTxO extras =
             let
@@ -533,7 +533,7 @@ fundHolding_Withdraw_TxSpecs tp txParams =
 
 fundHolding_Collect_Protocol_Commission_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
 fundHolding_Collect_Protocol_Commission_TxSpecs tp txParams =
-    let 
+    let
         --------------------------
         -- UTxO Mock Data --
         input_Protocol_UTxO _extras = protocol_UTxO_MockData tp
@@ -564,14 +564,14 @@ fundHolding_Collect_Protocol_Commission_TxSpecs tp txParams =
         input_FundHolding_UTxO_gen op extras =
             txOut_With_TestEntity_Gen tp (input_FundHolding_UTxO extras) FundHolding_TestEntity op
         -----------------
-        withdraw extras = 
-            let 
+        withdraw extras =
+            let
                 deadline = FundT.fdDeadline (input_Fund_Datum extras)
                 share = ProtocolT.pdShare_InBPx1e2_Protocol (input_Protocol_Datum extras)
                 taken =  FundHoldingT.hdSubtotal_FT_Commissions_Collected_Protocol (input_FundHolding_Datum extras)
-                ------------------  
+                ------------------
                 withdrawAmount = FundHelpers.getCommissionsAvailable deadline (input_FundHolding_Datum extras) share taken withdrawDate
-                ------------------  
+                ------------------
             in withdrawAmount
         -----------------
         output_FundHolding_UTxO extras = fundHolding_UTxO_With_Collected_Protocol_Parametrizable tp (input_FundHolding_UTxO extras) (withdraw extras)
@@ -623,7 +623,7 @@ fundHolding_Collect_Protocol_Commission_TxSpecs tp txParams =
 
 fundHolding_Collect_Managers_Commission_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
 fundHolding_Collect_Managers_Commission_TxSpecs tp txParams =
-    let 
+    let
         --------------------------
         -- UTxO Mock Data --
         input_Protocol_UTxO _extras = protocol_UTxO_MockData tp
@@ -654,14 +654,14 @@ fundHolding_Collect_Managers_Commission_TxSpecs tp txParams =
         input_FundHolding_UTxO_gen op extras =
             txOut_With_TestEntity_Gen tp (input_FundHolding_UTxO extras) FundHolding_TestEntity op
         -----------------
-        withdraw extras = 
-            let 
+        withdraw extras =
+            let
                 deadline = FundT.fdDeadline (input_Fund_Datum extras)
                 share = ProtocolT.pdShare_InBPx1e2_Managers (input_Protocol_Datum extras)
                 taken =  FundHoldingT.hdSubtotal_FT_Commissions_Collected_Managers (input_FundHolding_Datum extras)
-                ------------------  
+                ------------------
                 withdrawAmount = FundHelpers.getCommissionsAvailable deadline (input_FundHolding_Datum extras) share taken withdrawDate
-                ------------------  
+                ------------------
             in withdrawAmount
         -----------------
         output_FundHolding_UTxO extras = fundHolding_UTxO_With_Collected_Managers_Parametrizable tp (input_FundHolding_UTxO extras) (withdraw extras)
@@ -712,7 +712,7 @@ fundHolding_Collect_Managers_Commission_TxSpecs tp txParams =
 
 fundHolding_Collect_Delegators_Commission_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
 fundHolding_Collect_Delegators_Commission_TxSpecs tp txParams =
-    let 
+    let
         --------------------------
         -- UTxO Mock Data --
         input_Protocol_UTxO _extras = protocol_UTxO_MockData tp
@@ -743,14 +743,14 @@ fundHolding_Collect_Delegators_Commission_TxSpecs tp txParams =
         input_FundHolding_UTxO_gen op extras =
             txOut_With_TestEntity_Gen tp (input_FundHolding_UTxO extras) FundHolding_TestEntity op
         -----------------
-        withdraw extras = 
-            let 
+        withdraw extras =
+            let
                 deadline = FundT.fdDeadline (input_Fund_Datum extras)
                 share = ProtocolT.pdShare_InBPx1e2_Delegators (input_Protocol_Datum extras)
                 taken =  FundHoldingT.hdSubtotal_FT_Commissions_Collected_Delegators (input_FundHolding_Datum extras)
-                ------------------  
+                ------------------
                 withdrawAmount = FundHelpers.getCommissionsAvailable deadline (input_FundHolding_Datum extras) share taken withdrawDate
-                ------------------  
+                ------------------
             in withdrawAmount
         -----------------
         output_FundHolding_UTxO extras = fundHolding_UTxO_With_Collected_Delegators_Parametrizable tp (input_FundHolding_UTxO extras) (withdraw extras)
@@ -811,7 +811,7 @@ fundHolding_BalanceAssets_TxSpecs tp txParams =
 -- setOutputs [output_FundHolding1_UTxO, output_FundHolding2_UTxO]
 -- setSignatories (tpFundAdmins tp)
 -- setValidyRange (createValidRange (tpTransactionDate tp))
- let 
+ let
         --------------------------
         -- UTxO Mock Data --
         input_Fund_UTxO _ = fund_UTxO_With_Added_FundHolding_MockData tp

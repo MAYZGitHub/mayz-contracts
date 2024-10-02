@@ -44,7 +44,7 @@ import qualified Protocol.Fund.Types         as FundT
 import qualified Protocol.InvestUnit.Types   as InvestUnitT
 import qualified Protocol.Protocol.Types     as ProtocolT
 import qualified Protocol.Script.Types       as ScriptT
-import qualified Protocol.SellOffer.Types    as SellOfferT
+import qualified Protocol.SwapOffer.Types    as SwapOfferT
 import qualified Protocol.Types              as T
 
 --------------------------------------------------------------------------------2
@@ -143,14 +143,14 @@ data ProtocolDeployParams
           , pdpScriptValidator_CborHex            :: P.String
           , pdpScriptValidator_AddressTestnet     :: P.String
           , pdpScriptValidator_AddressMainnet     :: P.String
-          , pdpSellOfferPolicyID_Params           :: SellOfferT.PolicyParams
-          , pdpSellOfferPolicyID_CborHex          :: P.String
-          , pdpSellOfferPolicyID_CS               :: LedgerApiV2.CurrencySymbol
-          , pdpSellOfferValidator_Params          :: SellOfferT.ValidatorParams
-          , pdpSellOfferValidator_Hash            :: LedgerApiV2.ValidatorHash
-          , pdpSellOfferValidator_CborHex         :: P.String
-          , pdpSellOfferValidator_AddressTestnet  :: P.String
-          , pdpSellOfferValidator_AddressMainnet  :: P.String
+          , pdpSwapOfferPolicyID_Params           :: SwapOfferT.PolicyParams
+          , pdpSwapOfferPolicyID_CborHex          :: P.String
+          , pdpSwapOfferPolicyID_CS               :: LedgerApiV2.CurrencySymbol
+          , pdpSwapOfferValidator_Params          :: SwapOfferT.ValidatorParams
+          , pdpSwapOfferValidator_Hash            :: LedgerApiV2.ValidatorHash
+          , pdpSwapOfferValidator_CborHex         :: P.String
+          , pdpSwapOfferValidator_AddressTestnet  :: P.String
+          , pdpSwapOfferValidator_AddressMainnet  :: P.String
           , pdpBuyOrderPolicyID_Params            :: BuyOrderT.PolicyParams
           , pdpBuyOrderPolicyID_CborHex           :: P.String
           , pdpBuyOrderPolicyID_CS                :: LedgerApiV2.CurrencySymbol
@@ -224,8 +224,8 @@ data DeployAllPreParams
           , dapProtocolValidator_Pre_CborHex    :: P.String
           , dapScriptPolicyID_Pre_CborHex       :: P.String
           , dapScriptValidator_Pre_CborHex      :: P.String
-          , dapSellOfferPolicyID_Pre_CborHex    :: P.String
-          , dapSellOfferValidator_Pre_CborHex   :: P.String
+          , dapSwapOfferPolicyID_Pre_CborHex    :: P.String
+          , dapSwapOfferValidator_Pre_CborHex   :: P.String
           , dapBuyOrderPolicyID_Pre_CborHex     :: P.String
           , dapBuyOrderValidator_Pre_CborHex    :: P.String
           , dapDelegationPolicyID_Pre_CborHex   :: P.String
@@ -284,15 +284,15 @@ data PABProtocolPrepareParams
           , ppppTokenAdminPolicy_CS             :: T.CS
           , ppppFundCategories                  :: [ProtocolT.FundCategory]
           , ppppFundLifeTime                    :: ProtocolT.MinMaxDef LedgerApiV2.POSIXTime
-          , ppppRequiredMAYZForSellOffer        :: Integer
+          , ppppRequiredMAYZForSwapOffer        :: Integer
           , ppppRequiredMAYZForBuyOrder         :: Integer
           , ppppCommissionFund_PerYear_InBPx1e3 :: ProtocolT.MinMaxDef Integer
-          , ppppCommissionSellOffer_InBPx1e3    :: ProtocolT.MinMaxDef Integer
+          , ppppCommissionSwapOffer_InBPx1e3    :: ProtocolT.MinMaxDef Integer
           , ppppCommissionBuyOrder_InBPx1e3     :: ProtocolT.MinMaxDef Integer
-          , ppppShare_InBPx1e2_Protocol          :: Integer
-          , ppppShare_InBPx1e2_Delegators              :: Integer
-          , ppppShare_InBPx1e2_Managers            :: Integer
-          , ppppDelegatorsAdmins                     :: [T.WalletPaymentPKH]
+          , ppppShare_InBPx1e2_Protocol         :: Integer
+          , ppppShare_InBPx1e2_Delegators       :: Integer
+          , ppppShare_InBPx1e2_Managers         :: Integer
+          , ppppDelegatorsAdmins                :: [T.WalletPaymentPKH]
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
@@ -306,15 +306,15 @@ data PABProtocolUpdateParams
           , ppupTokenAdminPolicy_CS             :: T.CS
           , ppupFundCategories                  :: [ProtocolT.FundCategory]
           , ppupFundLifeTime                    :: ProtocolT.MinMaxDef LedgerApiV2.POSIXTime
-          , ppupRequiredMAYZForSellOffer        :: Integer
+          , ppupRequiredMAYZForSwapOffer        :: Integer
           , ppupRequiredMAYZForBuyOrder         :: Integer
           , ppupCommissionFund_PerYear_InBPx1e3 :: ProtocolT.MinMaxDef Integer
-          , ppupCommissionSellOffer_InBPx1e3    :: ProtocolT.MinMaxDef Integer
+          , ppupCommissionSwapOffer_InBPx1e3    :: ProtocolT.MinMaxDef Integer
           , ppupCommissionBuyOrder_InBPx1e3     :: ProtocolT.MinMaxDef Integer
-          , ppupShare_InBPx1e2_Protocol          :: Integer
-          , ppupShare_InBPx1e2_Delegators              :: Integer
-          , ppupShare_InBPx1e2_Managers            :: Integer
-          , ppupDelegatorsAdmins                     :: [T.WalletPaymentPKH]
+          , ppupShare_InBPx1e2_Protocol         :: Integer
+          , ppupShare_InBPx1e2_Delegators       :: Integer
+          , ppupShare_InBPx1e2_Managers         :: Integer
+          , ppupDelegatorsAdmins                :: [T.WalletPaymentPKH]
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
@@ -677,14 +677,14 @@ exampleFundHoldingValidatorParams =
 
 --------------------------------------------------------------------------------2
 
-exampleSellOfferPolicyParams :: SellOfferT.PolicyParams
-exampleSellOfferPolicyParams =
-    SellOfferT.PolicyParams exampleCS exampleValidatorHash exampleNFT
+exampleSwapOfferPolicyParams :: SwapOfferT.PolicyParams
+exampleSwapOfferPolicyParams =
+    SwapOfferT.PolicyParams exampleCS exampleValidatorHash exampleNFT
 
 
-exampleSellOfferValidatorParams :: SellOfferT.ValidatorParams
-exampleSellOfferValidatorParams =
-    SellOfferT.ValidatorParams exampleCS exampleCS
+exampleSwapOfferValidatorParams :: SwapOfferT.ValidatorParams
+exampleSwapOfferValidatorParams =
+    SwapOfferT.ValidatorParams exampleCS exampleCS
 
 --------------------------------------------------------------------------------2
 
@@ -805,10 +805,10 @@ examplePABProtocolPrepareParams =
             ppppTokenAdminPolicy_CS = exampleCS,
             ppppFundCategories = [ProtocolT.FundCategory exampleInteger exampleInteger exampleInteger],
             ppppFundLifeTime = ProtocolT.mkMinMaxDef examplePOSIXTime examplePOSIXTime examplePOSIXTime,
-            ppppRequiredMAYZForSellOffer = exampleInteger,
+            ppppRequiredMAYZForSwapOffer = exampleInteger,
             ppppRequiredMAYZForBuyOrder = exampleInteger,
             ppppCommissionFund_PerYear_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
-            ppppCommissionSellOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
+            ppppCommissionSwapOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
             ppppCommissionBuyOrder_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
             ppppShare_InBPx1e2_Protocol = exampleInteger,
             ppppShare_InBPx1e2_Delegators = exampleInteger,
@@ -825,10 +825,10 @@ examplePABProtocolUpdateParams =
             ppupTokenAdminPolicy_CS = exampleCS,
             ppupFundCategories = [ProtocolT.FundCategory exampleInteger exampleInteger exampleInteger],
             ppupFundLifeTime = ProtocolT.mkMinMaxDef examplePOSIXTime examplePOSIXTime examplePOSIXTime,
-            ppupRequiredMAYZForSellOffer = exampleInteger,
+            ppupRequiredMAYZForSwapOffer = exampleInteger,
             ppupRequiredMAYZForBuyOrder = exampleInteger,
             ppupCommissionFund_PerYear_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
-            ppupCommissionSellOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
+            ppupCommissionSwapOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
             ppupCommissionBuyOrder_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger,
             ppupShare_InBPx1e2_Protocol = exampleInteger,
             ppupShare_InBPx1e2_Delegators = exampleInteger,

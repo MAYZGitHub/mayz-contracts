@@ -18,22 +18,22 @@ module Contracts.Fund.MintingPolicy where
 
 -- Non-IOG imports
 
-import qualified Test.Tasty as Tasty
-import Prelude as P
+import           Prelude                            as P
+import qualified Test.Tasty                         as Tasty
 
 -- IOG imports
 
 -- Project imports
-import TestUtils.Automatic.TestCases
-import TestUtils.Automatic.TestConfigTree
-import TestUtils.Automatic.TestRules
-import TestUtils.Automatic.TxGenerators
-import TestUtils.Automatic.Types
-import TestUtils.Constants
-import TestUtils.Contracts.InitialData
-import TestUtils.Contracts.TxSpecs.Fund
-import TestUtils.Types
-import TestUtils.TypesMAYZ
+import           TestUtils.Automatic.TestCases
+import           TestUtils.Automatic.TestConfigTree
+import           TestUtils.Automatic.TestRules
+import           TestUtils.Automatic.TxGenerators
+import           TestUtils.Automatic.Types
+import           TestUtils.Constants
+import           TestUtils.Contracts.InitialData
+import           TestUtils.Contracts.TxSpecs.Fund
+import           TestUtils.Types
+import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 

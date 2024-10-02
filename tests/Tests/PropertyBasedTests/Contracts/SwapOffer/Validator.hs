@@ -4,10 +4,10 @@
 --------------------------------------------------------------------------------4
 
 {- |
-Module      : SellOffer.Validator
+Module      : SwapOffer.Validator
 Description :
 -}
-module Contracts.SellOffer.Validator where
+module Contracts.SwapOffer.Validator where
 --------------------------------------------------------------------------------
 -- Non-IOG imports
 import qualified Control.Monad.Reader                    as MReader
@@ -17,189 +17,189 @@ import qualified Test.Tasty                              as Tasty
 import           PlutusTx.Prelude
 
 -- Project imports
+import qualified Protocol.Constants                      as T
+import qualified Protocol.Protocol.Types                 as ProtocolT
 import           TestUtils.Contracts.InitialData
-import           TestUtils.Contracts.TxContext.SellOffer
+import           TestUtils.Contracts.TxContext.SwapOffer
 import           TestUtils.TypesMAYZ
-import qualified Protocol.Constants as T
-import qualified Protocol.Protocol.Types as ProtocolT
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Tests :: AppM Tasty.TestTree
-sellOffer_Validator_Tests = do
+swapOffer_Validator_Tests :: AppM Tasty.TestTree
+swapOffer_Validator_Tests = do
     tp <- MReader.asks appTestParams
     return $
         Tasty.testGroup
-            "SellOffer Validator Tests"
-            [ sellOffer_Validator_Redeemer_UpdateStatus_Tests tp
-            , sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp
-            , sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp
-            , sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp
-            , sellOffer_Validator_Redeemer_Deposit_Tests tp
-            , sellOffer_Validator_Redeemer_Withdraw_Tests tp
-            , sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp
-            , sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp
-            , sellOffer_Validator_Redeemer_Delete_Tests tp
+            "SwapOffer Validator Tests"
+            [ swapOffer_Validator_Redeemer_UpdateStatus_Tests tp
+            , swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp
+            , swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp
+            , swapOffer_Validator_Redeemer_UpdateMinADA_Tests tp
+            , swapOffer_Validator_Redeemer_Deposit_Tests tp
+            , swapOffer_Validator_Redeemer_Withdraw_Tests tp
+            , swapOffer_Validator_Redeemer_SwapFTxADA_Tests tp
+            , swapOffer_Validator_Redeemer_SwapADAxFT_Tests tp
+            , swapOffer_Validator_Redeemer_Delete_Tests tp
             ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateStatus_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateStatus_Tests tp =
+swapOffer_Validator_Redeemer_UpdateStatus_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateStatus_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_UpdateStatus_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateStatus_TestRedeemer)
+        txName = show SwapOffer_UpdateStatus_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateStatus_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_UpdateStatus_TxContext tp T.sellOffer_Status_Open
+                    ctx = swapOffer_UpdateStatus_TxContext tp T.swapOffer_Status_Open
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp =
+swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_UpdateAskedCommissionRate_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateAskedCommissionRate_TestRedeemer)
+        txName = show SwapOffer_UpdateAskedCommissionRate_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateAskedCommissionRate_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_UpdateAskedCommissionRate_TxContext tp (ProtocolT.mmdMin $ ProtocolT.pdCommissionSellOffer_InBPx1e3 $ protocol_DatumType_MockData tp) 
+                    ctx = swapOffer_UpdateAskedCommissionRate_TxContext tp (ProtocolT.mmdMin $ ProtocolT.pdCommissionSwapOffer_InBPx1e3 $ protocol_DatumType_MockData tp)
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp =
+swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_UpdateSellRestrictions_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateSellRestrictions_TestRedeemer)
+        txName = show SwapOffer_UpdateSellRestrictions_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateSellRestrictions_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_UpdateSellRestrictions_TxContext tp T.sellOffer_NotAllowSell T.sellOffer_NotAllowSell
+                    ctx = swapOffer_UpdateSellRestrictions_TxContext tp T.swapOffer_NotAllowSell T.swapOffer_NotAllowSell
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateMinADA_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp =
+swapOffer_Validator_Redeemer_UpdateMinADA_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateMinADA_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_UpdateMinADA_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateMinADA_TestRedeemer)
+        txName = show SwapOffer_UpdateMinADA_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateMinADA_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_UpdateMinADA_TxContext tp toAlter_minAda
+                    ctx = swapOffer_UpdateMinADA_TxContext tp toAlter_minAda
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Deposit_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Deposit_Tests tp =
+swapOffer_Validator_Redeemer_Deposit_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Deposit_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_Deposit_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Deposit_TestRedeemer)
+        txName = show SwapOffer_Deposit_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Deposit_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_Deposit_TxContext tp
+                    ctx = swapOffer_Deposit_TxContext tp
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Withdraw_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Withdraw_Tests tp =
+swapOffer_Validator_Redeemer_Withdraw_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Withdraw_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_Withdraw_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Withdraw_TestRedeemer)
+        txName = show SwapOffer_Withdraw_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Withdraw_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_Withdraw_TxContext tp
+                    ctx = swapOffer_Withdraw_TxContext tp
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_SwapFTxADA_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp =
+swapOffer_Validator_Redeemer_SwapFTxADA_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_SwapFTxADA_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_SwapFTxADA_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_SwapFTxADA_TestRedeemer)
+        txName = show SwapOffer_SwapFTxADA_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_SwapFTxADA_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_SwapFTxADA_TxContext tp
+                    ctx = swapOffer_SwapFTxADA_TxContext tp
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_SwapADAxFT_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp =
+swapOffer_Validator_Redeemer_SwapADAxFT_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_SwapADAxFT_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_SwapADAxFT_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_SwapADAxFT_TestRedeemer)
+        txName = show SwapOffer_SwapADAxFT_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_SwapADAxFT_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_SwapADAxFT_TxContext tp
+                    ctx = swapOffer_SwapADAxFT_TxContext tp
                 in
                     [
                     ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Delete_Tests :: TestParams -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Delete_Tests tp =
+swapOffer_Validator_Redeemer_Delete_Tests :: TestParams -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Delete_Tests tp =
     let
         ------------------------
-        txName = show SellOffer_Delete_Tx
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Delete_TestRedeemer)
+        txName = show SwapOffer_Delete_Tx
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Delete_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
         ------------------------
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = sellOffer_Delete_TxContext tp
+                    ctx = swapOffer_Delete_TxContext tp
                 in
                     [
                     ]

@@ -4,7 +4,7 @@
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------3
 
-module Protocol.SellOffer.PABSimulator where
+module Protocol.SwapOffer.PABSimulator where
 
 --------------------------------------------------------------------------------2
 -- Import Externos

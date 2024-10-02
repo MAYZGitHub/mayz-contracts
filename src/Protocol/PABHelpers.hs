@@ -17,13 +17,13 @@ import qualified Control.Monad                  as Monad
 import qualified Control.Monad.Freer.Internal   as MonadFreerInternal (Eff)
 import qualified Control.Monad.IO.Class         as MonadIOClass (MonadIO (..))
 import qualified Data.Default                   as DataDefault (def)
+import qualified Data.Maybe                     as DataMaybe
+import qualified Ledger
+import qualified Ledger.Value                   as LedgerValue
 import qualified Plutus.PAB.Simulator           as PABSimulator
 import qualified Plutus.V2.Ledger.Api           as LedgerApiV2
 import           PlutusTx.Prelude               hiding (unless)
 import qualified Prelude                        as P
-import qualified Data.Maybe                     as DataMaybe
-import qualified Ledger
-import qualified Ledger.Value                   as LedgerValue
 
 --------------------------------------------------------------------------------2
 -- Import Internos
@@ -201,7 +201,7 @@ isMAYZHolderAdmin (Just walletNro) (Just protocolPABParams) = do
 --------------------------------------------------------------------------------2
 
 isMAYZHolder :: Maybe Integer -> MonadFreerInternal.Eff PABContracts.PABEffects Bool
-isMAYZHolder Nothing = return False
+isMAYZHolder Nothing  = return False
 isMAYZHolder (Just _) = return True
     -- TODO: tenemos que agregar el token mayx en los pab params para pdoer acceder luego
     -- do
@@ -328,7 +328,7 @@ pabShowInvestUnit _ (_, _) protocolPABParams fundPABParams' _ _ = do
 --------------------------------------------------------------------------------2
 
 pabShowFTPriceADA :: PABContracts.PABParamsInFundMenu
-pabShowFTPriceADA _ (_, _) protocolPABParams fundPABParams' _ _ = do
+pabShowFTPriceADA _ (_, _) _rotocolPABParams _fundPABParams' _ _ = do
     MonadIOClass.liftIO $ CLIHelpers.printSubTitle "FT Price"
     -- case fundPABParams' of
     --     (Just fundPABParams) -> do
@@ -366,7 +366,7 @@ pabShowFTPriceADA _ (_, _) protocolPABParams fundPABParams' _ _ = do
 --------------------------------------------------------------------------------2
 
 pabShowReIdxPriceADA :: PABContracts.PABParamsInFundMenu
-pabShowReIdxPriceADA _ (_, _) protocolPABParams fundPABParams' _ _ = do
+pabShowReIdxPriceADA _ (_, _) _protocolPABParams _fundPABParams' _ _ = do
     MonadIOClass.liftIO $ CLIHelpers.printSubTitle "Prices for Re-Indexing"
     -- case fundPABParams' of
     --     (Just fundPABParams) -> do

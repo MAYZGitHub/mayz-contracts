@@ -4,10 +4,10 @@
 --------------------------------------------------------------------------------3
 
 {- |
-Module      : TestUtils.Contracts.TxSpecs.SellOffer
-Description : Mock Data and Auxiliary Functions for testing the SellOffer.
+Module      : TestUtils.Contracts.TxSpecs.SwapOffer
+Description : Mock Data and Auxiliary Functions for testing the SwapOffer.
 -}
-module TestUtils.Contracts.TxSpecs.SellOffer where
+module TestUtils.Contracts.TxSpecs.SwapOffer where
 
 --------------------------------------------------------------------------------3
 
@@ -27,9 +27,9 @@ import           PlutusTx.Prelude
 import qualified Generic.OnChainHelpers               as OnChainHelpers
 import qualified Protocol.Constants                   as T
 import qualified Protocol.Protocol.Types              as ProtocolT
-import qualified Protocol.SellOffer.OnChain           as SellOffer
-import qualified Protocol.SellOffer.Types             as SellOfferT
-import qualified Protocol.SellOffer.Types             as T
+import qualified Protocol.SwapOffer.OnChain           as SwapOffer
+import qualified Protocol.SwapOffer.Types             as SwapOfferT
+import qualified Protocol.SwapOffer.Types             as T
 import qualified Protocol.Types                       as T
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.Helpers
@@ -43,11 +43,11 @@ import           TestUtils.Types
 import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
--- SellOffer Contract
+-- SwapOffer Contract
 --------------------------------------------------------------------------------
 
-sellOffer_Create_TxSpecs :: TestParams -> TxSpecs
-sellOffer_Create_TxSpecs tp =
+swapOffer_Create_TxSpecs :: TestParams -> TxSpecs
+swapOffer_Create_TxSpecs tp =
     let
         -----------------
         input_Protocol_UTxO_gen op _ =
@@ -59,13 +59,13 @@ sellOffer_Create_TxSpecs tp =
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        output_SellOffer_UTxO_gen op extras =
+        output_SwapOffer_UTxO_gen op extras =
             let
                 tempTxOut =
                     txOut_With_TestEntity_Gen
                         tp
-                        (sellOffer_UTxO_MockData tp)
-                        SellOffer_TestEntity
+                        (swapOffer_UTxO_MockData tp)
+                        SwapOffer_TestEntity
                         op
             in
                 -- aca voy a seguir manipulando la lista de txOuts generadas en funcion de los extras
@@ -74,23 +74,23 @@ sellOffer_Create_TxSpecs tp =
                     -- por lo tanto se que hay una sola y valida txOut
                     Just ("total_FT_Earned different from 0", _) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head tempTxOut)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head tempTxOut)
                             datumUpdated =
-                                datum {SellOfferT.sodTotal_FT_Earned = 1}
+                                datum {SwapOfferT.sodTotal_FT_Earned = 1}
                         in
                             [ (head tempTxOut)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     _ -> tempTxOut
 
         -----------------
-        mint_SellOfferID_gen op _ =
+        mint_SwapOfferID_gen op _ =
             mint_Value_With_TestToken_Gen
                 tp
-                (SellOfferID_TestToken, SellOffer_MintID_TestRedeemer)
+                (SwapOfferID_TestToken, SwapOffer_MintID_TestRedeemer)
                 1
                 op
         -----------------
@@ -105,12 +105,12 @@ sellOffer_Create_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs = []
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints =
                 [
-                    ( SellOfferID_TestToken
-                    , mint_SellOfferID_gen
-                    , SellOffer_MintID_TestRedeemer
+                    ( SwapOfferID_TestToken
+                    , mint_SwapOfferID_gen
+                    , SwapOffer_MintID_TestRedeemer
                     )
                 ]
             , tsUseSignatures = Nothing
@@ -120,39 +120,39 @@ sellOffer_Create_TxSpecs tp =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Delete_TxSpecs :: TestParams -> TxSpecs
-sellOffer_Delete_TxSpecs tp =
+swapOffer_Delete_TxSpecs :: TestParams -> TxSpecs
+swapOffer_Delete_TxSpecs tp =
     -----------------
     let
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData = SellOfferT.mkDeleteRedeemer
-        consume_SellOffer_InvalidRedeemerData = Nothing
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_ValidRedeemerData = SwapOfferT.mkDeleteRedeemer
+        consume_SwapOffer_InvalidRedeemerData = Nothing
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        burn_SellOfferID_gen op _ =
+        burn_SwapOfferID_gen op _ =
             mint_Value_With_TestToken_Gen
                 tp
-                (SellOfferID_TestToken, SellOffer_BurnID_TestRedeemer)
+                (SwapOfferID_TestToken, SwapOffer_BurnID_TestRedeemer)
                 1
                 op
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -162,18 +162,18 @@ sellOffer_Delete_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_Delete_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_Delete_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
             , tsOutputs = []
             , tsMints =
                 [
-                    ( SellOfferID_TestToken
-                    , burn_SellOfferID_gen
-                    , SellOffer_BurnID_TestRedeemer
+                    ( SwapOfferID_TestToken
+                    , burn_SwapOfferID_gen
+                    , SwapOffer_BurnID_TestRedeemer
                     )
                 ]
             , tsUseSignatures = Just signatures_gen'
@@ -183,60 +183,60 @@ sellOffer_Delete_TxSpecs tp =
 
 --------------------------------------------------------------------------------
 
-sellOffer_UpdateStatus_TxSpecs :: TestParams -> TxSpecs
-sellOffer_UpdateStatus_TxSpecs tp =
+swapOffer_UpdateStatus_TxSpecs :: TestParams -> TxSpecs
+swapOffer_UpdateStatus_TxSpecs tp =
     -----------------
     let
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        newStatus = T.sellOffer_Status_Closed
+        newStatus = T.swapOffer_Status_Closed
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_StatusChanged
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_StatusChanged
+                input_SwapOffer_Datum
                 newStatus
         -----------------
-        output_SellOffer_UTxO =
-            (sellOffer_UTxO_MockData tp)
+        output_SwapOffer_UTxO =
+            (swapOffer_UTxO_MockData tp)
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $
-                        SellOfferT.mkDatum output_SellOffer_Datum
+                        SwapOfferT.mkDatum output_SwapOffer_Datum
                 }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkUpdateStatusRedeemer newStatus
-        consume_SellOffer_InvalidRedeemerData =
-            Just (SellOfferT.mkUpdateStatusRedeemer T.sellOffer_Status_Open)
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkUpdateStatusRedeemer newStatus
+        consume_SwapOffer_InvalidRedeemerData =
+            Just (SwapOfferT.mkUpdateStatusRedeemer T.swapOffer_Status_Open)
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -246,13 +246,13 @@ sellOffer_UpdateStatus_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_UpdateStatus_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_UpdateStatus_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -261,8 +261,8 @@ sellOffer_UpdateStatus_TxSpecs tp =
 
 --------------------------------------------------------------------------------
 
-sellOffer_UpdateAskedCommissionRate_TxSpecs :: TestParams -> TxSpecs
-sellOffer_UpdateAskedCommissionRate_TxSpecs tp =
+swapOffer_UpdateAskedCommissionRate_TxSpecs :: TestParams -> TxSpecs
+swapOffer_UpdateAskedCommissionRate_TxSpecs tp =
     -----------------
     let
         input_Protocol_UTxO_gen op _ =
@@ -274,57 +274,57 @@ sellOffer_UpdateAskedCommissionRate_TxSpecs tp =
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
         askedCommissions =
             ProtocolT.mmdMax $
-                ProtocolT.pdCommissionSellOffer_InBPx1e3 $
+                ProtocolT.pdCommissionSwapOffer_InBPx1e3 $
                     protocol_DatumType_MockData tp
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_CommissionChanged
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_CommissionChanged
+                input_SwapOffer_Datum
                 askedCommissions
         -----------------
-        output_SellOffer_UTxO =
-            (sellOffer_UTxO_MockData tp)
+        output_SwapOffer_UTxO =
+            (swapOffer_UTxO_MockData tp)
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $
-                        SellOfferT.mkDatum output_SellOffer_Datum
+                        SwapOfferT.mkDatum output_SwapOffer_Datum
                 }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkUpdateAskedCommissionRateRedeemer askedCommissions
-        consume_SellOffer_InvalidRedeemerData =
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkUpdateAskedCommissionRateRedeemer askedCommissions
+        consume_SwapOffer_InvalidRedeemerData =
             Just
-                (SellOfferT.mkUpdateAskedCommissionRateRedeemer (askedCommissions + 1))
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+                (SwapOfferT.mkUpdateAskedCommissionRateRedeemer (askedCommissions + 1))
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -337,13 +337,13 @@ sellOffer_UpdateAskedCommissionRate_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_UpdateStatus_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_UpdateStatus_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -352,66 +352,66 @@ sellOffer_UpdateAskedCommissionRate_TxSpecs tp =
 
 --------------------------------------------------------------------------------
 
-sellOffer_UpdateSellRestrictions_TxSpecs :: TestParams -> TxSpecs
-sellOffer_UpdateSellRestrictions_TxSpecs tp =
+swapOffer_UpdateSellRestrictions_TxSpecs :: TestParams -> TxSpecs
+swapOffer_UpdateSellRestrictions_TxSpecs tp =
     -----------------
     let
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        sellFT = T.sellOffer_NotAllowSell
-        sellADA = T.sellOffer_NotAllowSell
+        sellFT = T.swapOffer_NotAllowSell
+        sellADA = T.swapOffer_NotAllowSell
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
+                input_SwapOffer_Datum
                 sellFT
                 sellADA
         -----------------
-        output_SellOffer_UTxO =
-            (sellOffer_UTxO_MockData tp)
+        output_SwapOffer_UTxO =
+            (swapOffer_UTxO_MockData tp)
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $
-                        SellOfferT.mkDatum output_SellOffer_Datum
+                        SwapOfferT.mkDatum output_SwapOffer_Datum
                 }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkUpdateSellRestrictionsRedeemer sellFT sellADA
-        consume_SellOffer_InvalidRedeemerData =
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkUpdateSellRestrictionsRedeemer sellFT sellADA
+        consume_SwapOffer_InvalidRedeemerData =
             Just
-                ( SellOfferT.mkUpdateSellRestrictionsRedeemer
-                    T.sellOffer_AllowSell
-                    T.sellOffer_NotAllowSell
+                ( SwapOfferT.mkUpdateSellRestrictionsRedeemer
+                    T.swapOffer_AllowSell
+                    T.swapOffer_NotAllowSell
                 )
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -421,13 +421,13 @@ sellOffer_UpdateSellRestrictions_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_UpdateStatus_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_UpdateStatus_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -436,8 +436,8 @@ sellOffer_UpdateSellRestrictions_TxSpecs tp =
 
 --------------------------------------------------------------------------------
 
-sellOffer_UpdateMinADA_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
-sellOffer_UpdateMinADA_TxSpecs tp txParams =
+swapOffer_UpdateMinADA_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
+swapOffer_UpdateMinADA_TxSpecs tp txParams =
     let
         -----------------
         -- min ADA es el que se va a establecer en salida
@@ -448,26 +448,26 @@ sellOffer_UpdateMinADA_TxSpecs tp txParams =
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        -- de la SellOffer original, quiero editar el ada available
+        -- de la SwapOffer original, quiero editar el ada available
         -----------------
-        input_SellOffer_Datum' = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum' = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        input_SellOffer_Datum =
-            input_SellOffer_Datum'
-                { SellOfferT.sodAmount_ADA_Available = availableADA
+        input_SwapOffer_Datum =
+            input_SwapOffer_Datum'
+                { SwapOfferT.sodAmount_ADA_Available = availableADA
                 }
         -----------------
-        input_SellOffer_UTxO =
+        input_SwapOffer_UTxO =
             let
-                origValue' = LedgerApiV2.txOutValue $ sellOffer_UTxO_MockData tp
+                origValue' = LedgerApiV2.txOutValue $ swapOffer_UTxO_MockData tp
                 newAmount' =
-                    SellOfferT.sodAmount_ADA_Available input_SellOffer_Datum
-                        + SellOfferT.sodMinADA input_SellOffer_Datum
+                    SwapOfferT.sodAmount_ADA_Available input_SwapOffer_Datum
+                        + SwapOfferT.sodMinADA input_SwapOffer_Datum
             in
-                (sellOffer_UTxO_MockData tp)
+                (swapOffer_UTxO_MockData tp)
                     { LedgerApiV2.txOutDatum =
                         LedgerApiV2.OutputDatum $
-                            SellOfferT.mkDatum input_SellOffer_Datum
+                            SwapOfferT.mkDatum input_SwapOffer_Datum
                     , LedgerApiV2.txOutValue =
                         changeValue_Amount
                             origValue'
@@ -475,28 +475,28 @@ sellOffer_UpdateMinADA_TxSpecs tp txParams =
                             newAmount'
                     }
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                input_SellOffer_UTxO
-                SellOffer_TestEntity
+                input_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_MinADAChanged
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_MinADAChanged
+                input_SwapOffer_Datum
                 newMinADA
         -----------------
-        origValue = LedgerApiV2.txOutValue input_SellOffer_UTxO
+        origValue = LedgerApiV2.txOutValue input_SwapOffer_UTxO
         newAmount =
-            SellOfferT.sodAmount_ADA_Available output_SellOffer_Datum
-                + SellOfferT.sodMinADA output_SellOffer_Datum
+            SwapOfferT.sodAmount_ADA_Available output_SwapOffer_Datum
+                + SwapOfferT.sodMinADA output_SwapOffer_Datum
         -----------------
-        output_SellOffer_UTxO =
-            input_SellOffer_UTxO
+        output_SwapOffer_UTxO =
+            input_SwapOffer_UTxO
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $
-                        SellOfferT.mkDatum output_SellOffer_Datum
+                        SwapOfferT.mkDatum output_SwapOffer_Datum
                 , LedgerApiV2.txOutValue =
                     changeValue_Amount
                         origValue
@@ -504,27 +504,27 @@ sellOffer_UpdateMinADA_TxSpecs tp txParams =
                         newAmount
                 }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData = SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerData = Nothing
-        consume_SellOffer_InvalidRedeemerType = Just SellOfferT.mkDeleteRedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_ValidRedeemerData = SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerData = Nothing
+        consume_SwapOffer_InvalidRedeemerType = Just SwapOfferT.mkDeleteRedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -534,13 +534,13 @@ sellOffer_UpdateMinADA_TxSpecs tp txParams =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_UpdateMinADA_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_UpdateMinADA_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -549,36 +549,36 @@ sellOffer_UpdateMinADA_TxSpecs tp txParams =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Deposit_TxSpecs :: TestParams -> Integer -> Integer -> TxSpecs
-sellOffer_Deposit_TxSpecs tp !newDeposit_FT !newDeposit_ADA =
+swapOffer_Deposit_TxSpecs :: TestParams -> Integer -> Integer -> TxSpecs
+swapOffer_Deposit_TxSpecs tp !newDeposit_FT !newDeposit_ADA =
     -----------------
     let
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_Deposit
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_Deposit
+                input_SwapOffer_Datum
                 newDeposit_FT
                 newDeposit_ADA
         -----------------
-        output_SellOffer_UTxO =
+        output_SwapOffer_UTxO =
             let
-                newDatum = output_SellOffer_Datum
-                origValue = LedgerApiV2.txOutValue $ sellOffer_UTxO_MockData tp
+                newDatum = output_SwapOffer_Datum
+                origValue = LedgerApiV2.txOutValue $ swapOffer_UTxO_MockData tp
                 newAmount_ADA =
-                    SellOfferT.sodAmount_ADA_Available newDatum
-                        + SellOfferT.sodMinADA newDatum
-                newAmount_FT = SellOfferT.sodAmount_FT_Available newDatum
+                    SwapOfferT.sodAmount_ADA_Available newDatum
+                        + SwapOfferT.sodMinADA newDatum
+                newAmount_FT = SwapOfferT.sodAmount_FT_Available newDatum
                 -----------------
                 adjustedValue_ADA =
                     changeValue_Amount
@@ -591,36 +591,36 @@ sellOffer_Deposit_TxSpecs tp !newDeposit_FT !newDeposit_ADA =
                         (LedgerValue.assetClass (tpFundPolicy_CS tp) (tpFundFT_TN tp))
                         newAmount_FT
             in
-                (sellOffer_UTxO_MockData tp)
+                (swapOffer_UTxO_MockData tp)
                     { LedgerApiV2.txOutDatum =
-                        LedgerApiV2.OutputDatum $ SellOfferT.mkDatum newDatum
+                        LedgerApiV2.OutputDatum $ SwapOfferT.mkDatum newDatum
                     , LedgerApiV2.txOutValue = adjustedValue_FT_And_ADA
                     }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkDepositRedeemer newDeposit_FT newDeposit_ADA
-        consume_SellOffer_InvalidRedeemerData =
-            Just (SellOfferT.mkDepositRedeemer (newDeposit_FT + 1) newDeposit_ADA)
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkDepositRedeemer newDeposit_FT newDeposit_ADA
+        consume_SwapOffer_InvalidRedeemerData =
+            Just (SwapOfferT.mkDepositRedeemer (newDeposit_FT + 1) newDeposit_ADA)
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -630,13 +630,13 @@ sellOffer_Deposit_TxSpecs tp !newDeposit_FT !newDeposit_ADA =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_Deposit_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_Deposit_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -645,36 +645,36 @@ sellOffer_Deposit_TxSpecs tp !newDeposit_FT !newDeposit_ADA =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Withdraw_TxSpecs :: TestParams -> Integer -> Integer -> TxSpecs
-sellOffer_Withdraw_TxSpecs tp !newWithdraw_FT !newWithdraw_ADA =
+swapOffer_Withdraw_TxSpecs :: TestParams -> Integer -> Integer -> TxSpecs
+swapOffer_Withdraw_TxSpecs tp !newWithdraw_FT !newWithdraw_ADA =
     -----------------
     let
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_Withdraw
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_Withdraw
+                input_SwapOffer_Datum
                 newWithdraw_FT
                 newWithdraw_ADA
         -----------------
-        output_SellOffer_UTxO =
+        output_SwapOffer_UTxO =
             let
-                newDatum = output_SellOffer_Datum
-                origValue = LedgerApiV2.txOutValue $ sellOffer_UTxO_MockData tp
+                newDatum = output_SwapOffer_Datum
+                origValue = LedgerApiV2.txOutValue $ swapOffer_UTxO_MockData tp
                 newAmount_ADA =
-                    SellOfferT.sodAmount_ADA_Available newDatum
-                        + SellOfferT.sodMinADA newDatum
-                newAmount_FT = SellOfferT.sodAmount_FT_Available newDatum
+                    SwapOfferT.sodAmount_ADA_Available newDatum
+                        + SwapOfferT.sodMinADA newDatum
+                newAmount_FT = SwapOfferT.sodAmount_FT_Available newDatum
                 -----------------
                 adjustedValue_ADA =
                     changeValue_Amount
@@ -687,37 +687,37 @@ sellOffer_Withdraw_TxSpecs tp !newWithdraw_FT !newWithdraw_ADA =
                         (LedgerValue.assetClass (tpFundPolicy_CS tp) (tpFundFT_TN tp))
                         newAmount_FT
             in
-                (sellOffer_UTxO_MockData tp)
+                (swapOffer_UTxO_MockData tp)
                     { LedgerApiV2.txOutDatum =
-                        LedgerApiV2.OutputDatum $ SellOfferT.mkDatum newDatum
+                        LedgerApiV2.OutputDatum $ SwapOfferT.mkDatum newDatum
                     , LedgerApiV2.txOutValue = adjustedValue_FT_And_ADA
                     }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkWithdrawRedeemer newWithdraw_FT newWithdraw_ADA
-        consume_SellOffer_InvalidRedeemerData =
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkWithdrawRedeemer newWithdraw_FT newWithdraw_ADA
+        consume_SwapOffer_InvalidRedeemerData =
             Just
-                (SellOfferT.mkWithdrawRedeemer (newWithdraw_FT + 1) newWithdraw_ADA)
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+                (SwapOfferT.mkWithdrawRedeemer (newWithdraw_FT + 1) newWithdraw_ADA)
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -727,13 +727,13 @@ sellOffer_Withdraw_TxSpecs tp !newWithdraw_FT !newWithdraw_ADA =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_Deposit_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_Deposit_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'
@@ -742,8 +742,8 @@ sellOffer_Withdraw_TxSpecs tp !newWithdraw_FT !newWithdraw_ADA =
 
 --------------------------------------------------------------------------------
 
-sellOffer_SwapFTxADA_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
-sellOffer_SwapFTxADA_TxSpecs tp txParams =
+swapOffer_SwapFTxADA_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
+swapOffer_SwapFTxADA_TxSpecs tp txParams =
     let
         -----------------
         token_FT_Price1xe6 = getTxParam "token_FT_Price1xe6" txParams :: Integer
@@ -763,15 +763,15 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
         -- Este es el generador. Puede generar zero, una o muchas txOuts, validas o invalidas.
-        input_SellOffer_UTxO_gen op extras =
+        input_SwapOffer_UTxO_gen op extras =
             -- aca el generador de txOut me genera una lista de txOuts segun test params
             let
-                input_SellOffer_UTxO = sellOffer_UTxO_MockData_Parametrizable tp 5_000_000 available_ADA
+                input_SwapOffer_UTxO = swapOffer_UTxO_MockData_Parametrizable tp 5_000_000 available_ADA
                 txOuts =
                     txOut_With_TestEntity_Gen
                         tp
-                        input_SellOffer_UTxO
-                        SellOffer_TestEntity
+                        input_SwapOffer_UTxO
+                        SwapOffer_TestEntity
                         op
             in
                 -- aca voy a seguir manipulando la lista de txOuts generadas en funcion de los extras
@@ -780,46 +780,46 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
                     -- por lo tanto se que hay una sola y valida txOut
                     Just ("not isOrderOpen", _) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_StatusChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_StatusChanged
                                     datum
-                                    T.sellOffer_Status_Closed
+                                    T.swapOffer_Status_Closed
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("isOrderRestrictedForSellingADA", True) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
                                     datum
-                                    T.sellOffer_AllowSell
-                                    T.sellOffer_NotAllowSell
+                                    T.swapOffer_AllowSell
+                                    T.swapOffer_NotAllowSell
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("isOrderRestrictedForSellingFT", True) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
                                     datum
-                                    T.sellOffer_NotAllowSell
-                                    T.sellOffer_AllowSell
+                                    T.swapOffer_NotAllowSell
+                                    T.swapOffer_AllowSell
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("not isAmount_ADA_Available", True) ->
@@ -829,29 +829,29 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
                         txOuts
         -----------------
         -- Este se usa para calcular los outputs txOuts. Se necesita al menos una entrada para hacer eso
-        input_SellOffer_UTxO_gen_for_calcs op extras =
+        input_SwapOffer_UTxO_gen_for_calcs op extras =
             case op of
-                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumType)) -> sellOffer_UTxO_MockData tp
-                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumNonExist)) -> sellOffer_UTxO_MockData tp
-                TxOutInvalid TxOutInvalidNone -> sellOffer_UTxO_MockData tp
-                _ -> case input_SellOffer_UTxO_gen op extras of
-                    []      -> sellOffer_UTxO_MockData tp
+                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumType)) -> swapOffer_UTxO_MockData tp
+                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumNonExist)) -> swapOffer_UTxO_MockData tp
+                TxOutInvalid TxOutInvalidNone -> swapOffer_UTxO_MockData tp
+                _ -> case input_SwapOffer_UTxO_gen op extras of
+                    []      -> swapOffer_UTxO_MockData tp
                     (x : _) -> x
         -----------------
         -- Este se usa para calculos internos. Se necesita al menos un datum de entrada para poder hacerlos
-        input_SellOffer_Datum' op extras = SellOfferT.getSellOffer_DatumType_From_UTxO (input_SellOffer_UTxO_gen_for_calcs op extras)
+        input_SwapOffer_Datum' op extras = SwapOfferT.getSwapOffer_DatumType_From_UTxO (input_SwapOffer_UTxO_gen_for_calcs op extras)
         -----------------
         calculateConversion op extras =
             -----------------
             let
-                input_SellOffer_Datum = input_SellOffer_Datum' op extras
+                input_SwapOffer_Datum = input_SwapOffer_Datum' op extras
                 -----------------
                 (_, _, price_FT_in_ADA) =
                     head $ T.iuValues $ T.odFTPriceADA1xe6 oracleData
                 --------
                 amount_ADA = OnChainHelpers.multiply_By_Scaled_1e6_And_RoundUp amount_FT price_FT_in_ADA
                 --------
-                commission = T.sodAskedCommission_InBPx1e3 input_SellOffer_Datum
+                commission = T.sodAskedCommission_InBPx1e3 input_SwapOffer_Datum
                 commission_ADA = OnChainHelpers.multiply_By_Scaled_BPx1e3_And_RoundUp amount_ADA commission
             in
                 --------
@@ -870,31 +870,31 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
                             (amount_ADA, commission_ADA + invalidAmount)
                     _ -> (amount_ADA, commission_ADA)
         -----------------
-        output_SellOffer_Datum op extras =
+        output_SwapOffer_Datum op extras =
             -----------------
             let
-                input_SellOffer_Datum = input_SellOffer_Datum' op extras
+                input_SwapOffer_Datum = input_SwapOffer_Datum' op extras
                 -----------------
                 (amount_ADA, commission_ADA) = calculateConversion op extras
             in
                 -----------------
-                SellOffer.mkUpdated_SellOffer_Datum_With_SwapFTxADA
-                    input_SellOffer_Datum
+                SwapOffer.mkUpdated_SwapOffer_Datum_With_SwapFTxADA
+                    input_SwapOffer_Datum
                     amount_FT
                     amount_ADA
                     commission_ADA
         -----------------
-        output_SellOffer_UTxO op extras =
+        output_SwapOffer_UTxO op extras =
             let
-                newDatum = output_SellOffer_Datum op extras
+                newDatum = output_SwapOffer_Datum op extras
                 -----------------
                 origValue =
                     LedgerApiV2.txOutValue $
-                        input_SellOffer_UTxO_gen_for_calcs op extras
+                        input_SwapOffer_UTxO_gen_for_calcs op extras
                 newAmount_ADA =
-                    SellOfferT.sodAmount_ADA_Available newDatum
-                        + SellOfferT.sodMinADA newDatum
-                newAmount_FT = SellOfferT.sodAmount_FT_Available newDatum
+                    SwapOfferT.sodAmount_ADA_Available newDatum
+                        + SwapOfferT.sodMinADA newDatum
+                newAmount_FT = SwapOfferT.sodAmount_FT_Available newDatum
                 -----------------
                 adjustedValue_ADA =
                     changeValue_Amount
@@ -909,20 +909,20 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
                         newAmount_FT
             in
                 -----------------
-                (input_SellOffer_UTxO_gen_for_calcs op extras)
+                (input_SwapOffer_UTxO_gen_for_calcs op extras)
                     { LedgerApiV2.txOutDatum =
-                        LedgerApiV2.OutputDatum $ SellOfferT.mkDatum newDatum
+                        LedgerApiV2.OutputDatum $ SwapOfferT.mkDatum newDatum
                     , LedgerApiV2.txOutValue = adjustedValue_FT_And_ADA
                     }
         -----------------
-        output_SellOffer_UTxO_gen op extras =
+        output_SwapOffer_UTxO_gen op extras =
             txOut_With_TestEntity_Gen
                 tp
-                (output_SellOffer_UTxO op extras)
-                SellOffer_TestEntity
+                (output_SwapOffer_UTxO op extras)
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData op extras =
+        consume_SwapOffer_ValidRedeemerData op extras =
             let
                 (amount_ADA, commission_ADA) =
                     calculateConversion (convertInputOptionsToTxOutOptions op) extras
@@ -976,36 +976,36 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
                                 mkOracleDataSignature tp oracleTokenFTData_Changed
                         _ -> mkOracleDataSignature tp oracleData'
             in
-                SellOfferT.mkSwapFTxADARedeemer
+                SwapOfferT.mkSwapFTxADARedeemer
                     amount_FT
                     amount_ADA
                     commission_ADA
                     oracleData'
                     oracleDataSignature'
         -----------------
-        consume_SellOffer_InvalidRedeemerData op extras =
+        consume_SwapOffer_InvalidRedeemerData op extras =
             let
                 (amount_ADA, commission_ADA) =
                     calculateConversion (convertInputOptionsToTxOutOptions op) extras
             in
                 Just $
-                    SellOfferT.mkSwapFTxADARedeemer
+                    SwapOfferT.mkSwapFTxADARedeemer
                         amount_FT
                         amount_ADA
                         (commission_ADA + sum_ONE_INVALID_NUMBER)
                         oracleData
                         (mkOracleDataSignature tp oracleData)
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen op extras =
+        consume_SwapOffer_UTxO_gen op extras =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                (consume_SellOffer_ValidRedeemerData op extras)
-                (consume_SellOffer_InvalidRedeemerData op extras)
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                (consume_SwapOffer_ValidRedeemerData op extras)
+                (consume_SwapOffer_InvalidRedeemerData op extras)
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
                 op
                 extras
         -----------------
@@ -1020,13 +1020,13 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_SwapFTxADA_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_SwapFTxADA_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Nothing
             , tsUseValidityRange = Just validityRange_gen'
@@ -1047,8 +1047,8 @@ sellOffer_SwapFTxADA_TxSpecs tp txParams =
 
 --------------------------------------------------------------------------------
 
-sellOffer_SwapADAxFT_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
-sellOffer_SwapADAxFT_TxSpecs tp !txParams =
+swapOffer_SwapADAxFT_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
+swapOffer_SwapADAxFT_TxSpecs tp !txParams =
     let
         -----------------
         token_FT_Price1xe6 = getTxParam "token_FT_Price1xe6" txParams :: Integer
@@ -1068,15 +1068,15 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
         -- Este es el generador. Puede generar zero, una o muchas txOuts, validas o invalidas.
-        input_SellOffer_UTxO_gen op extras =
+        input_SwapOffer_UTxO_gen op extras =
             -- aca el generador de txOut me genera una lista de txOuts segun test params
             let
-                new_SellOffer_UTxO = sellOffer_UTxO_MockData_Parametrizable tp available_FT 5_000_000
+                new_SwapOffer_UTxO = swapOffer_UTxO_MockData_Parametrizable tp available_FT 5_000_000
                 txOuts =
                     txOut_With_TestEntity_Gen
                         tp
-                        new_SellOffer_UTxO
-                        SellOffer_TestEntity
+                        new_SwapOffer_UTxO
+                        SwapOffer_TestEntity
                         op
             in
                 -- aca voy a seguir manipulando la lista de txOuts generadas en funcion de los extras
@@ -1085,68 +1085,68 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
                     -- por lo tanto se que hay una sola y valida txOut
                     Just ("not isOrderOpen", _) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_StatusChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_StatusChanged
                                     datum
-                                    T.sellOffer_Status_Closed
+                                    T.swapOffer_Status_Closed
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("isOrderRestrictedForSellingADA", True) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
                                     datum
-                                    T.sellOffer_AllowSell
-                                    T.sellOffer_NotAllowSell
+                                    T.swapOffer_AllowSell
+                                    T.swapOffer_NotAllowSell
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("isOrderRestrictedForSellingFT", True) ->
                         let
-                            datum = SellOfferT.getSellOffer_DatumType_From_UTxO (head txOuts)
+                            datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (head txOuts)
                             datumUpdated =
-                                SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
+                                SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
                                     datum
-                                    T.sellOffer_NotAllowSell
-                                    T.sellOffer_AllowSell
+                                    T.swapOffer_NotAllowSell
+                                    T.swapOffer_AllowSell
                         in
                             [ (head txOuts)
                                 { LedgerApiV2.txOutDatum =
                                     LedgerApiV2.OutputDatum $
-                                        SellOfferT.mkDatum datumUpdated
+                                        SwapOfferT.mkDatum datumUpdated
                                 }
                             ]
                     Just ("not isAmount_FT_Available", True) -> txOuts -- deberia generar el valor incorrecto el property en las variables price and available ADA
                     _ -> txOuts
         -----------------
         -- Este se usa para calcular los outputs txOuts. Se necesita al menos una entrada para hacer eso
-        input_SellOffer_UTxO_gen_for_calcs op extras =
+        input_SwapOffer_UTxO_gen_for_calcs op extras =
             case op of
-                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumType)) -> sellOffer_UTxO_MockData tp
-                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumNonExist)) -> sellOffer_UTxO_MockData tp
-                TxOutInvalid TxOutInvalidNone -> sellOffer_UTxO_MockData tp
-                _ -> case input_SellOffer_UTxO_gen op extras of
-                    []      -> sellOffer_UTxO_MockData tp
+                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumType)) -> swapOffer_UTxO_MockData tp
+                TxOutInvalid (TxOutInvalidEntity (TxOutInvalidEntityDatum InvalidEntityDatumNonExist)) -> swapOffer_UTxO_MockData tp
+                TxOutInvalid TxOutInvalidNone -> swapOffer_UTxO_MockData tp
+                _ -> case input_SwapOffer_UTxO_gen op extras of
+                    []      -> swapOffer_UTxO_MockData tp
                     (x : _) -> x
         -----------------
         -- Este se usa para calculos internos. Se necesita al menos un datum de entrada para poder hacerlos
-        input_SellOffer_Datum' op extras = SellOfferT.getSellOffer_DatumType_From_UTxO (input_SellOffer_UTxO_gen_for_calcs op extras)
+        input_SwapOffer_Datum' op extras = SwapOfferT.getSwapOffer_DatumType_From_UTxO (input_SwapOffer_UTxO_gen_for_calcs op extras)
         -----------------
         calculateConversion op extras =
             -----------------
             let
-                input_SellOffer_Datum = input_SellOffer_Datum' op extras
+                input_SwapOffer_Datum = input_SwapOffer_Datum' op extras
                 -----------------
                 (_, _, price_FT_in_ADA) =
                     head $ T.iuValues $ T.odFTPriceADA1xe6 oracleData
@@ -1154,7 +1154,7 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
                 amount_FT = OnChainHelpers.divide_By_Scaled_1e6_And_RoundDownSafe amount_ADA_fromUser price_FT_in_ADA
                 amount_ADA_real = OnChainHelpers.multiply_By_Scaled_1e6_And_RoundUp amount_FT price_FT_in_ADA
                 --------
-                commission = T.sodAskedCommission_InBPx1e3 input_SellOffer_Datum
+                commission = T.sodAskedCommission_InBPx1e3 input_SwapOffer_Datum
                 commission_FT = OnChainHelpers.multiply_By_Scaled_BPx1e3_And_RoundUp amount_FT commission
             in
                 -----------------
@@ -1172,28 +1172,28 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
                             (amount_ADA_real, amount_FT, commission_FT + invalidAmount)
                     _ -> (amount_ADA_real, amount_FT, commission_FT)
         -----------------
-        output_SellOffer_Datum op extras =
+        output_SwapOffer_Datum op extras =
             -----------------
             let
-                input_SellOffer_Datum = input_SellOffer_Datum' op extras
+                input_SwapOffer_Datum = input_SwapOffer_Datum' op extras
                 -----------------
                 (amount_ADA_real, amount_FT, commission_FT) = calculateConversion op extras
             in
                 -----------------
-                SellOffer.mkUpdated_SellOffer_Datum_With_SwapADAxFT
-                    input_SellOffer_Datum
+                SwapOffer.mkUpdated_SwapOffer_Datum_With_SwapADAxFT
+                    input_SwapOffer_Datum
                     amount_ADA_real
                     amount_FT
                     commission_FT
         -----------------
-        output_SellOffer_UTxO op extras =
+        output_SwapOffer_UTxO op extras =
             let
-                newDatum = output_SellOffer_Datum op extras
-                origValue = LedgerApiV2.txOutValue $ input_SellOffer_UTxO_gen_for_calcs op extras
+                newDatum = output_SwapOffer_Datum op extras
+                origValue = LedgerApiV2.txOutValue $ input_SwapOffer_UTxO_gen_for_calcs op extras
                 newAmount_ADA =
-                    SellOfferT.sodAmount_ADA_Available newDatum
-                        + SellOfferT.sodMinADA newDatum
-                newAmount_FT = SellOfferT.sodAmount_FT_Available newDatum
+                    SwapOfferT.sodAmount_ADA_Available newDatum
+                        + SwapOfferT.sodMinADA newDatum
+                newAmount_FT = SwapOfferT.sodAmount_FT_Available newDatum
                 -----------------
                 adjustedValue_ADA =
                     changeValue_Amount
@@ -1206,20 +1206,20 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
                         (LedgerValue.assetClass (tpFundPolicy_CS tp) (tpFundFT_TN tp))
                         newAmount_FT
             in
-                (sellOffer_UTxO_MockData tp)
+                (swapOffer_UTxO_MockData tp)
                     { LedgerApiV2.txOutDatum =
-                        LedgerApiV2.OutputDatum $ SellOfferT.mkDatum newDatum
+                        LedgerApiV2.OutputDatum $ SwapOfferT.mkDatum newDatum
                     , LedgerApiV2.txOutValue = adjustedValue_FT
                     }
         -----------------
-        output_SellOffer_UTxO_gen op extras =
+        output_SwapOffer_UTxO_gen op extras =
             txOut_With_TestEntity_Gen
                 tp
-                (output_SellOffer_UTxO op extras)
-                SellOffer_TestEntity
+                (output_SwapOffer_UTxO op extras)
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData op extras =
+        consume_SwapOffer_ValidRedeemerData op extras =
             let
                 (amount_ADA_real, amount_FT, commission_FT) = calculateConversion (convertInputOptionsToTxOutOptions op) extras
                 -- modifico oracleTokenFTData: el valor de la fecha del oraculo y otras cosas segun los extras
@@ -1272,34 +1272,34 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
                                 mkOracleDataSignature tp oracleTokenFTData_Changed
                         _ -> mkOracleDataSignature tp oracleData'
             in
-                SellOfferT.mkSwapADAxFTRedeemer
+                SwapOfferT.mkSwapADAxFTRedeemer
                     amount_ADA_real
                     amount_FT
                     commission_FT
                     oracleData'
                     oracleDataSignature'
-        consume_SellOffer_InvalidRedeemerData op extras =
+        consume_SwapOffer_InvalidRedeemerData op extras =
             let
                 (amount_ADA_real, amount_FT, commission_FT) = calculateConversion (convertInputOptionsToTxOutOptions op) extras
             in
                 Just $
-                    SellOfferT.mkSwapADAxFTRedeemer
+                    SwapOfferT.mkSwapADAxFTRedeemer
                         amount_ADA_real
                         amount_FT
                         (commission_FT + sum_ONE_INVALID_NUMBER)
                         oracleData
                         (mkOracleDataSignature tp oracleData)
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkUpdateMinADARedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkUpdateMinADARedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen op extras =
+        consume_SwapOffer_UTxO_gen op extras =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                (consume_SellOffer_ValidRedeemerData op extras)
-                (consume_SellOffer_InvalidRedeemerData op extras)
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                (consume_SwapOffer_ValidRedeemerData op extras)
+                (consume_SwapOffer_InvalidRedeemerData op extras)
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
                 op
                 extras
         -----------------
@@ -1314,13 +1314,13 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_SwapFTxADA_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_SwapFTxADA_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Nothing
             , tsUseValidityRange = Just validityRange_gen'
@@ -1341,66 +1341,66 @@ sellOffer_SwapADAxFT_TxSpecs tp !txParams =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Emergency_TxSpecs :: TestParams -> TxSpecs
-sellOffer_Emergency_TxSpecs tp =
+swapOffer_Emergency_TxSpecs :: TestParams -> TxSpecs
+swapOffer_Emergency_TxSpecs tp =
     -----------------
     let
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_MockData tp) Fund_TestEntity op
         -----------------
-        input_SellOffer_UTxO_gen op _ =
+        input_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                (sellOffer_UTxO_MockData tp)
-                SellOffer_TestEntity
+                (swapOffer_UTxO_MockData tp)
+                SwapOffer_TestEntity
                 op
         -----------------
-        input_SellOffer_Datum = SellOfferT.getSellOffer_DatumType_From_UTxO (sellOffer_UTxO_MockData tp)
+        input_SwapOffer_Datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO (swapOffer_UTxO_MockData tp)
         -----------------
-        sellFT = T.sellOffer_NotAllowSell
-        sellADA = T.sellOffer_NotAllowSell
+        sellFT = T.swapOffer_NotAllowSell
+        sellADA = T.swapOffer_NotAllowSell
         -----------------
-        output_SellOffer_Datum =
-            SellOffer.mkUpdated_SellOffer_Datum_With_RestrictionsChanged
-                input_SellOffer_Datum
+        output_SwapOffer_Datum =
+            SwapOffer.mkUpdated_SwapOffer_Datum_With_RestrictionsChanged
+                input_SwapOffer_Datum
                 sellFT
                 sellADA
         -----------------
-        output_SellOffer_UTxO =
-            (sellOffer_UTxO_MockData tp)
+        output_SwapOffer_UTxO =
+            (swapOffer_UTxO_MockData tp)
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $
-                        SellOfferT.mkDatum output_SellOffer_Datum
+                        SwapOfferT.mkDatum output_SwapOffer_Datum
                 }
         -----------------
-        output_SellOffer_UTxO_gen op _ =
+        output_SwapOffer_UTxO_gen op _ =
             txOut_With_TestEntity_Gen
                 tp
-                output_SellOffer_UTxO
-                SellOffer_TestEntity
+                output_SwapOffer_UTxO
+                SwapOffer_TestEntity
                 op
         -----------------
-        consume_SellOffer_ValidRedeemerData =
-            SellOfferT.mkUpdateSellRestrictionsRedeemer sellFT sellADA
-        consume_SellOffer_InvalidRedeemerData =
+        consume_SwapOffer_ValidRedeemerData =
+            SwapOfferT.mkUpdateSellRestrictionsRedeemer sellFT sellADA
+        consume_SwapOffer_InvalidRedeemerData =
             Just
-                ( SellOfferT.mkUpdateSellRestrictionsRedeemer
-                    T.sellOffer_AllowSell
-                    T.sellOffer_NotAllowSell
+                ( SwapOfferT.mkUpdateSellRestrictionsRedeemer
+                    T.swapOffer_AllowSell
+                    T.swapOffer_NotAllowSell
                 )
-        consume_SellOffer_InvalidRedeemerType =
-            Just SellOfferT.mkEmergencyRedeemer
-        consume_SellOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        consume_SwapOffer_InvalidRedeemerType =
+            Just SwapOfferT.mkEmergencyRedeemer
+        consume_SwapOffer_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        consume_SellOffer_UTxO_gen =
+        consume_SwapOffer_UTxO_gen =
             consume_TxOut_Gen
-                input_SellOffer_UTxO_gen
-                consume_SellOffer_ValidRedeemerData
-                consume_SellOffer_InvalidRedeemerData
-                consume_SellOffer_InvalidRedeemerType
-                consume_SellOffer_InvalidRedeemerNonExist
+                input_SwapOffer_UTxO_gen
+                consume_SwapOffer_ValidRedeemerData
+                consume_SwapOffer_InvalidRedeemerData
+                consume_SwapOffer_InvalidRedeemerType
+                consume_SwapOffer_InvalidRedeemerNonExist
         -----------------
-        signatures_gen' op _ = signatures_gen tp [tpSellOfferAdmin tp] op
+        signatures_gen' op _ = signatures_gen tp [tpSwapOfferAdmin tp] op
         -----------------
         validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
     in
@@ -1410,13 +1410,13 @@ sellOffer_Emergency_TxSpecs tp =
             , tsInputsRefScripts = []
             , tsInputs =
                 [
-                    ( SellOffer_TestEntity
-                    , consume_SellOffer_UTxO_gen
-                    , SellOffer_UpdateStatus_TestRedeemer
+                    ( SwapOffer_TestEntity
+                    , consume_SwapOffer_UTxO_gen
+                    , SwapOffer_UpdateStatus_TestRedeemer
                     )
                 ]
             , tsInputsFromWallet = []
-            , tsOutputs = [(SellOffer_TestEntity, output_SellOffer_UTxO_gen)]
+            , tsOutputs = [(SwapOffer_TestEntity, output_SwapOffer_UTxO_gen)]
             , tsMints = []
             , tsUseSignatures = Just signatures_gen'
             , tsUseValidityRange = Just validityRange_gen'

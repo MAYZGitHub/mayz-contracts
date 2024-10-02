@@ -11,6 +11,7 @@ module TestTree.PropertyTests where
 -- External Imports
 ------------------------------------------------------------------------------------------
 
+import qualified Control.Monad                   as ControlMonad
 import qualified Ledger.Ada                      as LedgerAda
 import qualified Ledger.Value                    as LedgerValue
 import qualified Plutus.V2.Ledger.Api            as LedgerApiV2
@@ -23,10 +24,10 @@ import qualified Test.Tasty.QuickCheck           as TastyQC
 ------------------------------------------------------------------------------------------
 -- Internal Imports
 ------------------------------------------------------------------------------------------
-import qualified Control.Monad                   as ControlMonad
-import qualified Generic.OffChainEvalTesting     as OffChainEvalTesting
+import qualified Generic.OffChainEval            as OffChainEval
 import qualified Generic.OffChainHelpers         as OffChainHelpers
 import qualified Generic.OnChainHelpers          as OnChainHelpers
+import           Helpers.Helpers                 as Helpers
 import qualified Protocol.Fund.Helpers           as Helpers
 import qualified Protocol.Types                  as InvestUnitT
 import           TestUtils.Contracts.InitialData
@@ -46,7 +47,7 @@ property_Tests tp =
 ------------------------------------------------------------------------------------------
 
 propertyTestsResources :: TestParams -> Tasty.TestTree
-propertyTestsResources tp = 
+propertyTestsResources tp =
     Tasty.testGroup
         "Testing resources usage"
         [ TastyQC.testProperty "PowRational should use less than 3.5Mb" (propPowRational_less_than False 3_500_000)
@@ -83,8 +84,8 @@ runCheckCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax com
     let
         evalCostResult =
             if useOptimized
-                then OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit)
-                else OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.calculateDepositCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit)
+                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit)
+                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit)
         (LedgerApiV2.ExBudget _ (LedgerApiV2.ExMemory mem), _) = evalCostResult
         memInt = read @Integer (show mem)
     in
@@ -113,8 +114,8 @@ runCheckPowRational_less_than useOptimized memMax num den n =
     let
         evalCostResult =
             if useOptimized
-                then OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.powRationalWrapperBuiltinDataCodeOptimized num den n)
-                else OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.powRationalWrapperBuiltinDataCode num den n)
+                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.powRationalWrapperBuiltinDataCodeOptimized num den n)
+                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.powRationalWrapperBuiltinDataCode num den n)
 
         (LedgerApiV2.ExBudget _ (LedgerApiV2.ExMemory mem), _) = evalCostResult
         memInt = read @Integer (show mem)
@@ -154,8 +155,8 @@ runCheckDeposit_less_than tp useOptimized memMax tokens commissionPerYearInBPx1e
         (fundFT_AC, valueOf_FundHoldingDatum_In, valueOf_FundHoldingDatum_Out, investUnit) = generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit
         evalCostResult =
             if useOptimized
-                then OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.testDepositBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
-                else OffChainEvalTesting.evaluateCompileCodeWithCekGetCost (OffChainEvalTesting.testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
+                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
+                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
         (LedgerApiV2.ExBudget _ (LedgerApiV2.ExMemory mem), _) = evalCostResult
         memInt = read @Integer (show mem)
     in
@@ -176,7 +177,7 @@ runCheckDeposit_isValid tp _ tokens commissionPerYearInBPx1e3 deadline date depo
         !den = 120_000_000
         !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
 
-        isValidDeposit = OffChainEvalTesting.testDeposit commissionsTable_Numerator1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
+        isValidDeposit = Helpers.testDeposit commissionsTable_Numerator1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
     in
         TastyQC.counterexample (show isValidDeposit) isValidDeposit
 
@@ -197,12 +198,6 @@ generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit 
         valueOf_FundHoldingDatum_In =
             LedgerAda.lovelaceValueOf minAdaFundDatum
                 <> LedgerApiV2.singleton "74854c7cd622e151aeef59b7d97fe0d60e8e69a10adbe13c19e918aa" "FundHoldingID0" 1
-
-        -- valueFor_FundHoldingDatum_Out :: LedgerValue.Value
-        -- valueFor_FundHoldingDatum_Out = LedgerAda.lovelaceValueOf 12241330
-        --             <> LedgerApiV2.singleton "74854c7cd622e151aeef59b7d97fe0d60e8e69a10adbe13c19e918aa" "FundHoldingID0" 1
-        --             <>  LedgerApiV2.singleton "6aa8df2a10e8530338279e41a1a40dc73f83e468b710c3b64082f759" "token" deposit
-        --             <>  LedgerApiV2.singleton tpFundPolicy_CS tp  T.fundFT_TN commissionsFT
 
         -- Invest unit tokens are multiplied by 100 to add precision
         adjustedTokens = [(cs, tn, amt * 100) | (cs, tn, amt) <- tokens]
@@ -226,8 +221,6 @@ generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit 
 
         !valueFor_FundHoldingDatum_Out = valueOf_FundHoldingDatum_In <> valueOf_TokensForDeposit <> valueFor_FT_Commissions
     in
-        -- token1 :: InvestUnitT.InvestUnitToken
-        -- token1 = ( "6aa8df2a10e8530338279e41a1a40dc73f83e468b710c3b64082f759","token", 1) :: InvestUnitT.InvestUnitToken
 
         (fundFT_AC, valueOf_FundHoldingDatum_In, valueFor_FundHoldingDatum_Out, investUnit)
 

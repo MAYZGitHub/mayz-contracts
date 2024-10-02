@@ -20,23 +20,23 @@ module Protocol.Script.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema
-import qualified GHC.Generics         as GHCGenerics
-import qualified Ledger.Value         as LedgerValue
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Data.Aeson             as DataAeson
+import qualified Data.OpenApi.Schema    as DataOpenApiSchema
+import qualified GHC.Generics           as GHCGenerics
+import qualified Ledger.Value           as LedgerValue
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Prelude              as P
+import qualified Prelude                as P
 import qualified Schema
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Protocol.Types       as T
 import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Generic.Types          as T
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -202,7 +202,7 @@ PlutusTx.makeIsDataIndexed
 getPolicyRedeemerName :: Maybe PolicyRedeemer -> Maybe P.String
 getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = Just "MintID"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
-getPolicyRedeemerName _ = Nothing
+getPolicyRedeemerName _                                                      = Nothing
 
 --------------------------------------------------------------------------------2
 
@@ -222,7 +222,7 @@ type ValidatorRedeemer = ValidatorRedeemerDelete
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
 getValidatorRedeemerName (Just ValidatorRedeemerDelete) = Just "Delete"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName _                              = Nothing
 
 ------------------------------------------------------------------------------
 
@@ -243,7 +243,7 @@ mkBurnIDRedeemer =
 mkScriptDeleteRedeemer :: LedgerApiV2.Redeemer
 mkScriptDeleteRedeemer =
     LedgerApiV2.Redeemer $
-        LedgerApiV2.toBuiltinData 
+        LedgerApiV2.toBuiltinData
             ValidatorRedeemerDelete
 
 --------------------------------------------------------------------------------2

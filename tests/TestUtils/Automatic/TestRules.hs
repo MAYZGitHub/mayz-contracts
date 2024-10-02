@@ -30,9 +30,9 @@ import qualified Text.Regex.TDFA             as Regex
 
 import           TestUtils.Automatic.Helpers
 import           TestUtils.Automatic.Types
+import           TestUtils.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Helpers
 
 ------------------------------------------------------------------------
 
@@ -373,7 +373,7 @@ findBestMatchRuleForConfigPath swTrace configPath ruleTree initialRulePath =
                     let score = ruleScore rule -- Use the pre-calculated score directly from the rule
                     in
                         debugTraceIf_ swTrace (indent depth' ++ "Matched rule at path: " ++ rulePath ++ "\n" ++
-                                        indent depth' ++ "Score: " ++ show score) 
+                                        indent depth' ++ "Score: " ++ show score)
                             (Just rule, rulePath, score)
                 Nothing -> (Nothing, rulePath, MatchScore 0 0 0 0 0 0 0)
         ----------

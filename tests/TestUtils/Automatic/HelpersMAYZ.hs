@@ -19,14 +19,14 @@ import qualified Protocol.Fund.Holding.Types          as FundHoldingT
 import qualified Protocol.Fund.Types                  as FundT
 import qualified Protocol.InvestUnit.Types            as InvestUnitT
 import qualified Protocol.Protocol.Types              as ProtocolT
-import qualified Protocol.SellOffer.Types             as SellOfferT
+import qualified Protocol.SwapOffer.Types             as SwapOfferT
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.Types
+import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Helpers
 import           TestUtils.HelpersMAYZ
 import           TestUtils.TypesMAYZ
-import TestUtils.Constants
 
 ----------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ getEntityTestConfig _ InvestUnit_TestEntity = TxSpecsEntityTestConfig
     {
         testInvalidValueOtherTokens = []
     }
-getEntityTestConfig tp SellOffer_TestEntity = TxSpecsEntityTestConfig
+getEntityTestConfig tp SwapOffer_TestEntity = TxSpecsEntityTestConfig
     {
         testInvalidValueOtherTokens = [InvalidValueOtherToken "MAYZ" (tpTokenMAYZ_CS tp) (tpTokenMAYZ_TN tp)]
     }
@@ -123,20 +123,20 @@ txOut_With_TestEntity_Gen tp valid_UTxO InvestUnit_TestEntity options =
         investUnit_UTxO
 
 
-txOut_With_TestEntity_Gen tp valid_UTxO SellOffer_TestEntity options =
+txOut_With_TestEntity_Gen tp valid_UTxO SwapOffer_TestEntity options =
     let
         -----------------
-        datum = SellOfferT.getSellOffer_DatumType_From_UTxO valid_UTxO
+        datum = SwapOfferT.getSwapOffer_DatumType_From_UTxO valid_UTxO
         datumUpdated =
-            datum { SellOfferT.sodMinADA = SellOfferT.sodMinADA datum + sum_ANY_INVALID_NUMBER * 2}
+            datum { SwapOfferT.sodMinADA = SwapOfferT.sodMinADA datum + sum_ANY_INVALID_NUMBER * 2}
         -----------------
-        invalidDatumData' = Just $ SellOfferT.mkDatum datumUpdated
+        invalidDatumData' = Just $ SwapOfferT.mkDatum datumUpdated
         invalidDatumType' = Just (protocol_Datum_MockData tp)
         invalidDatumNonExist' = Just fakeDatumEmpty
         -----------------
-        sellOffer_UTxO = txOut_Gen valid_UTxO (tpSellOfferPolicyID_CS tp) T.sellOfferID_TN invalidDatumData' invalidDatumType' invalidDatumNonExist' options
+        swapOffer_UTxO = txOut_Gen valid_UTxO (tpSwapOfferPolicyID_CS tp) T.swapOfferID_TN invalidDatumData' invalidDatumType' invalidDatumNonExist' options
     in
-        sellOffer_UTxO
+        swapOffer_UTxO
 
 txOut_With_TestEntity_Gen _ _ _ _ = P.error "txOut_With_TestEntity_Gen: not implemented for this TestEntity"
 
@@ -265,32 +265,32 @@ mint_Value_With_TestToken_Gen tp (FundHoldingID_TestToken, FundHolding_BurnID_Te
     in
         burn_FundHoldingID_gen
 
-mint_Value_With_TestToken_Gen tp (SellOfferID_TestToken, SellOffer_MintID_TestRedeemer) validAmount options =
+mint_Value_With_TestToken_Gen tp (SwapOfferID_TestToken, SwapOffer_MintID_TestRedeemer) validAmount options =
     let
         -----------------
-        validRedeemeer = SellOfferT.mkMintIDRedeemer
+        validRedeemeer = SwapOfferT.mkMintIDRedeemer
         invalidRedeemerData = Nothing
-        invalidRedeemerType = Just SellOfferT.mkBurnIDRedeemer
+        invalidRedeemerType = Just SwapOfferT.mkBurnIDRedeemer
         invalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
-        mint_SellOfferID_gen = mint_Value_Gen (tpSellOfferPolicyID_CS tp) T.sellOfferID_TN validAmount validRedeemeer invalidRedeemerData invalidRedeemerType invalidRedeemerNonExist options
+        mint_SwapOfferID_gen = mint_Value_Gen (tpSwapOfferPolicyID_CS tp) T.swapOfferID_TN validAmount validRedeemeer invalidRedeemerData invalidRedeemerType invalidRedeemerNonExist options
         -----------------
     in
-        mint_SellOfferID_gen
+        mint_SwapOfferID_gen
 
-mint_Value_With_TestToken_Gen tp (SellOfferID_TestToken, SellOffer_BurnID_TestRedeemer) validAmount options =
+mint_Value_With_TestToken_Gen tp (SwapOfferID_TestToken, SwapOffer_BurnID_TestRedeemer) validAmount options =
     let
         -----------------
-        validRedeemer = SellOfferT.mkBurnIDRedeemer
+        validRedeemer = SwapOfferT.mkBurnIDRedeemer
         invalidRedeemerData' = Nothing
-        invalidRedeemerType' = Just SellOfferT.mkMintIDRedeemer
+        invalidRedeemerType' = Just SwapOfferT.mkMintIDRedeemer
         invalidRedeemerNonExist' = Just fakeRedeemerEmpty
         -----------------
-        burn_SellOfferID_gen = mint_Value_Gen (tpSellOfferPolicyID_CS tp) T.sellOfferID_TN (-validAmount) validRedeemer invalidRedeemerData' invalidRedeemerType' invalidRedeemerNonExist' options
+        burn_SwapOfferID_gen = mint_Value_Gen (tpSwapOfferPolicyID_CS tp) T.swapOfferID_TN (-validAmount) validRedeemer invalidRedeemerData' invalidRedeemerType' invalidRedeemerNonExist' options
         -----------------
     in
-        burn_SellOfferID_gen
--- TODO: TODO: TODO: agregar el resto de los casos
+        burn_SwapOfferID_gen
+        
 mint_Value_With_TestToken_Gen _ _ _ _ = P.error "mint_Value_With_TestToken_Gen: not implemented for this TestToken"
 
 --------------------------------------------------------------------------------

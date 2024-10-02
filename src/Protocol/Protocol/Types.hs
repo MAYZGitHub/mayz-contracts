@@ -21,24 +21,24 @@ module Protocol.Protocol.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson (FromJSON, ToJSON)
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema (ToSchema)
-import qualified GHC.Generics         as GHCGenerics (Generic)
-import qualified Ledger.Address       as LedgerAddress
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Data.Aeson             as DataAeson (FromJSON, ToJSON)
+import qualified Data.OpenApi.Schema    as DataOpenApiSchema (ToSchema)
+import qualified GHC.Generics           as GHCGenerics (Generic)
+import qualified Ledger.Address         as LedgerAddress
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 import qualified PlutusTx
 import           PlutusTx.Prelude
-import qualified Prelude              as P
+import qualified Prelude                as P
 import qualified Schema
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Protocol.Constants   as T
-import qualified Protocol.Types       as T
 import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Generic.Types          as T
+import qualified Protocol.Constants     as T
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -154,18 +154,18 @@ data ProtocolDatumType
           , pdScriptValidator_Hash            :: LedgerApiV2.ValidatorHash
           , pdOraclePaymentPubKey             :: LedgerAddress.PaymentPubKey
           , pdAdmins                          :: [T.WalletPaymentPKH]
-          , pdDelegatorsAdmins                     :: [T.WalletPaymentPKH]
+          , pdDelegatorsAdmins                :: [T.WalletPaymentPKH]
           , pdTokenAdminPolicy_CS             :: LedgerApiV2.CurrencySymbol
           , pdFundCategories                  :: [FundCategory]
           , pdFundLifeTime                    :: MinMaxDef LedgerApiV2.POSIXTime
-          , pdRequiredMAYZForSellOffer        :: Integer
+          , pdRequiredMAYZForSwapOffer        :: Integer
           , pdRequiredMAYZForBuyOrder         :: Integer
           , pdCommissionFund_PerYear_InBPx1e3 :: MinMaxDef Integer
-          , pdCommissionSellOffer_InBPx1e3    :: MinMaxDef Integer
+          , pdCommissionSwapOffer_InBPx1e3    :: MinMaxDef Integer
           , pdCommissionBuyOrder_InBPx1e3     :: MinMaxDef Integer
-          , pdShare_InBPx1e2_Protocol          :: Integer
-          , pdShare_InBPx1e2_Delegators              :: Integer
-          , pdShare_InBPx1e2_Managers            :: Integer
+          , pdShare_InBPx1e2_Protocol         :: Integer
+          , pdShare_InBPx1e2_Delegators       :: Integer
+          , pdShare_InBPx1e2_Managers         :: Integer
           , pdMinADA                          :: Integer
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
@@ -181,10 +181,10 @@ instance Eq ProtocolDatumType where
             && pdTokenAdminPolicy_CS ps1 == pdTokenAdminPolicy_CS ps2
             && pdFundCategories ps1 == pdFundCategories ps2
             && pdFundLifeTime ps1 == pdFundLifeTime ps2
-            && pdRequiredMAYZForSellOffer ps1 == pdRequiredMAYZForSellOffer ps2
+            && pdRequiredMAYZForSwapOffer ps1 == pdRequiredMAYZForSwapOffer ps2
             && pdRequiredMAYZForBuyOrder ps1 == pdRequiredMAYZForBuyOrder ps2
             && pdCommissionFund_PerYear_InBPx1e3 ps1 == pdCommissionFund_PerYear_InBPx1e3 ps2
-            && pdCommissionSellOffer_InBPx1e3 ps1 == pdCommissionSellOffer_InBPx1e3 ps2
+            && pdCommissionSwapOffer_InBPx1e3 ps1 == pdCommissionSwapOffer_InBPx1e3 ps2
             && pdCommissionBuyOrder_InBPx1e3 ps1 == pdCommissionBuyOrder_InBPx1e3 ps2
             && pdShare_InBPx1e2_Protocol ps1 == pdShare_InBPx1e2_Protocol ps2
             && pdShare_InBPx1e2_Delegators ps1 == pdShare_InBPx1e2_Delegators ps2
@@ -257,10 +257,10 @@ mkProtocolDatumType
     tokenAdminPolicy_CS
     fundCategories
     fundLifeTime
-    requiredMAYZForSellOffer
+    requiredMAYZForSwapOffer
     requiredMAYZForBuyOrder
     commissionFund_PerYear_InBPx1e3
-    commissionSellOffer_InBPx1e3
+    commissionSwapOffer_InBPx1e3
     commissionBuyOrder_InBPx1e3
     share_InBPx1e2_Protocol
     share_InBPx1e2_Delegators
@@ -279,10 +279,10 @@ mkProtocolDatumType
                 , pdTokenAdminPolicy_CS = tokenAdminPolicy_CS
                 , pdFundCategories = fundCategoriesOrdered
                 , pdFundLifeTime = fundLifeTime
-                , pdRequiredMAYZForSellOffer = requiredMAYZForSellOffer
+                , pdRequiredMAYZForSwapOffer = requiredMAYZForSwapOffer
                 , pdRequiredMAYZForBuyOrder = requiredMAYZForBuyOrder
                 , pdCommissionFund_PerYear_InBPx1e3 = commissionFund_PerYear_InBPx1e3
-                , pdCommissionSellOffer_InBPx1e3 = commissionSellOffer_InBPx1e3
+                , pdCommissionSwapOffer_InBPx1e3 = commissionSwapOffer_InBPx1e3
                 , pdCommissionBuyOrder_InBPx1e3 = commissionBuyOrder_InBPx1e3
                 , pdShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol
                 , pdShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators
@@ -319,10 +319,10 @@ mkProtocolDatum
     tokenAdminPolicy_CS
     fundCategories
     fundLifeTime
-    requiredMAYZForSellOffer
+    requiredMAYZForSwapOffer
     requiredMAYZForBuyOrder
     commissionFund_PerYear_InBPx1e3
-    commissionSellOffer_InBPx1e3
+    commissionSwapOffer_InBPx1e3
     commissionBuyOrder_InBPx1e3
     share_InBPx1e2_Protocol
     share_InBPx1e2_Delegators
@@ -338,10 +338,10 @@ mkProtocolDatum
                     tokenAdminPolicy_CS
                     fundCategories
                     fundLifeTime
-                    requiredMAYZForSellOffer
+                    requiredMAYZForSwapOffer
                     requiredMAYZForBuyOrder
                     commissionFund_PerYear_InBPx1e3
-                    commissionSellOffer_InBPx1e3
+                    commissionSwapOffer_InBPx1e3
                     commissionBuyOrder_InBPx1e3
                     share_InBPx1e2_Protocol
                     share_InBPx1e2_Delegators
@@ -419,10 +419,10 @@ PlutusTx.makeIsDataIndexed
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
-getValidatorRedeemerName (Just (ValidatorRedeemerDatumUpdate ValidatorRedeemerDatumUpdateType)) = Just "DatumUpdate"
+getValidatorRedeemerName (Just (ValidatorRedeemerDatumUpdate ValidatorRedeemerDatumUpdateType))   = Just "DatumUpdate"
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType)) = Just "Emergency"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))       = Just "Emergency"
+getValidatorRedeemerName _                                                                        = Nothing
 
 --------------------------------------------------------------------------------2
 

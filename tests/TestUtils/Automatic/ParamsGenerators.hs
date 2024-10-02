@@ -10,19 +10,19 @@ module TestUtils.Automatic.ParamsGenerators where
 
 -- Non-IOG imports
 
-import qualified Data.Data                              as Data
-import qualified Data.Map                               as DataMap
-import           Prelude                                as P hiding ((<>))
-import qualified Test.QuickCheck                        as QC
+import qualified Data.Data                             as Data
+import qualified Data.Map                              as DataMap
+import           Prelude                               as P hiding ((<>))
+import qualified Test.QuickCheck                       as QC
 
 -- IOG imports
-import qualified Plutus.V2.Ledger.Api                   as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api                  as LedgerApiV2
 
 -- Project imports
 
 import           TestUtils.Automatic.Types
+import           TestUtils.QuickCheckGen.QuickCheckGen
 import           TestUtils.Types
-import TestUtils.QuickCheckGen.QuickCheckGen
 
 ----------------------------------------------------------------------------------------
 

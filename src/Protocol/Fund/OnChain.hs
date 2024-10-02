@@ -125,7 +125,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         -- 0 out is the FundDatum
                         -- 1 out is the InvestUnitDatum
                         ------------------
-                        !(outputs_txOuts_index0, outputs_txOuts_index1) = 
+                        !(outputs_txOuts_index0, outputs_txOuts_index1) =
                             if length outputs_txOuts < 2
                                 then traceError "Expected at least two outputs to script addresses"
                                 else (head outputs_txOuts,  outputs_txOuts!!1)
@@ -277,9 +277,6 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                 (T.PolicyRedeemerBurnID _) ->
                     ------------------
                     -- it runs along with Fund Validator (ValidatorRedeemerDelete)
-                    -- validateAdminAction
-                    -- traceIfFalse "not isBurningFundID" isBurningFundID
-                    -- && traceIfFalse "not isZeroHoldings" isZeroHoldings
                     ------------------
                     -- Que se quemen todos los Fund IDs con own póliza
                     -- No hay control adicional sobre los MAYZ, se supone que quien hace la tx, es un Fund Admin y el recupera los MAYZ o los envia a cualquier lado
@@ -310,10 +307,6 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                 (T.PolicyRedeemerMintFT _) ->
                     ------------------
                     -- it runs along with FundHolding Validator (ValidatorRedeemerDeposit)
-                    -- traceIfFalse "not isCorrect_Output_FundHolding_Datum_With_Deposit" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Control_With_Deposit)
-                    -- && traceIfFalse "not isCorrect_Output_FundHolding_Value_With_Tokens_And_FT" (isCorrect_Output_FundHolding_Value valueFor_FundHoldingDatum_Control_With_Tokens_And_FT)
-                    -- && traceIfFalse "not isMintingFT" isMintingFT
-                    -- && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
                     ------------------
                     -- que se este consumiendo fundholding datum con el redeemer correcto
                     -- que se este minteando FT, no importa la cantidad, eso esta controlado en FundHolding Validator (ValidatorRedeemerDeposit)
@@ -339,14 +332,10 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                 (T.PolicyRedeemerBurnFT _) ->
                     ------------------
                     -- it runs along with FundHolding Validator (ValidatorRedeemerWithdraw)
-                    -- traceIfFalse "not isCorrect_Output_FundHolding_Datum_With_Withdraw" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Control_With_Withdraw)
-                    -- && traceIfFalse "not isCorrect_Output_FundHolding_Value_Without_Tokens_And_FT_for_Commissions" (isCorrect_Output_FundHolding_Value valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions)
-                    -- && traceIfFalse "not isBurningFT" isBurningFT
-                    -- && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
                     ------------------
                     -- no hay restricciones temporales
                     -- que se este consumiendo fundholding datum con el redeemer correcto
-                    -- TODO: no hace falta controlar este redeemer, no hay otra forma de conseguir FT que no sea consumiendo el fundHolding datum con el redeemer correcto
+                    -- NOTE: no hace falta controlar este redeemer, no hay otra forma de conseguir FT que no sea consumiendo el fundHolding datum con el redeemer correcto
                     -- si no pongo esta condicion permitiría quemar FT por otros medios, si alguien quiere eliminarlos de su wallet por ejemplo
                     -- que se este quemando FT
                     ------------------
@@ -356,7 +345,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !redeemerFundHoldingDatum = get_Redeemer_FundHoldingDatum
                         !validatorRedeemerWithdrawType = case redeemerFundHoldingDatum of
                                                             FundHoldingT.ValidatorRedeemerWithdraw x -> x
-                                                            _                                       -> traceError "Expected FundHolding ValidatorRedeemerWithdraw"
+                                                            _                                        -> traceError "Expected FundHolding ValidatorRedeemerWithdraw"
                         ------------------
                         !withdrawPlusComissions = FundHoldingT.rwAmountPlusComissions validatorRedeemerWithdrawType
                         ------------------
@@ -479,7 +468,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             ------------------
                             isAdminTokenPresent :: Bool
                             isAdminTokenPresent = case LedgerApiV2.txInfoOutputs info of
-                                [] -> False
+                                []         -> False
                                 -- search admin token in output 0
                                 (output:_) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
                                 where
@@ -493,7 +482,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             (T.ValidatorRedeemerDelete _) ->
                                 ------------------
                                 -- it runs along with Fund ID Policy  (PolicyRedeemerBurnID)
-                                -- traceIfFalse "not isBurningIDs" isBurningIDs
                                 ------------------
                                 -- Que sea Fund Admin
                                 -- que el fondo tenga CERO holdings
@@ -534,10 +522,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 (T.ValidatorRedeemerFundHoldingAdd T.ValidatorRedeemerFundHoldingAddType) ->
                                     ------------------
                                     -- it runs along with Holding ID Policy (PolicyRedeemerMintID)
-                                    -- traceIfFalse "not isMintingFundHoldingID" isMintingFundHoldingID &&
-                                    -- traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingAdd ) &&
-                                    -- traceIfFalse "not isCorrect_Output_FundHolding_Datum" isCorrect_Output_FundHolding_Datum &&
-                                    -- traceIfFalse "not isCorrect_Output_FundHolding_Value" isCorrect_Output_FundHolding_Value
                                     ------------------
                                     -- Que sea Fund Admin
                                     -- Que se mintee Holding ID con la correcta póliza indicada en FundDatum
@@ -569,12 +553,8 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 (T.ValidatorRedeemerFundHoldingDelete T.ValidatorRedeemerFundHoldingDeleteType) ->
                                     ------------------
                                     -- it runs along with FundHolding ID Policy (PolicyRedeemerBurnID)
-                                    -- traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
-                                    -- && traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingDelete)
-                                    -- && traceIfFalse "not isZeroAssets" isZeroAssets
                                     ------------------
                                     -- it runs along with FundHolding Validator (ValidatorRedeemerDelete)
-                                    -- traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                                     ------------------
                                     -- Que sea Fund Admin
                                     -- Que se queme Holding ID con la correcta póliza indicada en FundDatum

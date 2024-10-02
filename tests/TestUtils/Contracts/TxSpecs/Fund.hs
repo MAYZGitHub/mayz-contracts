@@ -14,19 +14,19 @@ module TestUtils.Contracts.TxSpecs.Fund where
 -- IOG imports
 
 -- Project imports
+import qualified Generic.OnChainHelpers                  as OnChainHelpers
+import qualified Plutus.V2.Ledger.Api                    as LedgerApiV2
+import           Prelude
+import qualified Protocol.Fund.Helpers                   as Fund
+import qualified Protocol.Fund.Types                     as FundT
+import           TestUtils.Automatic.ContextGenerator
+import           TestUtils.Automatic.HelpersMAYZ
 import           TestUtils.Automatic.Types
+import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxSpecs.FundHolding
+import           TestUtils.Helpers
+import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Types
-import TestUtils.Automatic.HelpersMAYZ
-import TestUtils.Contracts.InitialData
-import TestUtils.Automatic.ContextGenerator
-import Prelude
-import qualified Protocol.Fund.Types as FundT
-import TestUtils.Helpers
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
-import qualified Generic.OnChainHelpers as OnChainHelpers
-import qualified Protocol.Fund.Helpers as Fund
 
 --------------------------------------------------------------------------------
 -- Fund Contract
@@ -200,7 +200,7 @@ fund_DatumUpdate_TxSpecs tp =
                             input_Fund_Datum
                             admins_updated
                             tokenAdminPolicy_CS
-                         
+
         -----------------
         output_Fund_UTxO =
             (fund_UTxO_MockData tp)

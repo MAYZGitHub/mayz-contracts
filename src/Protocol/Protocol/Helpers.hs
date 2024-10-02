@@ -32,17 +32,17 @@ import qualified Protocol.Protocol.Types as T
 
 {-# INLINEABLE mkUpdated_Protocol_Datum_With_NormalChanges #-}
 mkUpdated_Protocol_Datum_With_NormalChanges :: T.ProtocolDatumType -> LedgerAddress.PaymentPubKey -> [T.WalletPaymentPKH] -> LedgerApiV2.CurrencySymbol -> [T.FundCategory] -> T.MinMaxDef LedgerApiV2.POSIXTime -> Integer -> Integer -> T.MinMaxDef Integer -> T.MinMaxDef Integer -> T.MinMaxDef Integer -> Integer -> Integer -> Integer -> [T.WalletPaymentPKH] -> T.ProtocolDatumType
-mkUpdated_Protocol_Datum_With_NormalChanges !protocolDatum_In !oraclePaymentPubKey !admins !tokenAdminPolicy_CS !fundCategories !fundLifeTime !requiredMAYZForSellOffer !requiredMAYZForBuyOrder !commissionFund_PerYear_InBPx1e3 !commissionSellOffer_InBPx1e3 !commissionBuyOrder_InBPx1e3 !share_InBPx1e2_Protocol !share_InBPx1e2_Delegators !share_InBPx1e2_Managers !delegatorsAdmins =
+mkUpdated_Protocol_Datum_With_NormalChanges !protocolDatum_In !oraclePaymentPubKey !admins !tokenAdminPolicy_CS !fundCategories !fundLifeTime !requiredMAYZForSwapOffer !requiredMAYZForBuyOrder !commissionFund_PerYear_InBPx1e3 !commissionSwapOffer_InBPx1e3 !commissionBuyOrder_InBPx1e3 !share_InBPx1e2_Protocol !share_InBPx1e2_Delegators !share_InBPx1e2_Managers !delegatorsAdmins =
     protocolDatum_In {
         T.pdOraclePaymentPubKey = oraclePaymentPubKey,
         T.pdAdmins = admins,
         T.pdTokenAdminPolicy_CS = tokenAdminPolicy_CS,
         T.pdFundCategories = fundCategories,
         T.pdFundLifeTime = fundLifeTime,
-        T.pdRequiredMAYZForSellOffer = requiredMAYZForSellOffer,
+        T.pdRequiredMAYZForSwapOffer = requiredMAYZForSwapOffer,
         T.pdRequiredMAYZForBuyOrder = requiredMAYZForBuyOrder,
         T.pdCommissionFund_PerYear_InBPx1e3 = commissionFund_PerYear_InBPx1e3,
-        T.pdCommissionSellOffer_InBPx1e3 = commissionSellOffer_InBPx1e3,
+        T.pdCommissionSwapOffer_InBPx1e3 = commissionSwapOffer_InBPx1e3,
         T.pdCommissionBuyOrder_InBPx1e3 = commissionBuyOrder_InBPx1e3,
         T.pdShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol,
         T.pdShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators,

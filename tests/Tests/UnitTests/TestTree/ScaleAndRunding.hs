@@ -28,7 +28,7 @@ logDetails opName values = DataList.intercalate "\n" $
 --------------------------------------------------------------------------------
 
 scale_And_Runding_Tests :: TestParams -> Tasty.TestTree
-scale_And_Runding_Tests tp =
+scale_And_Runding_Tests _tp =
     Tasty.testGroup "Tests"
     [
         Tasty.testCase "Multiply 100 by 1.05 and round up" $

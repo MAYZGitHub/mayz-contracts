@@ -1,12 +1,12 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
+-- {-# LANGUAGE DataKinds             #-}
+-- {-# LANGUAGE FlexibleContexts      #-}
+-- {-# LANGUAGE InstanceSigs          #-}
+-- {-# LANGUAGE MultiParamTypeClasses #-}
+-- {-# LANGUAGE RankNTypes            #-}
+-- {-# LANGUAGE RecordWildCards       #-}
+-- {-# LANGUAGE ScopedTypeVariables   #-}
+-- {-# LANGUAGE TypeApplications      #-}
+-- {-# LANGUAGE TypeFamilies          #-}
 
 --------------------------------------------------------------------------------3
 {- HLINT ignore "Use camelCase"          -}

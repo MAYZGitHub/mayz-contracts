@@ -11,7 +11,6 @@
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE RecordWildCards       #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeApplications      #-}
 {-# LANGUAGE TypeFamilies          #-}
 
@@ -61,12 +60,18 @@ import qualified Plutus.Contract                                 as PlutusContra
 import qualified Plutus.Contract.CardanoAPI                      as PlutusContractCardanoAPI
 import qualified Plutus.Script.Utils.V1.Typed.Scripts.Validators as UtilsTypedScriptsValidatorsV1 (DatumType, RedeemerType)
 import qualified Plutus.V2.Ledger.Api                            as LedgerApiV2
+import qualified PlutusCore                                      as PLC
+import           PlutusCore.Default                              (DefaultFun, DefaultUni)
+import qualified PlutusCore.Evaluation.Machine.ExBudget          as PLC
+import qualified PlutusTx.Code                                   as PlutusTxCode
 import           PlutusTx.Prelude                                hiding (unless)
 import qualified PlutusTx.Prelude                                as PlutusTxPrelude
 import qualified Prelude                                         as P
 import           System.Directory                                (doesDirectoryExist, doesFileExist, listDirectory)
 import           System.FilePath                                 (dropExtension, takeDirectory, takeExtension, takeFileName, (</>))
 import qualified Text.Printf                                     as TextPrintf (printf)
+import qualified UntypedPlutusCore                               as UPLC
+import qualified UntypedPlutusCore.Evaluation.Machine.Cek        as UPLC
 
 --------------------------------------------------------------------------------2
 -- Import Internos
@@ -74,6 +79,10 @@ import qualified Text.Printf                                     as TextPrintf (
 
 import qualified Generic.OffChainHelpers                         as OffChainHelpers
 import qualified Generic.OnChainHelpers                          as OnChainHelpers
+import qualified PlutusTx
+import qualified Plutus.V1.Ledger.ProtocolVersions as LedgerProtocolVersionsV1
+import qualified Plutus.V2.Ledger.EvaluationContext as LedgerEvaluationContextV2
+import qualified Plutus.V1.Ledger.Scripts as LedgerScriptsV1
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -221,7 +230,6 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
             let decoratedTxOut = OnChainHelpers.fromJust decoratedTxOut'
             let script' = decoratedTxOut ControlLens.^? LedgerTx.decoratedTxOutReferenceScript
             let script = OnChainHelpers.fromJust script'
-            -- TODO: reemplaze esto: return $ P.maybe Nothing (Just . Ledger.scriptHash) script
             return ((Just . Ledger.scriptHash) P.=<< script)
         --------------------
         getReferenceScriptHashFromLedgerTxOut :: Ledger.TxOut -> PlutusContract.Contract w s DataText.Text (Maybe LedgerApiV2.ScriptHash)
@@ -389,9 +397,6 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
     ---------------------
     ControlMonad.when (sizeTx > 16000)
         P.$ PlutusContract.throwError @DataText.Text $ OffChainHelpers.stringToStrictText $ TextPrintf.printf "Tx is too big: %s" (showStrNumbers sizeTx)
-    -- if sizeTx > 16000
-    --     then PlutusContract.throwError @DataText.Text $ OffChainHelpers.stringToStrictText $ TextPrintf.printf "Tx is too big: %s" (showStrNumbers sizeTx)
-    --     else return ()
     ------------------------
     let !allUnits = map (\(_, (_, AlonzoScripts.ExUnits mem steps)) -> (mem, steps)) allRedeemers
         !sumUnitsMem = foldl (\acc (mem, _) -> acc `GHCNatural.plusNatural` mem) 0 allUnits
@@ -401,7 +406,6 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
     mapM_ (PlutusContract.logInfo @P.String) (formatUnits allUnits)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "Total ExMemory: %s, Total ExCPU: %s, Total Size: %s" (showStrNumbers sumUnitsMem) (showStrNumbers sumUnitsSteps) (showStrNumbers sizeTx)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "Valid Tx: %s" (P.show validTx)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "------------------------------------------------------------"
     ------------------------
     let mockTxInfoFee :: LedgerApiV2.Value
         mockTxInfoFee = txFee'
@@ -463,7 +467,7 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
                                 !paramsData = [] :: [LedgerApiV2.Data]
                                 !redeemerData = LedgerApiV2.toData redeemer
                                 !ctxData = LedgerApiV2.toData mockCtx
-                                (eval_log, eval_err, eval_size) = OffChainHelpers.evaluateScriptMint policy paramsData redeemerData ctxData
+                                (eval_log, eval_err, eval_size) = evaluateScriptMint policy paramsData redeemerData ctxData
                             --------------------------------
                             PlutusContract.logInfo @P.String $ "ScriptPurpose: " ++ P.show scriptPurpose
                             PlutusContract.logInfo @P.String $ "--------------------------------"
@@ -502,7 +506,7 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
                                 !datumData = LedgerApiV2.toData datum
                                 !redeemerData = LedgerApiV2.toData redeemer
                                 !ctxData = LedgerApiV2.toData mockCtx
-                                (eval_log, eval_err, eval_size) = OffChainHelpers.evaluateScriptValidator validator paramsData datumData redeemerData ctxData
+                                (eval_log, eval_err, eval_size) = evaluateScriptValidator validator paramsData datumData redeemerData ctxData
                             --------------------------------
                             PlutusContract.logInfo @P.String $ "ScriptPurpose: " ++ P.show scriptPurpose
                             PlutusContract.logInfo @P.String $ "--------------------------------"
@@ -577,7 +581,6 @@ evalAndSubmitTx nameEndPoint listOfMintingScripts listOfValidators showDatum loo
     -- Ledger.UtxoIndex DataMap.empty --mempty  -- Ledger.UtxoIndex DataMap.empty --LedgerTxCardanoAPI.fromPlutusIndex mempty -- (Ledger.UtxoIndex utxo)
     let validateCardanoTx = CardanoNodeEmulatorValidation.validateCardanoTx params cSlot cUtxoIndex submittedTx
     case validateCardanoTx of
-        -- Left (validationPhase, validationError) ->
         Left err ->
             -- PlutusContract.throwError @DataText.Text $ OffChainHelpers.stringToStrictText $ TextPrintf.printf "validateCardanoTx (txId: %s) - ERROR: %s" (P.show $ Ledger.getCardanoTxId submittedTx) (P.show err)
             -- PlutusContract.logError @P.String $ P.show err
@@ -712,7 +715,7 @@ evaluatePolicy_With_StringParams paramsJsonStr = do
                         redeemerData = OffChainHelpers.getDataFromEncodedJson (OffChainHelpers.stringToLazyByteString epRedeemer)
                         ctxData = OffChainHelpers.getDataFromEncodedJson (OffChainHelpers.stringToLazyByteString epCtx)
                     P.putStrLn $ "RedeemerData: " ++ P.show redeemerData
-                    let (eval_log, eval_err, eval_size) = OffChainHelpers.evaluateScriptMint policy paramsData redeemerData ctxData
+                    let (eval_log, eval_err, eval_size) = evaluateScriptMint policy paramsData redeemerData ctxData
                     return (eval_log, eval_err, eval_size)
 
 --------------------------------------------------------------------------------2
@@ -737,8 +740,70 @@ evaluateValidator_With_StringParams paramsJsonStr = do
                         ctxData = OffChainHelpers.getDataFromEncodedJson (OffChainHelpers.stringToLazyByteString evCtx)
                     P.putStrLn $ "datumData: " ++ P.show datumData
                     P.putStrLn $ "redeemerData: " ++ P.show redeemerData
-                    let (eval_log, eval_err, eval_size) = OffChainHelpers.evaluateScriptValidator validator paramsData datumData redeemerData ctxData
+                    let (eval_log, eval_err, eval_size) = evaluateScriptValidator validator paramsData datumData redeemerData ctxData
                     return (eval_log, eval_err, eval_size)
+
+--------------------------------------------------------------------------------22
+
+evaluateScriptValidator :: LedgerApiV2.Validator -> [PlutusTx.Data] -> PlutusTx.Data -> PlutusTx.Data -> PlutusTx.Data -> (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Integer)
+evaluateScriptValidator validator params datum redeemer ctx =
+    let datas :: [PlutusTx.Data]
+        datas = params ++ [datum, redeemer, ctx]
+        ----------------------
+        !pv = LedgerProtocolVersionsV1.vasilPV
+        !scriptUnValidatorV2 = OffChainHelpers.getScriptUnValidator validator
+        !scriptShortBsV2 = OffChainHelpers.getScriptShortBs scriptUnValidatorV2
+        ----------------------
+        exBudget :: LedgerApiV2.ExBudget
+        exBudget = LedgerApiV2.ExBudget 10000000000 14000000
+        ----------------------
+        !(logout, e) = LedgerApiV2.evaluateScriptRestricting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting exBudget scriptShortBsV2 datas
+        ----------------------
+        !size = LedgerScriptsV1.scriptSize scriptUnValidatorV2
+    in  (logout, e, size)
 
 --------------------------------------------------------------------------------2
 
+evaluateScriptMint :: LedgerApiV2.MintingPolicy -> [PlutusTx.Data] -> PlutusTx.Data -> PlutusTx.Data -> (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Integer)
+evaluateScriptMint policy params redeemer ctx =
+    let datas :: [PlutusTx.Data]
+        datas = params ++ [redeemer, ctx]
+        ----------------------
+        !pv = LedgerProtocolVersionsV1.vasilPV
+        !scriptMintingPolicyV2 = OffChainHelpers.getScriptMintingPolicy policy
+        !scriptShortBsV2 = OffChainHelpers.getScriptShortBs scriptMintingPolicyV2
+        ----------------------
+        exBudget :: LedgerApiV2.ExBudget
+        exBudget = LedgerApiV2.ExBudget 10000000000 14000000
+        ----------------------
+        !(logout, e) = LedgerApiV2.evaluateScriptRestricting pv LedgerApiV2.Verbose LedgerEvaluationContextV2.evalCtxForTesting exBudget scriptShortBsV2 datas
+        ----------------------
+        !size = LedgerScriptsV1.scriptSize scriptMintingPolicyV2
+    in  (logout, e, size)
+
+
+--------------------------------------------------------------------------------2
+
+-- plcProgram :: PlutusTxCode.CompiledCode a -> UPLC.Program UPLC.NamedDeBruijn DefaultUni DefaultFun ()
+-- plcProgram = PlutusTxCode.getPlc
+
+-- evaluatePlcProgramWithCek :: UPLC.Term UPLC.NamedDeBruijn DefaultUni DefaultFun () -> UPLC.EvaluationResult (UPLC.Term UPLC.NamedDeBruijn DefaultUni DefaultFun ())
+-- evaluatePlcProgramWithCek = UPLC.unsafeExtractEvaluationResult . (\(fstT,_,_) -> fstT) . UPLC.runCekDeBruijn PLC.defaultCekParameters UPLC.restrictingEnormous UPLC.noEmitter
+
+-- evaluateCompileCodeWithCekGetCost :: PlutusTxCode.CompiledCode a -> UPLC.RestrictingSt
+-- evaluateCompileCodeWithCekGetCost =  (\(_,cost,_) -> cost) . UPLC.runCekDeBruijn PLC.defaultCekParameters UPLC.restrictingEnormous UPLC.noEmitter . plcProgramTerm
+
+plcProgramTerm :: PlutusTxCode.CompiledCode a -> UPLC.Term UPLC.NamedDeBruijn DefaultUni  DefaultFun ()
+plcProgramTerm = UPLC._progTerm . PlutusTxCode.getPlc
+
+evaluateCompileCodeWithCek :: PlutusTxCode.CompiledCode a -> UPLC.EvaluationResult (UPLC.Term UPLC.NamedDeBruijn DefaultUni DefaultFun ())
+evaluateCompileCodeWithCek = UPLC.unsafeExtractEvaluationResult . (\(fstT,_,_) -> fstT) . UPLC.runCekDeBruijn PLC.defaultCekParameters UPLC.restrictingEnormous UPLC.logEmitter . plcProgramTerm
+
+evaluateCompileCodeWithCekGetCost :: PlutusTxCode.CompiledCode a -> (PLC.ExBudget, [DataText.Text])
+evaluateCompileCodeWithCekGetCost code  =
+    let (result, UPLC.TallyingSt _ budget, logOut) = UPLC.runCekDeBruijn PLC.defaultCekParameters UPLC.tallying UPLC.logEmitter  (plcProgramTerm code)
+    in case result of
+            Right _ -> (budget, logOut)
+            Left _  -> (budget, logOut)
+
+--------------------------------------------------------------------------------

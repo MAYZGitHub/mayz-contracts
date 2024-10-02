@@ -1,7 +1,7 @@
 
+{-# LANGUAGE InstanceSigs     #-}
+{-# LANGUAGE RecordWildCards  #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE InstanceSigs #-}
 
 --------------------------------------------------------------------------------2
 {- HLINT ignore "Use camelCase"          -}
@@ -349,7 +349,7 @@ doAddScriptTxWitParams
                 Nothing -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptPolicyID was not found as ref. Attaching Script: %s" (P.show scriptPolicyID_ScriptHash)
                     return [attachScriptToTx scriptPolicyID]
-                Just _ -> do 
+                Just _ -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptPolicyID was found as ref. Adding the Ref only if it is not already in some input. Script: %s" (P.show scriptPolicyID_ScriptHash)
                     -- checkIfScriptIsAlreadyIfNotAddRefToTx (scriptPolicyID, scriptPolicyID_ScriptHash, uTxO_With_ScriptPolicyID)
                     return []
@@ -551,7 +551,7 @@ doDeleteScriptTxWithParams
                 Nothing -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptValidator was not found as ref. Attaching Script: %s" (P.show scriptValidator_ScriptHash)
                     return [attachScriptToTx scriptValidator]
-                Just _ -> do 
+                Just _ -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptValidator was found as ref. Adding the Ref only if it is not already in some input. Script: %s" (P.show scriptValidator_ScriptHash)
                     -- checkIfScriptIsAlreadyIfNotAddRefToTx (scriptValidator, scriptValidator_ScriptHash, uTxO_With_ScriptValidator)
                     return []
@@ -561,7 +561,7 @@ doDeleteScriptTxWithParams
                 Nothing -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptPolicyID was not found as ref. Attaching Script: %s" (P.show scriptPolicyID_ScriptHash)
                     return [attachScriptToTx scriptPolicyID]
-                Just _ -> do 
+                Just _ -> do
                     PlutusContract.logInfo @P.String $ TextPrintf.printf "ScriptPolicyID was found as ref. Adding the Ref only if it is not already in some input. Script: %s" (P.show scriptPolicyID_ScriptHash)
                     -- checkIfScriptIsAlreadyIfNotAddRefToTx (scriptPolicyID, scriptPolicyID_ScriptHash, uTxO_With_ScriptPolicyID)
                     return []

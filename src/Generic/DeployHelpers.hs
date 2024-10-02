@@ -94,13 +94,12 @@ readMintingPolicy path file = do
             let curSymbol = OffChainHelpers.getCurSymbolOfPolicy policy
             return (policy, curSymbol)
 
--- curSymbol <- OffChainHelpers.readPlutusDataFromFile (path SystemFilePathPosix.</> file ++ ".symbol")
-
 --------------------------------------------------------------------------------2
 -- ESCRIBE Y LEE COMPILED CODE A ARCHIVO
 --------------------------------------------------------------------------------2
 
--- TODO mover a offchain helpers
+-- TODO mover metodos a offchain helpers
+
 serializableToScript :: CodecSerialise.Serialise a => a -> CardanoApi.PlutusScript CardanoApi.PlutusScriptV2
 serializableToScript = CardanoApiShelley.PlutusScriptSerialised . BSS.toShort . BSL.toStrict . CodecSerialise.serialise
 

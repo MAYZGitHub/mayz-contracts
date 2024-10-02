@@ -13,7 +13,7 @@
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------3
 
-module Protocol.SellOffer.OffChain where
+module Protocol.SwapOffer.OffChain where
 
 --------------------------------------------------------------------------------2
 -- External Imports
@@ -50,7 +50,7 @@ module Protocol.SellOffer.OffChain where
 -- import qualified Protocol.OffChainHelpers            as OffChainHelpers
 -- import qualified Protocol.PABTypes                   as T
 -- import qualified Protocol.Protocol.Types             as ProtocolT
--- import qualified Protocol.SellOffer.Types            as T
+-- import qualified Protocol.SwapOffer.Types            as T
 -- import qualified Protocol.Types                      as T
 
 --------------------------------------------------------------------------------2

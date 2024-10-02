@@ -10,8 +10,8 @@ module TestUtils.Constants where
 
 -- Non-IOG imports
 
-import           Prelude                           as P
 import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import           Prelude              as P
 
 -- IOG imports
 

@@ -3,15 +3,15 @@
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------4
 {- |
-Module      : SellOffer.MintingPolicy
-Description : Validation logic and tests related to the SellOffer minting policy.
+Module      : SwapOffer.MintingPolicy
+Description : Validation logic and tests related to the SwapOffer minting policy.
 
-This module defines the validation logic for the SellOffer's minting policy.
+This module defines the validation logic for the SwapOffer's minting policy.
 
 It includes multiple test cases to ensure the integrity and correctness of the
 minting script.
 -}
-module Contracts.SellOffer.MintingPolicy where
+module Contracts.SwapOffer.MintingPolicy where
 
 --------------------------------------------------------------------------------
 
@@ -28,31 +28,31 @@ import           TestUtils.Automatic.TestRules
 import           TestUtils.Automatic.TxGenerators
 import           TestUtils.Automatic.Types
 import           TestUtils.Constants
-import           TestUtils.Contracts.TxSpecs.SellOffer
+import           TestUtils.Contracts.TxSpecs.SwapOffer
 import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 
-sellOffer_Policy_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Policy_Tests tp ruleTree =
+swapOffer_Policy_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Policy_Tests tp ruleTree =
     Tasty.testGroup
-        "SellOffer Policy Tests"
+        "SwapOffer Policy Tests"
 
         [
-            sellOffer_Policy_Redeemer_MintID_Tests tp ruleTree,
-            sellOffer_Policy_Redeemer_BurnID_Tests tp ruleTree
+            swapOffer_Policy_Redeemer_MintID_Tests tp ruleTree,
+            swapOffer_Policy_Redeemer_BurnID_Tests tp ruleTree
         ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Policy_Redeemer_MintID_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Policy_Redeemer_MintID_Tests tp ruleTree =
+swapOffer_Policy_Redeemer_MintID_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Policy_Redeemer_MintID_Tests tp ruleTree =
     let
         ------------------------
-        txName = show SellOffer_Create_Tx
-        txSpecs = sellOffer_Create_TxSpecs tp
+        txName = show SwapOffer_Create_Tx
+        txSpecs = swapOffer_Create_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogPolicy (Just SellOffer_MintID_TestRedeemer)
+        selectedRedeemer = RedeemerLogPolicy (Just SwapOffer_MintID_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -62,14 +62,14 @@ sellOffer_Policy_Redeemer_MintID_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Policy_Redeemer_BurnID_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Policy_Redeemer_BurnID_Tests tp ruleTree =
+swapOffer_Policy_Redeemer_BurnID_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Policy_Redeemer_BurnID_Tests tp ruleTree =
     let
         ------------------------
-        txName = show SellOffer_Delete_Tx
-        txSpecs = sellOffer_Delete_TxSpecs tp
+        txName = show SwapOffer_Delete_Tx
+        txSpecs = swapOffer_Delete_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogPolicy (Just SellOffer_BurnID_TestRedeemer)
+        selectedRedeemer = RedeemerLogPolicy (Just SwapOffer_BurnID_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree

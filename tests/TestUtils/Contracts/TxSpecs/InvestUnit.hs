@@ -16,18 +16,18 @@ import qualified Plutus.V2.Ledger.Api                 as LedgerApiV2
 
 -- Project imports
 import qualified Generic.OnChainHelpers               as OnChainHelpers
+import qualified Protocol.Fund.Holding.Types          as FundHoldingT
 import qualified Protocol.InvestUnit.OnChain          as InvestUnit
 import qualified Protocol.InvestUnit.Types            as InvestUnitT
+import qualified Protocol.Types                       as T
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.HelpersMAYZ
 import           TestUtils.Automatic.Types
+import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Types as T
-import TestUtils.Constants
 
 --------------------------------------------------------------------------------
 -- InvestUnit Contract
@@ -35,16 +35,16 @@ import TestUtils.Constants
 
 investUnit_ReIndexing_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
 investUnit_ReIndexing_TxSpecs tp txParams =
-     let 
+     let
         -----------------
         input_Protocol_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (protocol_UTxO_MockData tp) Protocol_TestEntity op
         input_Fund_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fund_UTxO_With_Added_FundHolding_MockData tp) Fund_TestEntity op
         input_FundHolding_UTxO_gen op _ =
-            txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Deposits_MockData tp) FundHolding_TestEntity op   
+            txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Deposits_MockData tp) FundHolding_TestEntity op
         input_InvestUnit_UTxO_gen op _ =
-            txOut_With_TestEntity_Gen tp (investUnit_UTxO_MockData tp) InvestUnit_TestEntity op   
+            txOut_With_TestEntity_Gen tp (investUnit_UTxO_MockData tp) InvestUnit_TestEntity op
          -----------------
         output_FundHolding_UTxO_gen op _ =
             txOut_With_TestEntity_Gen tp (fundHolding_UTxO_After_Reidx_MockData tp investUnit_Initial investUnit_AfterReIdx) FundHolding_TestEntity op
@@ -66,7 +66,7 @@ investUnit_ReIndexing_TxSpecs tp txParams =
                 consume_FundHolding_InvalidRedeemerNonExist
         -----------------
         consume_InvestUnit_ValidRedeemerData = InvestUnitT.mkReIndexingRedeemer investUnit_AfterReIdx investUnit_Initial (oracleReIdxData tp) (oracleReIdxSignature tp)
-        consume_InvestUnit_InvalidRedeemerData = 
+        consume_InvestUnit_InvalidRedeemerData =
             let
                 investUnit_Initial_Tokens = T.iuValues investUnit_Initial
                 (cs, tn, _amt) = head investUnit_Initial_Tokens
@@ -107,7 +107,7 @@ investUnit_ReIndexing_TxSpecs tp txParams =
             , tsUseValidityRange = Just validityRange_gen'
             , tsExtras = []
         }
-       
+
 
 --------------------------------------------------------------------------------
 

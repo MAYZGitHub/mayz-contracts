@@ -52,15 +52,15 @@ import qualified Text.Printf                      as TextPrintf (printf)
 -- Internal Imports
 --------------------------------------------------------------------------------2
 
+import qualified Generic.OnChainHelpers           as OnChainHelpers
 import qualified Protocol.Fund.Holding.Types      as FundHoldingT
 import qualified Protocol.Fund.Types              as FundT
 import qualified Protocol.InvestUnit.Types        as InvestUnitT
 import qualified Protocol.PABTypes                as T
 import qualified Protocol.Protocol.Types          as ProtocolT
 import qualified Protocol.Script.Types            as ScriptT
-import qualified Protocol.SellOffer.Types         as SellOfferT
+import qualified Protocol.SwapOffer.Types         as SwapOfferT
 import qualified Protocol.Types                   as T
-import qualified Generic.OnChainHelpers as OnChainHelpers
 
 --------------------------------------------------------------------------------2
 -- Module
@@ -310,16 +310,13 @@ readStringDecodedAsPolicyRedeemerRedeemer encoded = do
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
-
 --------------------------------------------------------------------------------
 
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c31bfa53cf3cd05ddb7e3e2230d78bbdbd6735c4018a1deb6b022a60c581c71818ecb72f7f5ac542566360ae318a3dd25a2541db9791414b09a2e581cf1e013aee32c3c7b5e318d8e24e50a4e1e1a03430c0a2212096c185e9f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b0000018971a313b81b00000189ad3dddb8d87a8000000080001a001ef015ffff\"}"
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26b581c7287baa38b03be764476101673c803b4d6d85640e37addce20ad2d68581cb1cb50589461b2f66955ca45707eb80a7a5a289600953ec5ef96843a9f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001897ab39aa31b00000189b64e64a3d87a8000000080001a001ef015ffff\"}"
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c7a1cea9e91d69cee0aee8cb3a61e3cf1c815ce9b1793c83d212d1614581c7ab790f20e31972f1b1e84c0e7468932018cdae8010aac890ed9a65f581c1a5595a496b3cc8161a61bff8109bdab3ddb30f1ff3d9ddb07ffda069f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001897ae5973d1b00000189b680613dd87a8000000080001a001ef015ffff\"}"
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c7a1cea9e91d69cee0aee8cb3a61e3cf1c815ce9b1793c83d212d1614581c7ab790f20e31972f1b1e84c0e7468932018cdae8010aac890ed9a65f581c1a5595a496b3cc8161a61bff8109bdab3ddb30f1ff3d9ddb07ffda069f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001897af078151b00000189b68b4216d87a8000000080001a001f76c7ffff\"}"
-
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f02581cb7eb625c4289e5c6caacd4c631d7290f83d3d7fc8032d3ddc287a87b581c0fee00f9d38692d31c707a74fc4296c6d81ddd3853981c4c93115a43581c113a210c5942a82f65bfb879b91a728183966419959afef6a59b7e23581c047d3f4f14e687440923f6f20cf16f9e83b8887f64c3073268429d6c581c5458e7503d967d7b19a5b595552b5d4fcb1e9681e332b9d9a40688949f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001898581977a1b00000189c11c617ad87a8000000080001a00218417ffff\"}"
-
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f03581c5deb66ced32cec9d3f67f65c7a28f48381a8878ea5100a80df5e718b424654581c299717576079e74bf47adb28acee81428732a2facdf55cc3fcfbfea7581c3c6ddaa70112e8d198365a53cb73b5474486acb148b1a6d26742edd1581c3571ab43f462a780a6e4a12338b0dd9c3b0763db2406c7ee2d18ffa1581c64216646e75f98779951f5207a660fafc29fafeb5acfa7aefd17af419f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cab011b0000018cd4f58be81b0000018d2234efe8d87a801a0001d4c09f1a000f42401a000f3e58ff00001a00218417ffff\"}"
 
 readStringDecodedAsFundValidatorDatum :: P.String -> P.IO FundT.ValidatorDatum
@@ -330,11 +327,8 @@ readStringDecodedAsFundValidatorDatum encoded = do
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
-
 -- readStringDecodedAsFundPolicyRedeemer "{\"getRedeemer\":\"d8799fd87980ff\"}"
 -- readStringDecodedAsFundPolicyRedeemer "{\"getRedeemer\":\"d8799fd87980ff\"}"
-
-
 
 readStringDecodedAsFundPolicyRedeemer :: P.String -> P.IO FundT.PolicyRedeemer
 readStringDecodedAsFundPolicyRedeemer encoded = do
@@ -343,7 +337,6 @@ readStringDecodedAsFundPolicyRedeemer encoded = do
     let !result = LedgerApiV2.unsafeFromBuiltinData @FundT.PolicyRedeemer (LedgerApiV2.getRedeemer raw)
     P.putStrLn $ "Result: " ++ P.show result
     return result
-
 
 -- readStringDecodedAsFundValidatorRedeemer "{\"getRedeemer\":\"d8799fd87980ff\"}"
 
@@ -357,15 +350,13 @@ readStringDecodedAsFundValidatorRedeemer encoded = do
 
 
 --------------------------------------------------------------------------------
--- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799fd8799f41aa41aa05ffd8799f41aa410005ffff1a001ef015ffff\"}"
 
+-- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799fd8799f41aa41aa05ffd8799f41aa410005ffff1a001ef015ffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799f9f9f404005ffffff1a001ef015ffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799f9fd8799f41aa41aa05ffd8799f41bb41bb1835ffffff1a001ef015ffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c7a1cea9e91d69cee0aee8cb3a61e3cf1c815ce9b1793c83d212d1614d8799f9fd8799f41aa41aa05ffd8799f41aa41bb04ffffff1a001ec7adffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581cb7eb625c4289e5c6caacd4c631d7290f83d3d7fc8032d3ddc287a87bd8799f9fd8799f404005ffffff1a00218417ffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c5deb66ced32cec9d3f67f65c7a28f48381a8878ea5100a80df5e718bd8799f9fd8799f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cab4334676701ffffff1a00218417ffff\"}"
-
-
 
 readStringDecodedAsInvestUnitValidatorDatum :: P.String -> P.IO InvestUnitT.ValidatorDatum
 readStringDecodedAsInvestUnitValidatorDatum encoded = do
@@ -389,7 +380,6 @@ readStringDecodedAsInvestUnitValidatorRedeemer encoded = do
     let !result = LedgerApiV2.unsafeFromBuiltinData @InvestUnitT.ValidatorRedeemer (LedgerApiV2.getRedeemer raw)
     P.putStrLn $ "Result: " ++ P.show result
     return result
-
 
 --------------------------------------------------------------------------------
 
@@ -419,38 +409,35 @@ readStringDecodedAsFundHoldingPolicyRedeemer encoded = do
 
 --------------------------------------------------------------------------------
 
--- readStringDecodedAsSellOfferValidatorRedeemer "{\"getRedeemer\":\"d87e9fd8799f0a19021705d8799fd8799f9fd8799f581c70f7fee602900e395d84c1a3cfe1603303fb8c48435777be6455a8bc44343635341836ffffff1b0000018a52a7ad15ff5840529e9eb87717a6fbe10203615a465e50eb99ae2908e6ab0dc94302ec18f4b787b24aefce16b772795dcfde40947037952fe91888919ed06049c2362ed1e19a0dffff\"}"
+-- readStringDecodedAsSwapOfferValidatorRedeemer "{\"getRedeemer\":\"d87e9fd8799f0a19021705d8799fd8799f9fd8799f581c70f7fee602900e395d84c1a3cfe1603303fb8c48435777be6455a8bc44343635341836ffffff1b0000018a52a7ad15ff5840529e9eb87717a6fbe10203615a465e50eb99ae2908e6ab0dc94302ec18f4b787b24aefce16b772795dcfde40947037952fe91888919ed06049c2362ed1e19a0dffff\"}"
 
-
-readStringDecodedAsSellOfferValidatorRedeemer :: P.String -> P.IO SellOfferT.ValidatorRedeemer
-readStringDecodedAsSellOfferValidatorRedeemer encoded = do
+readStringDecodedAsSwapOfferValidatorRedeemer :: P.String -> P.IO SwapOfferT.ValidatorRedeemer
+readStringDecodedAsSwapOfferValidatorRedeemer encoded = do
     !raw <- OffChainHelpers.readStringDecodedAsRedeemer encoded
     P.putStrLn $ "Raw: " ++ P.show raw
-    let !result = LedgerApiV2.unsafeFromBuiltinData @SellOfferT.ValidatorRedeemer (LedgerApiV2.getRedeemer raw)
+    let !result = LedgerApiV2.unsafeFromBuiltinData @SwapOfferT.ValidatorRedeemer (LedgerApiV2.getRedeemer raw)
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
+-- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f000000000000000000001a00223332ffff\"}"
+-- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d87e9fd8799f0a19022105d8799fd8799f80ff1b0000018a52965795ff58406b8d97c54e097f202c3f2a443242c9db22164414a0c149147035475c85d4d3443dd941151f6a02b5375331cc21621f554753e896ddfcd2d8f05f735d62b7d90cffff\"}"
+-- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f581ca28ef1f69611287b85222b8586b248614561eb31b7f40d9f8a4a921b581cb12bdf271f678c97ed08886f906eadef6c84fd0c91b6bde7a8dd8014581ced03815867fcf3d4339e0ea59c761dc15d569af70604c988eb311e53d8799f581c57982a2da187bd107cc6f73e5ee6c3a7a3cb9524d3b216e874dea4fbff1a000186a01a0bf39de11b00000079dc73c33e1913d31a0e523b79011a002b16e8ffff\"}"
 
--- readStringDecodedAsSellOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f000000000000000000001a00223332ffff\"}"
--- readStringDecodedAsSellOfferValidatorDatum "{\"getDatum\":\"d87e9fd8799f0a19022105d8799fd8799f80ff1b0000018a52965795ff58406b8d97c54e097f202c3f2a443242c9db22164414a0c149147035475c85d4d3443dd941151f6a02b5375331cc21621f554753e896ddfcd2d8f05f735d62b7d90cffff\"}"
--- readStringDecodedAsSellOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f581ca28ef1f69611287b85222b8586b248614561eb31b7f40d9f8a4a921b581cb12bdf271f678c97ed08886f906eadef6c84fd0c91b6bde7a8dd8014581ced03815867fcf3d4339e0ea59c761dc15d569af70604c988eb311e53d8799f581c57982a2da187bd107cc6f73e5ee6c3a7a3cb9524d3b216e874dea4fbff1a000186a01a0bf39de11b00000079dc73c33e1913d31a0e523b79011a002b16e8ffff\"}"
-
-
-readStringDecodedAsSellOfferValidatorDatum :: P.String -> P.IO SellOfferT.ValidatorDatum
-readStringDecodedAsSellOfferValidatorDatum encoded = do
+readStringDecodedAsSwapOfferValidatorDatum :: P.String -> P.IO SwapOfferT.ValidatorDatum
+readStringDecodedAsSwapOfferValidatorDatum encoded = do
     !raw <- OffChainHelpers.readStringDecodedAsDatum encoded
     P.putStrLn $ "Raw: " ++ P.show raw
-    let !result = LedgerApiV2.unsafeFromBuiltinData @SellOfferT.ValidatorDatum (LedgerApiV2.getDatum raw)
+    let !result = LedgerApiV2.unsafeFromBuiltinData @SwapOfferT.ValidatorDatum (LedgerApiV2.getDatum raw)
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
--- readStringDecodedAsSellOfferPolicyRedeemer "{\"getRedeemer\":\"d87e9fd8799f0a19021705d8799fd8799f9fd8799f581c70f7fee602900e395d84c1a3cfe1603303fb8c48435777be6455a8bc44343635341836ffffff1b0000018a52a7ad15ff5840529e9eb87717a6fbe10203615a465e50eb99ae2908e6ab0dc94302ec18f4b787b24aefce16b772795dcfde40947037952fe91888919ed06049c2362ed1e19a0dffff\"}"
+-- readStringDecodedAsSwapOfferPolicyRedeemer "{\"getRedeemer\":\"d87e9fd8799f0a19021705d8799fd8799f9fd8799f581c70f7fee602900e395d84c1a3cfe1603303fb8c48435777be6455a8bc44343635341836ffffff1b0000018a52a7ad15ff5840529e9eb87717a6fbe10203615a465e50eb99ae2908e6ab0dc94302ec18f4b787b24aefce16b772795dcfde40947037952fe91888919ed06049c2362ed1e19a0dffff\"}"
 
-readStringDecodedAsSellOfferPolicyRedeemer :: P.String -> P.IO SellOfferT.PolicyRedeemer
-readStringDecodedAsSellOfferPolicyRedeemer encoded = do
+readStringDecodedAsSwapOfferPolicyRedeemer :: P.String -> P.IO SwapOfferT.PolicyRedeemer
+readStringDecodedAsSwapOfferPolicyRedeemer encoded = do
     !raw <- OffChainHelpers.readStringDecodedAsRedeemer encoded
     P.putStrLn $ "Raw: " ++ P.show raw
-    let !result = LedgerApiV2.unsafeFromBuiltinData @SellOfferT.PolicyRedeemer (LedgerApiV2.getRedeemer raw)
+    let !result = LedgerApiV2.unsafeFromBuiltinData @SwapOfferT.PolicyRedeemer (LedgerApiV2.getRedeemer raw)
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
@@ -504,12 +491,12 @@ exampleValue4 = LedgerApiV2.singleton exampleCS4 exampleTN4 1<> exampleValueADA
 exampleValue5 :: LedgerApiV2.Value
 exampleValue5 = LedgerApiV2.singleton exampleCS exampleTN 1<> LedgerApiV2.singleton exampleCS2 exampleTN2 1<>  LedgerApiV2.singleton exampleCS4 exampleTN4 1<>exampleValueADA
 
-datum :: SellOfferT.ValidatorDatum
+datum :: SwapOfferT.ValidatorDatum
 datum = let
      !encoded = "{\"getDatum\":\"d8799fd8799f581cd3453f3693c96c135226c00deafdc464067d12cb3c0287b44116811b581cfc4b4f6440bafdb46c008dcad7338b094254b1c10a7cc2bd4ed2b40b581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabd87a801a0001de841a07a162a71ae27fdfd90000011a006e7e72ffff\"}"
      in case DataAeson.decode (OffChainHelpers.strictTextToLazyByteString encoded) of
         Nothing      -> P.error "Could not decode As Datum "
-        Just decoded -> LedgerApiV2.unsafeFromBuiltinData @SellOfferT.ValidatorDatum (LedgerApiV2.getDatum decoded)
+        Just decoded -> LedgerApiV2.unsafeFromBuiltinData @SwapOfferT.ValidatorDatum (LedgerApiV2.getDatum decoded)
 
 datumInEra ::  CardanoApi.TxOutDatum CardanoApi.CtxTx CardanoApi.BabbageEra
 datumInEra = LedgerTxCardanoAPI.toCardanoTxOutDatumInline (LedgerApiV2.Datum $ PlutusTx.toBuiltinData datum)
@@ -619,5 +606,5 @@ mkValue_From_InvestUnit_And_Amount2 (T.InvestUnit investUnitTokens) deposit =
             scaledAmount = OnChainHelpers.multiply_By_Scaled_1e2_And_RoundUp amount deposit
         in
             accValue <> LedgerApiV2.singleton cs tn scaledAmount
-            
+
  ------------------------------------------------------------

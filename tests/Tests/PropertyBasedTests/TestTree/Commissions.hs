@@ -5,22 +5,22 @@
 
 {- |
 Module      : TestTree.Commissions
-Description : 
+Description :
 -}
 module TestTree.Commissions where
 
 -- Non-IOG imports
 
-import           Prelude                 
-import qualified Test.QuickCheck         as QC
-import qualified Test.Tasty              as Tasty
-import qualified Test.Tasty.QuickCheck   as TastyQC
+import           Prelude
+import qualified Test.QuickCheck        as QC
+import qualified Test.Tasty             as Tasty
+import qualified Test.Tasty.QuickCheck  as TastyQC
 -- IOG imports
-import qualified Plutus.V2.Ledger.Api    as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
 
 -- Project imports
-import qualified Generic.OnChainHelpers  as OnChainHelpers
-import qualified Protocol.Fund.Helpers   as FundHelpers
+import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Fund.Helpers  as FundHelpers
 import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ prop_withdrawCommissionsRespectGranularity =
             isWithdrawValid = withdraw `mod` granularity == 0
             isCommissionsValid = commissionsForUserFTToGetBack `mod` granularity == 0
             isWithdrawPlusCommissionsValid = withdrawPlusCommissionsGetBack `mod` granularity == 0
-            
+
         in QC.counterexample
             (unlines
                 [ "Granularity: " ++ show granularity
@@ -126,7 +126,7 @@ prop_depositCommissionsLessThanDeposit =
                     date
                     deposit
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Deposit: " ++ show deposit
                 , "Commissions: " ++ show commissionsFT
@@ -156,9 +156,9 @@ prop_withdrawPlusCommissionsGreaterThanWithdraw =
                     deadline
                     date
                     withdraw
-                    granularity 
+                    granularity
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Withdraw: " ++ show withdraw
                 , "Withdraw plus commissions: " ++ show withdrawPlusCommissions
@@ -174,10 +174,10 @@ prop_commissionRateDecreasesOverTime =
     QC.forAll (QC.choose (10000, 1000000)) $ \commissionPerYearInBPx1e3 ->
         let
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
-            
+
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
             !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
-            
+
             calculateCommissionRate month =
                 let
                     date = LedgerApiV2.POSIXTime $ msPerMonth * month
@@ -191,7 +191,7 @@ prop_commissionRateDecreasesOverTime =
 
             commissionRates = map calculateCommissionRate [0..monthsTotalReal-1]
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Commission rates: " ++ show commissionRates
                 ])
@@ -226,7 +226,7 @@ prop_depositAndImmediateWithdrawResultsInLoss =
                     userFTAfterDeposit
                     1  -- Using granularity 1 for simplicity
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Initial amount: " ++ show amount
                 , "User FT after deposit: " ++ show userFTAfterDeposit
@@ -264,7 +264,7 @@ prop_higherCommissionRateLowerUserFT =
                     date
                     deposit
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Deposit: " ++ show deposit
                 , "Lower commission rate: " ++ show lowerCommissionRate
@@ -306,7 +306,7 @@ prop_longerDurationHigherTotalCommissions =
                     date
                     deposit
         in
-        QC.counterexample 
+        QC.counterexample
             (unlines
                 [ "Deposit: " ++ show deposit
                 , "Shorter duration: " ++ show shorterDuration
@@ -315,5 +315,5 @@ prop_longerDurationHigherTotalCommissions =
                 , "Commissions (longer): " ++ show commissionsLonger
                 ])
             (commissionsLonger > commissionsShorter)
-                 
+
 --------------------------------------------------------------------------------

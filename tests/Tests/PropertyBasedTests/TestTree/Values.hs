@@ -14,19 +14,19 @@ utility functions that help in the creation and manipulation of Ledger values.
 module TestTree.Values where
 
 -- Non-IOG imports
-import qualified Data.List                   as DataList
-import           Prelude                     hiding (length)
-import qualified Test.Tasty                  as Tasty
-import qualified Test.Tasty.QuickCheck       as TastyQC
+import qualified Data.List                             as DataList
+import           Prelude                               hiding (length)
+import qualified Test.Tasty                            as Tasty
+import qualified Test.Tasty.QuickCheck                 as TastyQC
 
 -- IOG imports
-import qualified Ledger.Value                as LedgerValue
-import qualified Plutus.V2.Ledger.Api        as LedgerApiV2
-import qualified PlutusTx.AssocMap           as TxAssocMap
-import           PlutusTx.Prelude            (length)
+import qualified Ledger.Value                          as LedgerValue
+import qualified Plutus.V2.Ledger.Api                  as LedgerApiV2
+import qualified PlutusTx.AssocMap                     as TxAssocMap
+import           PlutusTx.Prelude                      (length)
 -- Project imports
-import           TestUtils.QuickCheckGen.QuickCheckGen
-import qualified Generic.OnChainHelpers      as OnChainHelpers
+import qualified Generic.OnChainHelpers                as OnChainHelpers
+import           TestUtils.QuickCheckGen.QuickCheckGen ()
 import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------

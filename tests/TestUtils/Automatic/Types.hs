@@ -1,7 +1,6 @@
 {-# LANGUAGE DerivingStrategies    #-}
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 
@@ -30,8 +29,8 @@ import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 -- Project imports
 
 import qualified Generic.Types        as T
+import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Types
 
 -----------------------------------------------------------------
 
@@ -80,9 +79,9 @@ newtype TxSpecsEntityTestConfig
 data InvalidValueOtherToken
     = InvalidValueOtherToken
           { testTokenName :: String
-              -- The name of the token (for dynamic test case display)
+            -- The name of the token (for dynamic test case display)
           , testTokenCS   :: T.CS
-              -- Currency Symbol of the token
+            -- Currency Symbol of the token
           , testTokenTN   :: T.TN
               -- Token Name of the token
           }
@@ -113,7 +112,7 @@ data TxParamGenerator where
 newtype TxParamGenerators
     = TxParamGenerators [TxParamGenerator]
 
-type TxParamGeneratorsList = [(String, TxParamGenerators)]  
+type TxParamGeneratorsList = [(String, TxParamGenerators)]
 
 -- Define a Semigroup instance for TxParamGenerators
 instance Semigroup.Semigroup TxParamGenerators where
@@ -193,9 +192,9 @@ data InvalidTokenAmountOptions = InvalidValueZero | InvalidValueLess | InvalidVa
 data TokenTestOptions
     = TokenTestOptions
           { tcTokenCS             :: T.CS
-              -- Currency Symbol of the token
+            -- Currency Symbol of the token
           , tcTokenTN             :: T.TN
-              -- Token Name of the token
+            -- Token Name of the token
           , tcTokenInvalidOptions :: InvalidTokenOptions
               -- Invalid options for the token
           }

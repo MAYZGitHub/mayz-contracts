@@ -12,15 +12,15 @@ module Protocol.Constants where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.ByteString         as DataByteString
-import qualified Plutus.V2.Ledger.Api    as LedgerApiV2
+import qualified Data.ByteString      as DataByteString
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import           PlutusTx.Prelude
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types           as T
+import qualified Generic.Types        as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -32,17 +32,17 @@ protocol_NotInEmergency = 0
 protocol_InEmergency :: Integer
 protocol_InEmergency = 1
 
-sellOffer_Status_Open  :: Integer
-sellOffer_Status_Open  = 1
+swapOffer_Status_Open  :: Integer
+swapOffer_Status_Open  = 1
 
-sellOffer_Status_Closed  :: Integer
-sellOffer_Status_Closed  = 2
+swapOffer_Status_Closed  :: Integer
+swapOffer_Status_Closed  = 2
 
-sellOffer_AllowSell  :: Integer
-sellOffer_AllowSell  = 1
+swapOffer_AllowSell  :: Integer
+swapOffer_AllowSell  = 1
 
-sellOffer_NotAllowSell  :: Integer
-sellOffer_NotAllowSell  = 0
+swapOffer_NotAllowSell  :: Integer
+swapOffer_NotAllowSell  = 0
 
 buyOrder_Status_Open  :: Integer
 buyOrder_Status_Open  = 1
@@ -73,8 +73,8 @@ fundHoldingID_TN_basename = "FundHoldingID" -- es NFT, la poliza es unica , la d
 investUnitID_TN :: T.TN
 investUnitID_TN = LedgerApiV2.TokenName "IUID" -- es NFT, la poliza es unica por fondo, pero el validador es el mismo para todos los fondos, por ende debo verificar en el validador que no haya dos inputs
 
-sellOfferID_TN :: T.TN
-sellOfferID_TN = LedgerApiV2.TokenName "SellOfferID" -- es FT, la poliza es por protocolo y el validador tambien, por ende debo verificar en el validador que no haya dos inputs
+swapOfferID_TN :: T.TN
+swapOfferID_TN = LedgerApiV2.TokenName "SwapOfferID" -- es FT, la poliza es por protocolo y el validador tambien, por ende debo verificar en el validador que no haya dos inputs
 
 buyOrderID_TN :: T.TN
 buyOrderID_TN = LedgerApiV2.TokenName "BuyOrderID" -- es FT, la poliza es por protocolo y el validador tambien, por ende debo verificar en el validador que no haya dos inputs
@@ -97,7 +97,6 @@ fundFactoryVersion = 3
 
 --------------------------------------------------------------------------------2
 
--- TODO: necesitamos esto?
 maxDepositAndWithdrawInFunds :: Integer
 maxDepositAndWithdrawInFunds = 10_000_000_000_000_000
 

@@ -145,12 +145,12 @@ endPointFundPrepare T.PABFundPrepareParams {..} = PlutusContract.handleError Off
         !valueFor_FundDatum' = valueFor_Mint_FundID
         !minADA_For_FundDatum = OnChainHelpers.calculateMinADAOfValue valueFor_FundDatum' True + 5_000_000  -- min ada para datum grande
         !value_MinADA_For_FundDatum = LedgerAda.lovelaceValueOf minADA_For_FundDatum
-        !valueFor_FundDatum = valueFor_FundDatum' <> value_MinADA_For_FundDatum <> valueOf_RequiredMAYZ 
+        !valueFor_FundDatum = valueFor_FundDatum' <> value_MinADA_For_FundDatum <> valueOf_RequiredMAYZ
     ---------------------
         !valueFor_InvestUnitDatum' = valueFor_Mint_InvestUnitID
         !minADA_For_InvestUnitDatum = OnChainHelpers.calculateMinADAOfValue valueFor_InvestUnitDatum' True + 5_000_000  -- min ada para datum grande
         !value_MinADA_For_InvestUnitDatum = LedgerAda.lovelaceValueOf minADA_For_InvestUnitDatum
-        !valueFor_InvestUnitDatum = valueFor_InvestUnitDatum' <> value_MinADA_For_InvestUnitDatum 
+        !valueFor_InvestUnitDatum = valueFor_InvestUnitDatum' <> value_MinADA_For_InvestUnitDatum
     ---------------------
         !fundFT_TN = pfppFundFT_TN
         !admins = pfppAdmins
@@ -455,7 +455,7 @@ endPointFundHoldingAdd T.PABFundHoldingAddParams {..} = PlutusContract.handleErr
         !valueFor_FundHoldingDatum_Out' = valueFor_Mint_FundHoldingID
         !minADA_For_FundHoldingDatum_Out = OnChainHelpers.calculateMinADAOfValue valueFor_FundHoldingDatum_Out' True + 5_000_000  -- min ada para datum grande
         !value_MinADA_For_FundHoldingDatum_Out = LedgerAda.lovelaceValueOf minADA_For_FundHoldingDatum_Out
-        !valueFor_FundHoldingDatum_Out = valueFor_FundHoldingDatum_Out' <> value_MinADA_For_FundHoldingDatum_Out 
+        !valueFor_FundHoldingDatum_Out = valueFor_FundHoldingDatum_Out' <> value_MinADA_For_FundHoldingDatum_Out
     ---------------------
         !fundDatum_Out =
             FundT.FundDatum $ FundHelpers.mkUpdated_Fund_Datum_With_HoldingAdded fundDatum_In

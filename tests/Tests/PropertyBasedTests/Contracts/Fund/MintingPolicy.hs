@@ -18,20 +18,20 @@ module Contracts.Fund.MintingPolicy where
 --------------------------------------------------------------------------------
 
 -- Non-IOG imports
-import qualified Control.Monad.Reader                      as MReader
+import qualified Control.Monad.Reader                  as MReader
 import           Prelude
-import qualified Test.QuickCheck                           as QC
-import qualified Test.Tasty                                as Tasty
-import qualified Test.Tasty.QuickCheck                     as TastyQC
+import qualified Test.QuickCheck                       as QC
+import qualified Test.Tasty                            as Tasty
+import qualified Test.Tasty.QuickCheck                 as TastyQC
 
 -- IOG imports
-import qualified Ledger.Ada                                as LedgerAda
-import qualified Plutus.V2.Ledger.Api                      as LedgerApiV2
-import           PlutusTx.Prelude                          ()
+import qualified Ledger.Ada                            as LedgerAda
+import qualified Plutus.V2.Ledger.Api                  as LedgerApiV2
+import           PlutusTx.Prelude                      ()
 
 -- Project imports
-import qualified Protocol.Constants                        as T
-import qualified Protocol.Fund.Types                       as FundT
+import qualified Protocol.Constants                    as T
+import qualified Protocol.Fund.Types                   as FundT
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxContext.Fund
 import           TestUtils.HelpersMAYZ

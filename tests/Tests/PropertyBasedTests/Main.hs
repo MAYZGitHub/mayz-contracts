@@ -26,8 +26,8 @@ import           Contracts.Fund.Validator
 import           Contracts.InvestUnit.Validator
 import           Contracts.Protocol.MintingPolicy
 import           Contracts.Protocol.Validator
-import           Contracts.SellOffer.MintingPolicy
-import           Contracts.SellOffer.Validator
+import           Contracts.SwapOffer.MintingPolicy
+import           Contracts.SwapOffer.Validator
 import           TestTree.Commissions
 import           TestTree.ScaleAndRunding
 import           TestTree.Values
@@ -58,8 +58,8 @@ appMain numTests = do
     fundHolding_Validator_Tests_ <- fundHolding_Validator_Tests
     fundHolding_Policy_Tests_ <- fundHolding_Policy_Tests
     investUnit_Validator_Tests_ <- investUnit_Validator_Tests
-    sellOffer_Policy_Tests_ <- sellOffer_Policy_Tests
-    sellOffer_Validator_Tests_ <- sellOffer_Validator_Tests
+    swapOffer_Policy_Tests_ <- swapOffer_Policy_Tests
+    swapOffer_Validator_Tests_ <- swapOffer_Validator_Tests
     -------------
     valueTests_ <- value_Tests
     comission_Tests_ <- comission_Tests
@@ -78,8 +78,8 @@ appMain numTests = do
                     , fundHolding_Policy_Tests_
                     , fundHolding_Validator_Tests_
                     , investUnit_Validator_Tests_
-                    , sellOffer_Policy_Tests_
-                    , sellOffer_Validator_Tests_
+                    , swapOffer_Policy_Tests_
+                    , swapOffer_Validator_Tests_
                     ]
                 , Tasty.testGroup
                     "Helpers Tests"

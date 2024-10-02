@@ -191,21 +191,19 @@ PlutusTx.makeIsDataIndexed
       ('PolicyRedeemerBurnID, 2)
     ]
 
-    
+
 --------------------------------------------------------------------------------2
 
 getPolicyRedeemerName :: Maybe PolicyRedeemer -> Maybe P.String
 getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = Just "MintID"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
-getPolicyRedeemerName _ = Nothing
+getPolicyRedeemerName _                                                      = Nothing
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
 --------------------------------------------------------------------------------2
 
-data ValidatorRedeemerUpdateMinADAType
-    = ValidatorRedeemerUpdateMinADAType 
-    deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
+data ValidatorRedeemerUpdateMinADAType = ValidatorRedeemerUpdateMinADAType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateMinADAType where
     {-# INLINEABLE (==) #-}
@@ -273,10 +271,10 @@ PlutusTx.makeIsDataIndexed
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {})) = Just "Deposit"
-getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {})) = Just "Withdraw"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType)) = Just "Delete"
-getValidatorRedeemerName _ = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {}))        = Just "Deposit"
+getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {}))      = Just "Withdraw"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType))             = Just "Delete"
+getValidatorRedeemerName _                                                                        = Nothing
 
 --------------------------------------------------------------------------------2
 

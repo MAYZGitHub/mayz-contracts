@@ -55,9 +55,9 @@ Our protocol utilizes a suite of advanced smart contracts to ensure secure and e
    - Key functions: deposit, withdraw, re-index
    - Located in `src/Protocol/Fund/`
 
-2. **Sell Offer Contract** (aka Swap Offer): Facilitates the exchange of ADA and Fund Tokens.
+2. **SwapOffer Contract**: Facilitates the exchange of ADA and Fund Tokens.
    - Key functions: create offer, execute swap, cancel offer
-   - Located in `src/Protocol/SellOffer/`
+   - Located in `src/Protocol/SwapOffer/`
 
 3. **Invest Unit Contract**: Handles the representation and valuation of fund compositions.
    - Key functions: create invest unit, update invest unit
@@ -99,7 +99,7 @@ mayz-protocol-contracts/
 ├── src/
 │   ├── Protocol/
 │   │   ├── Fund/
-│   │   ├── SellOffer/
+│   │   ├── SwapOffer/
 │   │   ├── InvestUnit/
 │   │   ├── Protocol/
 │   │   └── Constants.hs

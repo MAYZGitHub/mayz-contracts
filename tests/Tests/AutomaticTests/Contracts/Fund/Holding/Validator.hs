@@ -17,32 +17,32 @@ module Contracts.Fund.Holding.Validator where
 --------------------------------------------------------------------------------
 
 -- Non-IOG imports
-import qualified GHC.Stack as GHC
-import qualified Test.Tasty as Tasty
-import Prelude as P
+import qualified GHC.Stack                                as GHC
+import           Prelude                                  as P
+import qualified Test.Tasty                               as Tasty
 
 -- IOG imports
-import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api                     as LedgerApiV2
 
 -- Project imports
 
-import qualified Generic.Constants as T
-import qualified Protocol.Constants as T
-import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Generic.Constants                        as T
+import qualified Protocol.Constants                       as T
+import qualified Protocol.Fund.Holding.Types              as FundHoldingT
+import qualified Protocol.Protocol.Types                  as ProtocolT
 
-import TestUtils.Automatic.ParamsGenerators
-import TestUtils.Automatic.ParamsGeneratorsMAYZ
-import TestUtils.Automatic.TestCases
-import TestUtils.Automatic.TestConfigTree
-import TestUtils.Automatic.TestRules
-import TestUtils.Automatic.TxGenerators
-import TestUtils.Automatic.Types
-import TestUtils.Constants
-import TestUtils.Contracts.InitialData
-import TestUtils.Contracts.TxSpecs.FundHolding
-import TestUtils.Types
-import TestUtils.TypesMAYZ
+import           TestUtils.Automatic.ParamsGenerators
+import           TestUtils.Automatic.ParamsGeneratorsMAYZ
+import           TestUtils.Automatic.TestCases
+import           TestUtils.Automatic.TestConfigTree
+import           TestUtils.Automatic.TestRules
+import           TestUtils.Automatic.TxGenerators
+import           TestUtils.Automatic.Types
+import           TestUtils.Constants
+import           TestUtils.Contracts.InitialData
+import           TestUtils.Contracts.TxSpecs.FundHolding
+import           TestUtils.Types
+import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 

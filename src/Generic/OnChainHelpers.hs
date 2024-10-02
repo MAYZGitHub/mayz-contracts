@@ -1,11 +1,11 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
 {-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE CPP #-}
 
 --------------------------------------------------------------------------------
 {- HLINT ignore "Use camelCase"          -}
@@ -63,7 +63,7 @@ checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS !paymentPubKey !signedMsg !
         !lb = Ledger.getPubKey pubKey
         !bbs = LedgerApiV2.getLedgerBytes lb
         !sig = Ledger.getSignature signature
-    in 
+    in
         if verifyEd25519Signature bbs signedMsg sig
             then Right ()
             else Left $ SignatureMismatch paymentPubKey signature
@@ -79,7 +79,7 @@ checkSignatureBBS
   -- ^ The signed message
   -> Bool
 checkSignatureBBS !paymentPubKeyBBS !signedMsgBBS !signatureBBS = verifyEd25519Signature paymentPubKeyBBS signedMsgBBS signatureBBS
-          
+
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE countDistinct #-}
@@ -307,7 +307,7 @@ isElement !x (y : ys) = x == y || isElement x ys
 
 {-# INLINEABLE find' #-}
 find' :: (a -> Bool) -> [a] -> Maybe a
-find' _ []       = Nothing
+find' _ []        = Nothing
 find' !f (x : xs) = if f x then Just x else find' f xs
 
 --------------------------------------------------------------------------------2
@@ -317,7 +317,7 @@ findWithIdx' :: (a -> Bool) -> [a] -> Maybe (Integer, a)
 findWithIdx' _ [] = Nothing
 findWithIdx' !f !l =
     let findWithIdx'' :: (a -> Bool) -> [a] -> Integer -> Maybe (Integer, a)
-        findWithIdx'' _ [] _         = Nothing
+        findWithIdx'' _ [] _          = Nothing
         findWithIdx'' !f' (x : xs) !i = if f' x then Just (i, x) else findWithIdx'' f' xs (i + 1)
     in  findWithIdx'' f l 0
 
@@ -339,7 +339,7 @@ drop' !n (x : xs)
 
 {-# INLINEABLE filter' #-}
 filter' :: (a -> Bool) -> [a] -> [a]
-filter' _ []       = []
+filter' _ []        = []
 filter' !f (x : xs) = if f x then x : filter' f xs else filter' f xs
 
 --------------------------------------------------------------------------------2
@@ -684,7 +684,7 @@ isOnlyToken_Burning_With_AC !ac !info =
     let !mintingValue = LedgerApiV2.txInfoMint info
         !amountToken = LedgerValue.assetClassValueOf mintingValue ac
         !valueTokenAC = LedgerValue.assetClassValue ac amountToken
-    in  mintingValue  `isEqValue` valueTokenAC && amountToken < 0 
+    in  mintingValue  `isEqValue` valueTokenAC && amountToken < 0
 
 {-# INLINEABLE isOnlyToken_Burning_With_AC_AndAmt #-}
 isOnlyToken_Burning_With_AC_AndAmt :: LedgerValue.AssetClass -> Integer -> LedgerContextsV2.TxInfo -> Bool
@@ -731,7 +731,6 @@ flattenValueWithoutZeros (LedgerValue.Value !mp) =
     in  f3
 
 ---------------------------------------------------
-
 
 {-# INLINEABLE isEqFlattenValue #-}
 isEqFlattenValue :: [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)] -> Bool
@@ -967,7 +966,7 @@ createValueAddingTokensOfCurrencySymbol !ac !cs !acIsWithoutTokenName !value !ca
 
 {-# INLINEABLE sumValues #-}
 sumValues :: [LedgerApiV2.Value] -> LedgerApiV2.Value
-sumValues  = foldl (<>) (LedgerAda.lovelaceValueOf 0) 
+sumValues  = foldl (<>) (LedgerAda.lovelaceValueOf 0)
 
 --------------------------------------------------------------------------------22
 
@@ -1061,7 +1060,7 @@ getDatum_In_TxOut_And_Datum = snd
 {-# INLINEABLE getUnsafeScriptHash_In_Address #-}
 getUnsafeScriptHash_In_Address :: LedgerApiV2.Address -> LedgerApiV2.ValidatorHash
 getUnsafeScriptHash_In_Address  (LedgerApiV2.Address (LedgerApiV2.ScriptCredential !script_Hash) _) = script_Hash
-getUnsafeScriptHash_In_Address  _                                                                  = traceError "getScriptHash_In_Address"
+getUnsafeScriptHash_In_Address  _                                                                   = traceError "getScriptHash_In_Address"
 
 --------------------------------------------------------------------------------2
 
@@ -1087,7 +1086,7 @@ getRedeemerForConsumeInput !txOutRef !info =
 isBurningAllTokenOwnCSAnyAmount :: LedgerContextsV2.ScriptContext -> Bool
 isBurningAllTokenOwnCSAnyAmount ctx = case getUnsafeOwnMintingTokenNameAndAmt ctx of
     [] -> False
-    !x  -> all (\(_, amt) -> amt < 0) x
+    !x -> all (\(_, amt) -> amt < 0) x
 
 --------------------------------------------------------------------------------2
 
@@ -1095,7 +1094,7 @@ isBurningAllTokenOwnCSAnyAmount ctx = case getUnsafeOwnMintingTokenNameAndAmt ct
 isMintingNFTOwnCSAnyTN :: LedgerContextsV2.ScriptContext -> Bool
 isMintingNFTOwnCSAnyTN ctx = case getUnsafeOwnMintingTokenNameAndAmt ctx of
     [] -> False
-    !x  -> all (\(_, amt) -> amt == 1) x
+    !x -> all (\(_, amt) -> amt == 1) x
 --------------------------------------------------------------------------------2
 
 -- OK helper function for others methods
@@ -1111,30 +1110,30 @@ getUnsafe_TxInInfo_By_TxOutRef ((LedgerApiV2.TxInInfo !tref !ot) : tl) o_ref
 {-# INLINEABLE getUnsafe_Own_Input_TxOut #-}
 getUnsafe_Own_Input_TxOut :: LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut
 getUnsafe_Own_Input_TxOut (LedgerContextsV2.ScriptContext !t_info (LedgerContextsV2.Spending !o_ref)) = LedgerApiV2.txInInfoResolved (getUnsafe_TxInInfo_By_TxOutRef (LedgerApiV2.txInfoInputs t_info) o_ref)
-getUnsafe_Own_Input_TxOut _                                                                         = traceError "getUnsafe_Own_Input_TxOut"
+getUnsafe_Own_Input_TxOut _                                                                           = traceError "getUnsafe_Own_Input_TxOut"
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE getInlineDatum_From_TxOut #-}
 getInlineDatum_From_TxOut :: forall datum. PlutusTx.FromData datum => LedgerApiV2.TxOut -> Maybe datum
-getInlineDatum_From_TxOut !txOut = 
+getInlineDatum_From_TxOut !txOut =
     case LedgerApiV2.txOutDatum txOut of
-        (LedgerApiV2.OutputDatum !datum)  -> LedgerApiV2.fromBuiltinData @datum $ LedgerApiV2.getDatum datum
-        _ -> Nothing
+        (LedgerApiV2.OutputDatum !datum) -> LedgerApiV2.fromBuiltinData @datum $ LedgerApiV2.getDatum datum
+        _                                -> Nothing
 
 {-# INLINEABLE getUnsafe_InlineDatum_From_TxOut #-}
 getUnsafe_InlineDatum_From_TxOut :: forall datum. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> datum
-getUnsafe_InlineDatum_From_TxOut _  !txOut = 
+getUnsafe_InlineDatum_From_TxOut _  !txOut =
     case LedgerTxV2.txOutDatum txOut of
-        (LedgerTxV2.OutputDatum !datum)  -> LedgerApiV2.unsafeFromBuiltinData @datum $ LedgerApiV2.getDatum datum
-        _ -> traceError "getUnsafe_InlineDatum_From_TxOut"
+        (LedgerTxV2.OutputDatum !datum) -> LedgerApiV2.unsafeFromBuiltinData @datum $ LedgerApiV2.getDatum datum
+        _                               -> traceError "getUnsafe_InlineDatum_From_TxOut"
 
 -- | Gets the Datum attached to the TxOut. Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
 {-# INLINEABLE getUnsafe_Datum_From_TxOut #-}
 getUnsafe_Datum_From_TxOut :: forall datum. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> datum
 getUnsafe_Datum_From_TxOut !ctx !txOut =
     let findDatum :: LedgerTxV2.OutputDatum -> Maybe LedgerApiV2.Datum
-        findDatum LedgerTxV2.NoOutputDatum               = Nothing
+        findDatum LedgerTxV2.NoOutputDatum                = Nothing
         findDatum (LedgerTxV2.OutputDatumHash !datumHash) = LedgerContextsV2.findDatum datumHash (LedgerContextsV2.scriptContextTxInfo ctx)
         findDatum (LedgerTxV2.OutputDatum !datum)         = Just datum
     in  case findDatum $ LedgerTxV2.txOutDatum txOut of
@@ -1146,7 +1145,7 @@ getUnsafe_Datum_From_TxOut !ctx !txOut =
 {-# INLINEABLE getTxOuts_And_DatumTypes_From_TxOuts_By_CS #-}
 getTxOuts_And_DatumTypes_From_TxOuts_By_CS :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [LedgerApiV2.TxOut] -> LedgerApiV2.CurrencySymbol -> (datum -> datumType) -> [(LedgerApiV2.TxOut, datumType)]
 getTxOuts_And_DatumTypes_From_TxOuts_By_CS !ctx !txOuts !cs !getDatumTypeFromDatum =
-    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts, 
+    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts,
         isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs]
 
 -- | Gets the Datum type attached to the TxOut and returns a tuple (txOut, datum type).
@@ -1154,13 +1153,13 @@ getTxOuts_And_DatumTypes_From_TxOuts_By_CS !ctx !txOuts !cs !getDatumTypeFromDat
 {-# INLINEABLE getTxOuts_And_DatumTypes_From_TxOuts_By_AC #-}
 getTxOuts_And_DatumTypes_From_TxOuts_By_AC :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [LedgerApiV2.TxOut] -> LedgerValue.AssetClass -> (datum -> datumType) -> [(LedgerApiV2.TxOut, datumType)]
 getTxOuts_And_DatumTypes_From_TxOuts_By_AC !ctx !txOuts !ac !getDatumTypeFromDatum =
-    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts, 
+    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts,
         isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac]
 
 {-# INLINEABLE getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS #-}
 getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut)] -> LedgerApiV2.CurrencySymbol -> (datum -> datumType) -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut, datumType)]
 getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS !ctx !txOutRef_And_TxOuts !cs !getDatumTypeFromDatum =
-    [(txOutRef, txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | (!txOutRef, !txOut) <- txOutRef_And_TxOuts, 
+    [(txOutRef, txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | (!txOutRef, !txOut) <- txOutRef_And_TxOuts,
         isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs]
 
 {-# INLINEABLE getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_AC #-}
@@ -1183,7 +1182,7 @@ getTxOut_And_DatumType_From_TxOut_And_AC_And_Address :: forall datum datumType. 
 getTxOut_And_DatumType_From_TxOut_And_AC_And_Address !ctx !txOut !ac !add' !getDatumTypeFromDatum =
     if (case  add' of
             Just !add -> LedgerApiV2.txOutAddress txOut == add
-            _        -> True)
+            _         -> True)
         && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac
        then Just (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut)
        else Nothing
@@ -1281,8 +1280,8 @@ the behavior of PlutusTx.Ratio.truncate.
 -}
 {-# INLINEABLE multiply_By_Scaled_And_RoundUp #-}
 multiply_By_Scaled_And_RoundUp :: Integer -> Integer -> Integer -> Integer
-multiply_By_Scaled_And_RoundUp amount number1e2 base = 
-    let 
+multiply_By_Scaled_And_RoundUp amount number1e2 base =
+    let
         multiplied = amount * number1e2
         (result, remainder') = abs multiplied `divMod` base
     in
@@ -1292,7 +1291,7 @@ multiply_By_Scaled_And_RoundUp amount number1e2 base =
 
 {-# INLINEABLE multiply_By_Scaled_And_RoundDown #-}
 multiply_By_Scaled_And_RoundDown :: Integer -> Integer -> Integer -> Integer
-multiply_By_Scaled_And_RoundDown amount number1e2 base = 
+multiply_By_Scaled_And_RoundDown amount number1e2 base =
     let
         multiplied = amount * number1e2
         result = abs multiplied `divide` base
@@ -1301,7 +1300,7 @@ multiply_By_Scaled_And_RoundDown amount number1e2 base =
 
 {-# INLINEABLE divide_By_Scaled_And_RoundDownSafe #-}
 divide_By_Scaled_And_RoundDownSafe :: Integer -> Integer -> Integer -> Integer
-divide_By_Scaled_And_RoundDownSafe amount number_scaled base = 
+divide_By_Scaled_And_RoundDownSafe amount number_scaled base =
     let
         rawAmount = amount * base
         absResult = abs rawAmount `divide` abs number_scaled
@@ -1311,48 +1310,48 @@ divide_By_Scaled_And_RoundDownSafe amount number_scaled base =
 
 {-# INLINEABLE multiply_By_Scaled_1e6_And_RoundUp #-}
 multiply_By_Scaled_1e6_And_RoundUp :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e6_And_RoundUp amount number_1x06 = 
+multiply_By_Scaled_1e6_And_RoundUp amount number_1x06 =
     multiply_By_Scaled_And_RoundUp amount number_1x06 1_000_000
 
 {-# INLINEABLE multiply_By_Scaled_1e6_And_RoundDown #-}
 multiply_By_Scaled_1e6_And_RoundDown :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e6_And_RoundDown amount number_1x06 = 
+multiply_By_Scaled_1e6_And_RoundDown amount number_1x06 =
     multiply_By_Scaled_And_RoundDown amount number_1x06 1_000_000
 
 {-# INLINEABLE divide_By_Scaled_1e6_And_RoundDownSafe #-}
 divide_By_Scaled_1e6_And_RoundDownSafe :: Integer -> Integer -> Integer
-divide_By_Scaled_1e6_And_RoundDownSafe amount number_1e6 = 
+divide_By_Scaled_1e6_And_RoundDownSafe amount number_1e6 =
     divide_By_Scaled_And_RoundDownSafe amount number_1e6 1_000_000
 
 {-# INLINEABLE multiply_By_Scaled_BPx1e3_And_RoundUp #-}
 multiply_By_Scaled_BPx1e3_And_RoundUp :: Integer -> Integer -> Integer
-multiply_By_Scaled_BPx1e3_And_RoundUp amount number_BPx1e3 = 
+multiply_By_Scaled_BPx1e3_And_RoundUp amount number_BPx1e3 =
     multiply_By_Scaled_And_RoundUp amount number_BPx1e3 10_000_000
 
 {-# INLINEABLE multiply_By_Scaled_BPx1e3_And_RoundDown #-}
 multiply_By_Scaled_BPx1e3_And_RoundDown :: Integer -> Integer -> Integer
-multiply_By_Scaled_BPx1e3_And_RoundDown amount number_BPx1e3 = 
+multiply_By_Scaled_BPx1e3_And_RoundDown amount number_BPx1e3 =
     multiply_By_Scaled_And_RoundDown amount number_BPx1e3 10_000_000
 
 -- BPx1e3 scale (Basis Points x 1_000 = 10_000 x 1_000)
 {-# INLINEABLE divide_By_Scaled_BPx1e3_And_RoundDownSafe #-}
 divide_By_Scaled_BPx1e3_And_RoundDownSafe :: Integer -> Integer -> Integer
-divide_By_Scaled_BPx1e3_And_RoundDownSafe amount number_BPx1e3 = 
+divide_By_Scaled_BPx1e3_And_RoundDownSafe amount number_BPx1e3 =
     divide_By_Scaled_And_RoundDownSafe amount number_BPx1e3 10_000_000
 
 {-# INLINEABLE multiply_By_Scaled_1e2_And_RoundUp #-}
 multiply_By_Scaled_1e2_And_RoundUp  :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e2_And_RoundUp amount number1e2  = 
+multiply_By_Scaled_1e2_And_RoundUp amount number1e2  =
     multiply_By_Scaled_And_RoundUp amount number1e2 100
 
 {-# INLINEABLE multiply_By_Scaled_1e2_And_RoundDown #-}
 multiply_By_Scaled_1e2_And_RoundDown  :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e2_And_RoundDown amount number1e2  = 
+multiply_By_Scaled_1e2_And_RoundDown amount number1e2  =
     multiply_By_Scaled_And_RoundDown amount number1e2 100
 
 {-# INLINEABLE divide_By_Scaled_1e2_And_RoundDownSafe #-}
 divide_By_Scaled_1e2_And_RoundDownSafe :: Integer -> Integer -> Integer
-divide_By_Scaled_1e2_And_RoundDownSafe amount number_1e2 = 
+divide_By_Scaled_1e2_And_RoundDownSafe amount number_1e2 =
     divide_By_Scaled_And_RoundDownSafe amount number_1e2 100
 
 --------------------------------------------------------------------------------2

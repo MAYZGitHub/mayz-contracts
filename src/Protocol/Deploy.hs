@@ -55,8 +55,8 @@ import qualified Protocol.Protocol.OnChain     as ProtocolOnChain
 import qualified Protocol.Protocol.Types       as ProtocolT
 import qualified Protocol.Script.OnChain       as ScriptOnChain
 import qualified Protocol.Script.Types         as ScriptT
-import qualified Protocol.SellOffer.OnChain    as SellOfferOnChain
-import qualified Protocol.SellOffer.Types      as SellOfferT
+import qualified Protocol.SwapOffer.OnChain    as SwapOfferOnChain
+import qualified Protocol.SwapOffer.Types      as SwapOfferT
 
 --------------------------------------------------------------------------------2
 -- Module
@@ -342,30 +342,30 @@ deploy_Protocol_And_FundFactory protocolPolicyID_TxOutRef tokenMAYZ_AC tokenEmer
     _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorHash (path SystemFilePathPosix.</> protocolName) "ScriptValidator" scriptValidator_Hash
     _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorAddress (path SystemFilePathPosix.</> protocolName) "ScriptValidator" scriptValidator_Address
     ------------------------------
-    MonadIOClass.liftIO $ P.putStrLn "Generating 'SellOffer Validator' Script..."
-    let sellOfferValidatorParams =
-            SellOfferT.ValidatorParams {
-                SellOfferT.vpProtocolPolicyID_CS = protocolPolicyID_CS,
-                SellOfferT.vpTokenEmergencyAdminPolicy_CS = tokenEmergencyAdminPolicy_CS
+    MonadIOClass.liftIO $ P.putStrLn "Generating 'SwapOffer Validator' Script..."
+    let swapOfferValidatorParams =
+            SwapOfferT.ValidatorParams {
+                SwapOfferT.vpProtocolPolicyID_CS = protocolPolicyID_CS,
+                SwapOfferT.vpTokenEmergencyAdminPolicy_CS = tokenEmergencyAdminPolicy_CS
                 }
-        sellOfferValidator = SellOfferOnChain.validator sellOfferValidatorParams
-        sellOfferValidator_Hash = OffChainHelpers.hashValidator sellOfferValidator
-        sellOfferValidator_Address = OffChainHelpers.addressValidator sellOfferValidator_Hash
-    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidator (path SystemFilePathPosix.</> protocolName) "SellOfferValidator" sellOfferValidator
-    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorHash (path SystemFilePathPosix.</> protocolName) "SellOfferValidator" sellOfferValidator_Hash
-    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorAddress (path SystemFilePathPosix.</> protocolName) "SellOfferValidator" sellOfferValidator_Address
+        swapOfferValidator = SwapOfferOnChain.validator swapOfferValidatorParams
+        swapOfferValidator_Hash = OffChainHelpers.hashValidator swapOfferValidator
+        swapOfferValidator_Address = OffChainHelpers.addressValidator swapOfferValidator_Hash
+    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidator (path SystemFilePathPosix.</> protocolName) "SwapOfferValidator" swapOfferValidator
+    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorHash (path SystemFilePathPosix.</> protocolName) "SwapOfferValidator" swapOfferValidator_Hash
+    _ <- MonadIOClass.liftIO $ DeployHelpers.deployValidatorAddress (path SystemFilePathPosix.</> protocolName) "SwapOfferValidator" swapOfferValidator_Address
     ------------------------------
-    MonadIOClass.liftIO $ P.putStrLn "Generating 'SellOffer PolicyID' Script..."
-    let sellOfferPolicyParams =
-            SellOfferT.PolicyParams
+    MonadIOClass.liftIO $ P.putStrLn "Generating 'SwapOffer PolicyID' Script..."
+    let swapOfferPolicyParams =
+            SwapOfferT.PolicyParams
                     {
-                        SellOfferT.ppProtocolPolicyID_CS = protocolPolicyID_CS,
-                        SellOfferT.ppSellOffer_Validator_Hash = sellOfferValidator_Hash,
-                        SellOfferT.ppTokenMAYZ_AC = tokenMAYZ_AC
+                        SwapOfferT.ppProtocolPolicyID_CS = protocolPolicyID_CS,
+                        SwapOfferT.ppSwapOffer_Validator_Hash = swapOfferValidator_Hash,
+                        SwapOfferT.ppTokenMAYZ_AC = tokenMAYZ_AC
                     }
-        sellOfferPolicyID = SellOfferOnChain.policyID sellOfferPolicyParams
-        sellOfferPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy sellOfferPolicyID
-    _ <- MonadIOClass.liftIO $ DeployHelpers.deployMintingPolicy (path SystemFilePathPosix.</> protocolName) "SellOfferPolicyID" sellOfferPolicyID sellOfferPolicyID_CS
+        swapOfferPolicyID = SwapOfferOnChain.policyID swapOfferPolicyParams
+        swapOfferPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy swapOfferPolicyID
+    _ <- MonadIOClass.liftIO $ DeployHelpers.deployMintingPolicy (path SystemFilePathPosix.</> protocolName) "SwapOfferPolicyID" swapOfferPolicyID swapOfferPolicyID_CS
     ------------------------------
     MonadIOClass.liftIO $ P.putStrLn "Generating 'BuyOrder Validator' Script..."
     let buyOrderValidatorParams =
@@ -438,10 +438,10 @@ deploy_Protocol_And_FundFactory protocolPolicyID_TxOutRef tokenMAYZ_AC tokenEmer
     scriptValidator_Address_Testnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "ScriptValidator-Testnet.addr")
     scriptValidator_Address_Mainnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "ScriptValidator-Mainnet.addr")
     ------------------------------
-    sellOfferPolicyID_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SellOfferPolicyID.plutus")
-    sellOfferValidator_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SellOfferValidator.plutus")
-    sellOfferValidator_Address_Testnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SellOfferValidator-Testnet.addr")
-    sellOfferValidator_Address_Mainnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SellOfferValidator-Mainnet.addr")
+    swapOfferPolicyID_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SwapOfferPolicyID.plutus")
+    swapOfferValidator_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SwapOfferValidator.plutus")
+    swapOfferValidator_Address_Testnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SwapOfferValidator-Testnet.addr")
+    swapOfferValidator_Address_Mainnet <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "SwapOfferValidator-Mainnet.addr")
     ------------------------------
     buyOrderPolicyID_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "BuyOrderPolicyID.plutus")
     buyOrderValidator_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> protocolName SystemFilePathPosix.</> "BuyOrderValidator.plutus")
@@ -483,14 +483,14 @@ deploy_Protocol_And_FundFactory protocolPolicyID_TxOutRef tokenMAYZ_AC tokenEmer
                 T.pdpScriptValidator_CborHex        = OffChainHelpers.lazyByteStringToString scriptValidator_CborHex,
                 T.pdpScriptValidator_AddressTestnet = OffChainHelpers.lazyByteStringToString scriptValidator_Address_Testnet,
                 T.pdpScriptValidator_AddressMainnet = OffChainHelpers.lazyByteStringToString scriptValidator_Address_Mainnet,
-                T.pdpSellOfferPolicyID_Params            = sellOfferPolicyParams,
-                T.pdpSellOfferPolicyID_CborHex           = OffChainHelpers.lazyByteStringToString sellOfferPolicyID_CborHex,
-                T.pdpSellOfferPolicyID_CS                = sellOfferPolicyID_CS,
-                T.pdpSellOfferValidator_Params           = sellOfferValidatorParams,
-                T.pdpSellOfferValidator_Hash             = sellOfferValidator_Hash,
-                T.pdpSellOfferValidator_CborHex          = OffChainHelpers.lazyByteStringToString sellOfferValidator_CborHex,
-                T.pdpSellOfferValidator_AddressTestnet   = OffChainHelpers.lazyByteStringToString sellOfferValidator_Address_Testnet,
-                T.pdpSellOfferValidator_AddressMainnet   = OffChainHelpers.lazyByteStringToString sellOfferValidator_Address_Mainnet,
+                T.pdpSwapOfferPolicyID_Params            = swapOfferPolicyParams,
+                T.pdpSwapOfferPolicyID_CborHex           = OffChainHelpers.lazyByteStringToString swapOfferPolicyID_CborHex,
+                T.pdpSwapOfferPolicyID_CS                = swapOfferPolicyID_CS,
+                T.pdpSwapOfferValidator_Params           = swapOfferValidatorParams,
+                T.pdpSwapOfferValidator_Hash             = swapOfferValidator_Hash,
+                T.pdpSwapOfferValidator_CborHex          = OffChainHelpers.lazyByteStringToString swapOfferValidator_CborHex,
+                T.pdpSwapOfferValidator_AddressTestnet   = OffChainHelpers.lazyByteStringToString swapOfferValidator_Address_Testnet,
+                T.pdpSwapOfferValidator_AddressMainnet   = OffChainHelpers.lazyByteStringToString swapOfferValidator_Address_Mainnet,
                 T.pdpBuyOrderPolicyID_Params             = buyOrderPolicyParams,
                 T.pdpBuyOrderPolicyID_CborHex            = OffChainHelpers.lazyByteStringToString buyOrderPolicyID_CborHex,
                 T.pdpBuyOrderPolicyID_CS                 = buyOrderPolicyID_CS,
@@ -945,7 +945,7 @@ deploy_PRE_script filePath name swOverWrite code = do
             let !optimizedCode = Plutonomy.optimizeUPLC code
             -- DeployHelpers.writeCompiledCodeToBinaryFile filePath optimizedCode
             DeployHelpers.writeCompiledCodeToJsonFile filePath optimizedCode
-            
+
 
 deploy_PRE ::  P.FilePath -> P.String -> Bool -> P.IO T.DeployAllPreParams
 deploy_PRE path name swOverWrite = do
@@ -961,8 +961,8 @@ deploy_PRE path name swOverWrite = do
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ProtocolValidator_PRE.plutus") "ProtocolValidator" swOverWrite ProtocolOnChain.validatorCode
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ScriptPolicyID_PRE.plutus") "ScriptPolicyID" swOverWrite ScriptOnChain.policyIDCode
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ScriptValidator_PRE.plutus") "ScriptValidator" swOverWrite ScriptOnChain.validatorCode
-    deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SellOfferPolicyID_PRE.plutus") "SellOfferPolicyID" swOverWrite SellOfferOnChain.policyIDCode
-    deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SellOfferValidator_PRE.plutus") "SellOfferValidator" swOverWrite SellOfferOnChain.validatorCode
+    deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SwapOfferPolicyID_PRE.plutus") "SwapOfferPolicyID" swOverWrite SwapOfferOnChain.policyIDCode
+    deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SwapOfferValidator_PRE.plutus") "SwapOfferValidator" swOverWrite SwapOfferOnChain.validatorCode
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "BuyOrderPolicyID_PRE.plutus") "BuyOrderPolicyID" swOverWrite BuyOrderOnChain.policyIDCode
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "BuyOrderValidator_PRE.plutus") "BuyOrderValidator" swOverWrite BuyOrderOnChain.validatorCode
     deploy_PRE_script (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "DelegationPolicyID_PRE.plutus") "DelegationPolicyID" swOverWrite DelegationOnChain.policyIDCode
@@ -977,8 +977,8 @@ deploy_PRE path name swOverWrite = do
     protocolValidator_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ProtocolValidator_PRE.plutus")
     scriptPolicyID_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ScriptPolicyID_PRE.plutus")
     scriptValidator_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "ScriptValidator_PRE.plutus")
-    sellOfferPolicyID_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SellOfferPolicyID_PRE.plutus")
-    sellOfferValidator_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SellOfferValidator_PRE.plutus")
+    swapOfferPolicyID_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SwapOfferPolicyID_PRE.plutus")
+    swapOfferValidator_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "SwapOfferValidator_PRE.plutus")
     buyOrderPolicyID_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "BuyOrderPolicyID_PRE.plutus")
     buyOrderValidator_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "BuyOrderValidator_PRE.plutus")
     delegationPolicyID_Pre_CborHex <- OffChainHelpers.readFile (path SystemFilePathPosix.</> name SystemFilePathPosix.</> "DelegationPolicyID_PRE.plutus")
@@ -997,8 +997,8 @@ deploy_PRE path name swOverWrite = do
                     T.dapProtocolValidator_Pre_CborHex   = OffChainHelpers.lazyByteStringToString protocolValidator_Pre_CborHex,
                     T.dapScriptPolicyID_Pre_CborHex      = OffChainHelpers.lazyByteStringToString scriptPolicyID_Pre_CborHex,
                     T.dapScriptValidator_Pre_CborHex     = OffChainHelpers.lazyByteStringToString scriptValidator_Pre_CborHex,
-                    T.dapSellOfferPolicyID_Pre_CborHex   = OffChainHelpers.lazyByteStringToString sellOfferPolicyID_Pre_CborHex,
-                    T.dapSellOfferValidator_Pre_CborHex  = OffChainHelpers.lazyByteStringToString sellOfferValidator_Pre_CborHex,
+                    T.dapSwapOfferPolicyID_Pre_CborHex   = OffChainHelpers.lazyByteStringToString swapOfferPolicyID_Pre_CborHex,
+                    T.dapSwapOfferValidator_Pre_CborHex  = OffChainHelpers.lazyByteStringToString swapOfferValidator_Pre_CborHex,
                     T.dapBuyOrderPolicyID_Pre_CborHex    = OffChainHelpers.lazyByteStringToString buyOrderPolicyID_Pre_CborHex,
                     T.dapBuyOrderValidator_Pre_CborHex   = OffChainHelpers.lazyByteStringToString buyOrderValidator_Pre_CborHex,
                     T.dapDelegationPolicyID_Pre_CborHex  = OffChainHelpers.lazyByteStringToString delegationPolicyID_Pre_CborHex,

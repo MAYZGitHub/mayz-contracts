@@ -11,15 +11,15 @@ module Protocol.OnChainHelpers where
 -- External Imports
 --------------------------------------------------------------------------------2
 
-import qualified Plutus.V2.Ledger.Api                as LedgerApiV2
-import           PlutusTx.Prelude                    hiding (unless)
+import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
+import           PlutusTx.Prelude       hiding (unless)
 
 --------------------------------------------------------------------------------2
 -- Internal Imports
 --------------------------------------------------------------------------------2
 
-import qualified Generic.OnChainHelpers              as OnChainHelpers
-import qualified Protocol.Types                      as T
+import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Types         as T
 
 --------------------------------------------------------------------------------2
 -- Module

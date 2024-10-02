@@ -1,5 +1,5 @@
 cabal-version: 2.4
-name:          mayz-protocol-sc
+name:          mayz-protocol-contracts
 version:       1.0.5
 author:        Manuel Padilla
 maintainer:    manuelpad@gmail.com
@@ -30,12 +30,6 @@ flag dump-uplc
   default:     False
   manual:      True
 
----------------------------------
--- flag no-use-serialize-onchain
---   description:
---     Use serialize data on chain code
---   default:     False
---   manual:      True
 ---------------------------------
 common warnings-config
   ghc-options:
@@ -103,7 +97,7 @@ common plutus-tx-config
 
 ---------------------------------
 -- https://plutus.cardano.intersectmbo.org/docs/using-plutus-tx/compiling-plutus-tx#extensions
--- TODO: con esto activado no anda LedgerApiV2.unsafeFromBuiltinData 
+-- TODO: con esto activado de forma general no compila LedgerApiV2.unsafeFromBuiltinData 
 -- default-extensions: Strict
 ---------------------------------
 common common-all-deps-and-languange
@@ -207,8 +201,6 @@ common common-deps-test-suites
 library
   import:
     common-all-deps-and-languange, common-deps-main-library, plutus-tx-config, warnings-config
-
-  -- cpp-options: -DNO_USE_SERIALISE_DATA
   hs-source-dirs:  src
   exposed-modules:
     Generic.CLIHelpers
@@ -216,7 +208,6 @@ library
     Generic.DeployHelpers
     Generic.EmulatorHelpers
     Generic.OffChainEval
-    Generic.OffChainEvalTesting
     Generic.OffChainHelpers
     Generic.OnChainHelpers
     Generic.PABHelpers
@@ -261,10 +252,10 @@ library
     Protocol.Script.OnChain
     Protocol.Script.PABSimulator
     Protocol.Script.Types
-    Protocol.SellOffer.OffChain
-    Protocol.SellOffer.OnChain
-    Protocol.SellOffer.PABSimulator
-    Protocol.SellOffer.Types
+    Protocol.SwapOffer.OffChain
+    Protocol.SwapOffer.OnChain
+    Protocol.SwapOffer.PABSimulator
+    Protocol.SwapOffer.Types
     Protocol.Types
 
 ---------------------------------
@@ -272,7 +263,7 @@ test-suite UnitTests
   import:
     common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
 
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: tests/Tests/UnitTests tests
@@ -284,17 +275,18 @@ test-suite UnitTests
     Contracts.InvestUnit.Validator
     Contracts.Protocol.MintingPolicy
     Contracts.Protocol.Validator
-    Contracts.SellOffer.MintingPolicy
-    Contracts.SellOffer.Validator
+    Contracts.SwapOffer.MintingPolicy
+    Contracts.SwapOffer.Validator
     TestTree.Commissions
     TestTree.ScaleAndRunding
     TestTree.Values
+    TestUtils.Constants
     TestUtils.Contracts.InitialData
     TestUtils.Contracts.TxContext.Fund
     TestUtils.Contracts.TxContext.FundHolding
     TestUtils.Contracts.TxContext.InvestUnit
     TestUtils.Contracts.TxContext.Protocol
-    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Contracts.TxContext.SwapOffer
     TestUtils.Helpers
     TestUtils.HelpersMAYZ
     TestUtils.TestContext.Asserts
@@ -308,7 +300,7 @@ test-suite PropertyBasedTests
   import:
     common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
 
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: tests/Tests/PropertyBasedTests tests
@@ -320,8 +312,8 @@ test-suite PropertyBasedTests
     Contracts.InvestUnit.Validator
     Contracts.Protocol.MintingPolicy
     Contracts.Protocol.Validator
-    Contracts.SellOffer.MintingPolicy
-    Contracts.SellOffer.Validator
+    Contracts.SwapOffer.MintingPolicy
+    Contracts.SwapOffer.Validator
     TestTree.Commissions
     TestTree.ScaleAndRunding
     TestTree.Values
@@ -331,7 +323,7 @@ test-suite PropertyBasedTests
     TestUtils.Contracts.TxContext.FundHolding
     TestUtils.Contracts.TxContext.InvestUnit
     TestUtils.Contracts.TxContext.Protocol
-    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Contracts.TxContext.SwapOffer
     TestUtils.Helpers
     TestUtils.HelpersMAYZ
     TestUtils.QuickCheckGen.QuickCheckGen
@@ -347,7 +339,7 @@ test-suite AutomaticTests
   import:
     common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
 
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: tests/Tests/AutomaticTests tests
@@ -359,8 +351,8 @@ test-suite AutomaticTests
     Contracts.InvestUnit.Validator
     Contracts.Protocol.MintingPolicy
     Contracts.Protocol.Validator
-    Contracts.SellOffer.MintingPolicy
-    Contracts.SellOffer.Validator
+    Contracts.SwapOffer.MintingPolicy
+    Contracts.SwapOffer.Validator
     TestUtils.Automatic.ContextGenerator
     TestUtils.Automatic.Helpers
     TestUtils.Automatic.HelpersMAYZ
@@ -378,7 +370,7 @@ test-suite AutomaticTests
     TestUtils.Contracts.TxSpecs.FundHolding
     TestUtils.Contracts.TxSpecs.InvestUnit
     TestUtils.Contracts.TxSpecs.Protocol
-    TestUtils.Contracts.TxSpecs.SellOffer
+    TestUtils.Contracts.TxSpecs.SwapOffer
     TestUtils.Helpers
     TestUtils.HelpersMAYZ
     TestUtils.QuickCheckGen.QuickCheckGen
@@ -394,11 +386,12 @@ test-suite PerformanceTests
   import:
     common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
 
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: tests/Tests/PerformanceTests tests
   other-modules:
+    Helpers.Helpers
     Helpers.PSM
     Helpers.Validator
     TestTree.PropertyTests
@@ -409,7 +402,7 @@ test-suite PerformanceTests
     TestUtils.Contracts.TxContext.FundHolding
     TestUtils.Contracts.TxContext.InvestUnit
     TestUtils.Contracts.TxContext.Protocol
-    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Contracts.TxContext.SwapOffer
     TestUtils.Helpers
     TestUtils.HelpersMAYZ
     TestUtils.QuickCheckGen.QuickCheckGen
@@ -421,77 +414,23 @@ test-suite PerformanceTests
     TestUtils.TypesMAYZ
 
 ---------------------------------
-test-suite TransactionsTests
-  import:
-    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
 
-  build-depends:  mayz-protocol
-  type:           exitcode-stdio-1.0
-  main-is:        Main.hs
-  hs-source-dirs: tests/Tests/TransactionsTests tests
-  other-modules:
-    Helpers.Data
-    Protocol.Transactions
-    TestUtils.Constants
-    TestUtils.Contracts.InitialData
-    TestUtils.Contracts.TxContext.Fund
-    TestUtils.Contracts.TxContext.FundHolding
-    TestUtils.Contracts.TxContext.InvestUnit
-    TestUtils.Contracts.TxContext.Protocol
-    TestUtils.Contracts.TxContext.SellOffer
-    TestUtils.Helpers
-    TestUtils.HelpersMAYZ
-    TestUtils.QuickCheckGen.QuickCheckGen
-    TestUtils.QuickCheckGen.QuickCheckGenMAYZ
-    TestUtils.TestContext.Asserts
-    TestUtils.TestContext.Evaluate
-    TestUtils.TestContext.Helpers
-    TestUtils.Types
-    TestUtils.TypesMAYZ
-
----------------------------------
 executable cli
   import:
     common-all-deps-and-languange, plutus-tx-config, warnings-config
 
   main-is:        cli.hs
   hs-source-dirs: app
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
 
 ---------------------------------
-executable deployProtocol
+
+executable deploy
   import:
     common-all-deps-and-languange, plutus-tx-config, warnings-config
 
-  main-is:        deployProtocol.hs
+  main-is:        deploy.hs
   hs-source-dirs: app
-  build-depends:  mayz-protocol
-
----------------------------------
-executable deployFundFactory
-  import:
-    common-all-deps-and-languange, plutus-tx-config, warnings-config
-
-  main-is:        deployFundFactory.hs
-  hs-source-dirs: app
-  build-depends:  mayz-protocol
-
----------------------------------
-executable optimizeValidator
-  import:
-    common-all-deps-and-languange, plutus-tx-config, warnings-config
-
-  main-is:        optimizeValidator.hs
-  hs-source-dirs: app
-  build-depends:  mayz-protocol
-
----------------------------------
-executable optimizeMintingPolicy
-  import:
-    common-all-deps-and-languange, plutus-tx-config, warnings-config
-
-  main-is:        optimizeMintingPolicy.hs
-  hs-source-dirs: app
-  build-depends:  mayz-protocol
+  build-depends:  mayz-protocol-contracts
 
 ---------------------------------

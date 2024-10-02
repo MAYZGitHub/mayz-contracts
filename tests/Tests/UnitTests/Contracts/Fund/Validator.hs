@@ -312,7 +312,7 @@ fund_Validator_Redeemer_Finish_Tests tp =
                 let
                     ctx = fund_Finish_TxContext tp (tpTransactionDate tp)
                 in
-                    [   
+                    [
                         Tasty.testCase "Finish Fund correctly must succeed" $ do
                             let ctx' = ctx
                             results <- testContextWrapper tp ctx'

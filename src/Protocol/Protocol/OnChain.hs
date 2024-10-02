@@ -101,10 +101,10 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
         ---------------------
         !fundCategories = T.pdFundCategories protocolDatum_Out
         !fundLifeTime = T.pdFundLifeTime protocolDatum_Out
-        !requiredMAYZForSellOffer = T.pdRequiredMAYZForSellOffer protocolDatum_Out
+        !requiredMAYZForSwapOffer = T.pdRequiredMAYZForSwapOffer protocolDatum_Out
         !requiredMAYZForBuyOrder = T.pdRequiredMAYZForBuyOrder protocolDatum_Out
         !commissionFund_PerYear_InBPx1e3 = T.pdCommissionFund_PerYear_InBPx1e3 protocolDatum_Out
-        !commissionSellOffer_InBPx1e3 = T.pdCommissionSellOffer_InBPx1e3 protocolDatum_Out
+        !commissionSwapOffer_InBPx1e3 = T.pdCommissionSwapOffer_InBPx1e3 protocolDatum_Out
         !commissionBuyOrder_InBPx1e3 = T.pdCommissionBuyOrder_InBPx1e3 protocolDatum_Out
         !share_InBPx1e2_Protocol = T.pdShare_InBPx1e2_Protocol protocolDatum_Out
         !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
@@ -119,10 +119,10 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 (T.pdTokenAdminPolicy_CS protocolDatum_Out)
                 fundCategories
                 fundLifeTime
-                requiredMAYZForSellOffer
+                requiredMAYZForSwapOffer
                 requiredMAYZForBuyOrder
                 commissionFund_PerYear_InBPx1e3
-                commissionSellOffer_InBPx1e3
+                commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
                 share_InBPx1e2_Delegators
@@ -138,16 +138,16 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 && traceIfFalse "not fundCategories fcRequiredMAYZ >= 0" (all (\fc -> T.fcRequiredMAYZ fc >= 0) fundCategories)
                 && traceIfFalse "not fundCategories fcMaxUI >= 0" (all (\fc -> T.fcMaxUI fc >= 0) fundCategories)
                 && traceIfFalse "not fundCategories have unique and sequential category numbers" (isSequentialAndUnique $ map T.fcCategoryNumber fundCategories)
-                && traceIfFalse "not requiredMAYZForSellOffer >= 0" (requiredMAYZForSellOffer >= 0)
+                && traceIfFalse "not requiredMAYZForSwapOffer >= 0" (requiredMAYZForSwapOffer >= 0)
                 && traceIfFalse "not requiredMAYZForBuyOrder >= 0" (requiredMAYZForBuyOrder >= 0)
                 && traceIfFalse "not isValidMinMaxDef fundLifeTime" (T.isValidMinMaxDef fundLifeTime)
                 && traceIfFalse "not Min fundLifeTime >= 0" (T.mmdMin fundLifeTime >= 0)
                 && traceIfFalse "not isValidMinMaxDef commissionFund_PerYear_InBPx1e3" (T.isValidMinMaxDef commissionFund_PerYear_InBPx1e3)
                 && traceIfFalse "not Min commissionFund_PerYear_InBPx1e3 >= 0" (T.mmdMin commissionFund_PerYear_InBPx1e3 >= 0)
                 && traceIfFalse "not Max commissionFund_PerYear_InBPx1e3 <= 100%" (T.mmdMax commissionFund_PerYear_InBPx1e3 <= 10_000_000) -- 10_000 x 1_000 BPx1e3 = 10_000_000 = 100%
-                && traceIfFalse "not isValidMinMaxDef commissionSellOffer_InBPx1e3" (T.isValidMinMaxDef commissionSellOffer_InBPx1e3)
-                && traceIfFalse "not Min commissionSellOffer_InBPx1e3 >= 0" (T.mmdMin commissionSellOffer_InBPx1e3 >= 0)
-                && traceIfFalse "not Max commissionSellOffer_InBPx1e3 <= 100%" (T.mmdMax commissionSellOffer_InBPx1e3 <= 10_000_000)
+                && traceIfFalse "not isValidMinMaxDef commissionSwapOffer_InBPx1e3" (T.isValidMinMaxDef commissionSwapOffer_InBPx1e3)
+                && traceIfFalse "not Min commissionSwapOffer_InBPx1e3 >= 0" (T.mmdMin commissionSwapOffer_InBPx1e3 >= 0)
+                && traceIfFalse "not Max commissionSwapOffer_InBPx1e3 <= 100%" (T.mmdMax commissionSwapOffer_InBPx1e3 <= 10_000_000)
                 && traceIfFalse "not isValidMinMaxDef commissionBuyOrder_InBPx1e3" (T.isValidMinMaxDef commissionBuyOrder_InBPx1e3)
                 && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
                 && traceIfFalse "not Max commissionBuyOrder_InBPx1e3 <= 100%" (T.mmdMax commissionBuyOrder_InBPx1e3 <= 10_000_000)
@@ -267,7 +267,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             ------------------
                             isAdminTokenPresent :: Bool
                             isAdminTokenPresent = case LedgerApiV2.txInfoOutputs info of
-                                [] -> False
+                                []         -> False
                                 -- search admin token in output 0
                                 (output:_) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
                                 where
@@ -291,10 +291,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     ---------------------
                                     !fundCategories = T.pdFundCategories protocolDatum_Out
                                     !fundLifeTime = T.pdFundLifeTime protocolDatum_Out
-                                    !requiredMAYZForSellOffer = T.pdRequiredMAYZForSellOffer protocolDatum_Out
+                                    !requiredMAYZForSwapOffer = T.pdRequiredMAYZForSwapOffer protocolDatum_Out
                                     !requiredMAYZForBuyOrder = T.pdRequiredMAYZForBuyOrder protocolDatum_Out
                                     !commissionFund_PerYear_InBPx1e3 = T.pdCommissionFund_PerYear_InBPx1e3 protocolDatum_Out
-                                    !commissionSellOffer_InBPx1e3 = T.pdCommissionSellOffer_InBPx1e3 protocolDatum_Out
+                                    !commissionSwapOffer_InBPx1e3 = T.pdCommissionSwapOffer_InBPx1e3 protocolDatum_Out
                                     !commissionBuyOrder_InBPx1e3 = T.pdCommissionBuyOrder_InBPx1e3 protocolDatum_Out
                                     !share_InBPx1e2_Protocol = T.pdShare_InBPx1e2_Protocol protocolDatum_Out
                                     !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
@@ -308,10 +308,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             (T.pdTokenAdminPolicy_CS protocolDatum_Out)
                                             fundCategories
                                             fundLifeTime
-                                            requiredMAYZForSellOffer
+                                            requiredMAYZForSwapOffer
                                             requiredMAYZForBuyOrder
                                             commissionFund_PerYear_InBPx1e3
-                                            commissionSellOffer_InBPx1e3
+                                            commissionSwapOffer_InBPx1e3
                                             commissionBuyOrder_InBPx1e3
                                             share_InBPx1e2_Protocol
                                             share_InBPx1e2_Delegators
@@ -325,14 +325,14 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             && traceIfFalse "not length fundCategories > 0" (not (null fundCategories))
                                             && traceIfFalse "not fundCategories fcCategoryNumber >= 0" (all (\fc -> T.fcCategoryNumber fc >= 0) fundCategories)
                                             && traceIfFalse "not fundCategories fcRequiredMAYZ >= 0" (all (\fc -> T.fcRequiredMAYZ fc >= 0) fundCategories)
-                                            && traceIfFalse "not requiredMAYZForSellOffer >= 0" (requiredMAYZForSellOffer >= 0)
+                                            && traceIfFalse "not requiredMAYZForSwapOffer >= 0" (requiredMAYZForSwapOffer >= 0)
                                             && traceIfFalse "not requiredMAYZForBuyOrder >= 0" (requiredMAYZForBuyOrder >= 0)
                                             && traceIfFalse "not isValidMinMaxDef fundLifeTime" (T.isValidMinMaxDef fundLifeTime)
                                             && traceIfFalse "not Min fundLifeTime >= 0" (T.mmdMin fundLifeTime >= 0)
                                             && traceIfFalse "not isValidMinMaxDef commissionFund_PerYear_InBPx1e3" (T.isValidMinMaxDef commissionFund_PerYear_InBPx1e3)
                                             && traceIfFalse "not Min commissionFund_PerYear_InBPx1e3 >= 0" (T.mmdMin commissionFund_PerYear_InBPx1e3 >= 0)
-                                            && traceIfFalse "not isValidMinMaxDef commissionSellOffer_InBPx1e3" (T.isValidMinMaxDef commissionSellOffer_InBPx1e3)
-                                            && traceIfFalse "not Min commissionSellOffer_InBPx1e3 >= 0" (T.mmdMin commissionSellOffer_InBPx1e3 >= 0)
+                                            && traceIfFalse "not isValidMinMaxDef commissionSwapOffer_InBPx1e3" (T.isValidMinMaxDef commissionSwapOffer_InBPx1e3)
+                                            && traceIfFalse "not Min commissionSwapOffer_InBPx1e3 >= 0" (T.mmdMin commissionSwapOffer_InBPx1e3 >= 0)
                                             && traceIfFalse "not isValidMinMaxDef commissionBuyOrder_InBPx1e3" (T.isValidMinMaxDef commissionBuyOrder_InBPx1e3)
                                             && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
                                             && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers == 1_000_000) -- 1_000_000 BPx1e2 = 100%
@@ -350,7 +350,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 -- Que el ProtocolDatum se actualiza correctamente
                                 -- Que el ProtocolDatum value cambie con el min ADA nuevo
                                 ------------------
-                                    traceIfFalse "not min ADA > 0" (newMinADA > 0) 
+                                    traceIfFalse "not min ADA > 0" (newMinADA > 0)
                                     && traceIfFalse "not isCorrect_Output_Protocol_Datum_With_MinADAChanged" isCorrect_Output_Protocol_Datum_With_MinADAChanged
                                     && traceIfFalse "not isCorrect_Output_Protocol_Value_With_MinADAChanged" isCorrect_Output_Protocol_Value_With_MinADAChanged
                                 where

@@ -34,11 +34,11 @@ import           TestUtils.Automatic.TestConfigTree
 import           TestUtils.Automatic.TestRules
 import           TestUtils.Automatic.TxGenerators
 import           TestUtils.Automatic.Types
+import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxSpecs.Fund
+import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import TestUtils.Types
-import           TestUtils.Constants
 
 --------------------------------------------------------------------------------
 

@@ -18,6 +18,7 @@ module Generic.CLIHelpers where
 --------------------------------------------------------------------------------2
 
 import qualified Data.Fixed                as DataFixed (Fixed (MkFixed), Pico)
+import qualified Data.Functor              as DataFunctor
 import qualified Data.List                 as DataList
 import qualified Data.Maybe                as DataMaybe
 import qualified Data.String               as DataString (IsString (fromString))
@@ -37,7 +38,6 @@ import qualified System.Directory          as SystemDirectory
 import qualified System.FilePath.Posix     as SystemFilePathPosix
 import qualified Text.Hex                  as TextHex
 import qualified Text.Read                 as TextRead (readMaybe)
-import qualified Data.Functor              as DataFunctor
 
 --------------------------------------------------------------------------------2
 -- Import Internos

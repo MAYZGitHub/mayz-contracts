@@ -32,8 +32,6 @@ import           TestUtils.HelpersMAYZ
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified Debug.Trace as DebugTrace
-import qualified GHC.IO as GHCIO
 
 --------------------------------------------------------------------------------
 -- FundHolding Contract

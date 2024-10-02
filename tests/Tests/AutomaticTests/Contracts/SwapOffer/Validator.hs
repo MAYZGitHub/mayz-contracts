@@ -4,15 +4,15 @@
 --------------------------------------------------------------------------------4
 
 {- |
-Module      : SellOffer.Validator
-Description : Validation logic and tests related to the SellOffer validator.
+Module      : SwapOffer.Validator
+Description : Validation logic and tests related to the SwapOffer validator.
 
-This module defines the validation logic for the SellOffer's validator
+This module defines the validation logic for the SwapOffer's validator
 
 It includes multiple test cases to ensure the integrity and correctness of the
 validator script.
 -}
-module Contracts.SellOffer.Validator where
+module Contracts.SwapOffer.Validator where
 
 --------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ import           PlutusTx.Prelude
 -- Project imports
 
 import qualified Protocol.Constants                    as T
-import qualified Protocol.SellOffer.Types              as SellOfferT
+import qualified Protocol.SwapOffer.Types              as SwapOfferT
 import           TestUtils.Automatic.ParamsGenerators
 import           TestUtils.Automatic.TestCases
 import           TestUtils.Automatic.TestConfigTree
@@ -37,37 +37,37 @@ import           TestUtils.Automatic.TxGenerators
 import           TestUtils.Automatic.Types
 import           TestUtils.Constants
 import           TestUtils.Contracts.InitialData
-import           TestUtils.Contracts.TxSpecs.SellOffer
+import           TestUtils.Contracts.TxSpecs.SwapOffer
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------3
 
-sellOffer_Validator_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Tests tp ruleTree =
+swapOffer_Validator_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Tests tp ruleTree =
     Tasty.testGroup
-        "SellOffer Validator Tests"
-        [ sellOffer_Validator_Redeemer_UpdateStatus_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_Deposit_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_Withdraw_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_Delete_Tests tp ruleTree
-        , sellOffer_Validator_Redeemer_Emergency_Tests tp ruleTree
+        "SwapOffer Validator Tests"
+        [ swapOffer_Validator_Redeemer_UpdateStatus_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_Deposit_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_Withdraw_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_Delete_Tests tp ruleTree
+        , swapOffer_Validator_Redeemer_Emergency_Tests tp ruleTree
         ]
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateStatus_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateStatus_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_UpdateStatus_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateStatus_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_UpdateStatus_Tx
-        txSpecs = sellOffer_UpdateStatus_TxSpecs tp
+        txName = show SwapOffer_UpdateStatus_Tx
+        txSpecs = swapOffer_UpdateStatus_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateStatus_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateStatus_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -77,13 +77,13 @@ sellOffer_Validator_Redeemer_UpdateStatus_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_UpdateAskedCommissionRate_Tx
-        txSpecs = sellOffer_UpdateAskedCommissionRate_TxSpecs tp
+        txName = show SwapOffer_UpdateAskedCommissionRate_Tx
+        txSpecs = swapOffer_UpdateAskedCommissionRate_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateAskedCommissionRate_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateAskedCommissionRate_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -93,13 +93,13 @@ sellOffer_Validator_Redeemer_UpdateAskedCommissionRate_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_UpdateSellRestrictions_Tx
-        txSpecs = sellOffer_UpdateSellRestrictions_TxSpecs tp
+        txName = show SwapOffer_UpdateSellRestrictions_Tx
+        txSpecs = swapOffer_UpdateSellRestrictions_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateSellRestrictions_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateSellRestrictions_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -108,11 +108,11 @@ sellOffer_Validator_Redeemer_UpdateSellRestrictions_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_UpdateMinADA_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_UpdateMinADA_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_UpdateMinADA_Tx
-        txSpecs = sellOffer_UpdateMinADA_TxSpecs tp
+        txName = show SwapOffer_UpdateMinADA_Tx
+        txSpecs = swapOffer_UpdateMinADA_TxSpecs tp
         ------------
         txParams_Default =
                 [
@@ -137,7 +137,7 @@ sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
         ------------------------
         defaultTxSpecs = txSpecs txParams_Default
         defaultTestCaseParams = generateTestCaseParams defaultTxSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_UpdateMinADA_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_UpdateMinADA_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
@@ -147,13 +147,13 @@ sellOffer_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Deposit_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Deposit_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_Deposit_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Deposit_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_Deposit_Tx
-        txSpecs = sellOffer_Deposit_TxSpecs tp 100 100
+        txName = show SwapOffer_Deposit_Tx
+        txSpecs = swapOffer_Deposit_TxSpecs tp 100 100
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Deposit_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Deposit_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -163,13 +163,13 @@ sellOffer_Validator_Redeemer_Deposit_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Withdraw_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Withdraw_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_Withdraw_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Withdraw_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_Withdraw_Tx
-        txSpecs = sellOffer_Withdraw_TxSpecs tp 100 100
+        txName = show SwapOffer_Withdraw_Tx
+        txSpecs = swapOffer_Withdraw_TxSpecs tp 100 100
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Withdraw_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Withdraw_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -179,11 +179,11 @@ sellOffer_Validator_Redeemer_Withdraw_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_SwapFTxADA_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_SwapFTxADA_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_SwapFTxADA_Tx
-        txSpecs = sellOffer_SwapFTxADA_TxSpecs tp
+        txName = show SwapOffer_SwapFTxADA_Tx
+        txSpecs = swapOffer_SwapFTxADA_TxSpecs tp
         ------------
         txParams_Default =
                 [
@@ -223,7 +223,7 @@ sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree =
         ------------------------
         defaultTxSpecs = txSpecs txParams_Default
         defaultTestCaseParams = generateTestCaseParams defaultTxSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_SwapFTxADA_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_SwapFTxADA_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
@@ -233,11 +233,11 @@ sellOffer_Validator_Redeemer_SwapFTxADA_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_SwapADAxFT_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_SwapADAxFT_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_SwapADAxFT_Tx
-        txSpecs = sellOffer_SwapADAxFT_TxSpecs tp
+        txName = show SwapOffer_SwapADAxFT_Tx
+        txSpecs = swapOffer_SwapADAxFT_TxSpecs tp
         ------------
         txParams_Default =
                 [
@@ -270,7 +270,7 @@ sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree =
         ------------------------
         defaultTxSpecs = txSpecs txParams_Default
         defaultTestCaseParams = generateTestCaseParams defaultTxSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_SwapADAxFT_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_SwapADAxFT_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
@@ -280,13 +280,13 @@ sellOffer_Validator_Redeemer_SwapADAxFT_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Delete_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Delete_Tests tp ruleTree =
+swapOffer_Validator_Redeemer_Delete_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Delete_Tests tp ruleTree =
     let ------------------------
-        txName = show SellOffer_Delete_Tx
-        txSpecs = sellOffer_Delete_TxSpecs tp
+        txName = show SwapOffer_Delete_Tx
+        txSpecs = swapOffer_Delete_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Delete_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Delete_TestRedeemer)
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
@@ -296,11 +296,11 @@ sellOffer_Validator_Redeemer_Delete_Tests tp ruleTree =
 
 --------------------------------------------------------------------------------
 
-sellOffer_Validator_Redeemer_Emergency_Tests :: TestParams -> RuleTree -> Tasty.TestTree
-sellOffer_Validator_Redeemer_Emergency_Tests tp _ =
+swapOffer_Validator_Redeemer_Emergency_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+swapOffer_Validator_Redeemer_Emergency_Tests tp _ =
     let ------------------------
-        txName = show SellOffer_Emergency_Tx
-        txSpecs = sellOffer_UpdateMinADA_TxSpecs tp
+        txName = show SwapOffer_Emergency_Tx
+        txSpecs = swapOffer_UpdateMinADA_TxSpecs tp
         ------------
         txParams_Default =
                 [
@@ -309,9 +309,9 @@ sellOffer_Validator_Redeemer_Emergency_Tests tp _ =
                 ]
         ------------
         defaultTxSpecs = txSpecs txParams_Default
-        selectedRedeemer = RedeemerLogValidator (Just SellOffer_Emergency_TestRedeemer)
+        selectedRedeemer = RedeemerLogValidator (Just SwapOffer_Emergency_TestRedeemer)
         ------------------------
      in
-        adminTokens_Tests_Gen tp txName selectedRedeemer (P.const defaultTxSpecs) SellOfferT.mkEmergencyRedeemer (tpTokenAdminPolicy_CS tp) (tpTokenEmergencyAdminPolicy_CS tp) T.protocolTokenAdmin_TN T.protocolTokenEmergencyAdmin_TN False True
+        adminTokens_Tests_Gen tp txName selectedRedeemer (P.const defaultTxSpecs) SwapOfferT.mkEmergencyRedeemer (tpTokenAdminPolicy_CS tp) (tpTokenEmergencyAdminPolicy_CS tp) T.protocolTokenAdmin_TN T.protocolTokenEmergencyAdmin_TN False True
 
 --------------------------------------------------------------------------------

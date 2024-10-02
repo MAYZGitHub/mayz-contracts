@@ -64,7 +64,7 @@ calculateFTForUserWithdraw commissions amount months =
 --------------------------------------------------------------------------------
 
 comission_Tests :: TestParams -> Tasty.TestTree
-comission_Tests tp = do
+comission_Tests _tp = do
     Tasty.testGroup
         "Tests"
         [ Tasty.testCase

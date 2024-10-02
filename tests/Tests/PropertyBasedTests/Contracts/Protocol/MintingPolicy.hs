@@ -13,7 +13,7 @@ It includes multiple property-based test cases to ensure the integrity and
 correctness of the minting policy.
 -}
 module Contracts.Protocol.MintingPolicy where
-    
+
 --------------------------------------------------------------------------------4
 
 -- Non-IOG imports
@@ -28,11 +28,11 @@ import qualified Plutus.V2.Ledger.Api                   as LedgerApiV2
 import           PlutusTx.Prelude                       ()
 
 -- Project imports
-import           TestUtils.QuickCheckGen.QuickCheckGen
 import qualified Protocol.Constants                     as T
 import qualified Protocol.Protocol.Types                as ProtocolT
 import           TestUtils.Contracts.TxContext.Protocol
 import           TestUtils.HelpersMAYZ
+import           TestUtils.QuickCheckGen.QuickCheckGen ()
 import           TestUtils.TestContext.Asserts
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
@@ -101,5 +101,5 @@ prop_spentUTxO tp selectedRedeemer ctx randomTxOut randomTxOutRef = QC.once $ do
     results <- testContextWrapper tp ctx'
     (Just selectedRedeemer, results)
             `assertResultsContainAnyOf` ["not isTxOutAnInput"]
-            
+
 --------------------------------------------------------------------------------

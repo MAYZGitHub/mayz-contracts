@@ -3,15 +3,6 @@ name: "mayz-contracts"
 services:
   plutus:
     image: manupadilla/${COMPOSE_PROJECT_NAME}_dev_image:latest
-     # container_name: ${COMPOSE_PROJECT_NAME}_dev_container
-    # build:
-    #   context: ubuntu_haskell
-    #   dockerfile: ../ubuntu_haskell/Dockerfile
-    #   args:
-    #     USER: plutus
-    #     WORK: /home/plutus/workspace
-    #     TOOLS: /home/plutus/tools
-    #     SCRIPTS: /home/plutus/tools/cardano-tools-scripts/scripts
     volumes:
       - ..:/home/plutus/workspace
     env_file:

@@ -106,7 +106,7 @@ PlutusTx.makeIsDataIndexed
 data Oracle_Data
     = Oracle_Data
           { odFTPriceADA1xe6 :: InvestUnit
-          , odTime       :: LedgerApiV2.POSIXTime
+          , odTime           :: LedgerApiV2.POSIXTime
           }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 

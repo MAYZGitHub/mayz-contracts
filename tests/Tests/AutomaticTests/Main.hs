@@ -12,26 +12,26 @@ module Main where
 --------------------------------------------------------------------------------3
 
 -- Non-IOG imports
-import Data.Proxy as DataProxy (Proxy (..))
-import qualified Test.Tasty as Tasty
-import qualified Test.Tasty.Options as TastyOptions
-import qualified Test.Tasty.QuickCheck as TastyQC
-import Prelude
+import           Data.Proxy                           as DataProxy (Proxy (..))
+import           Prelude
+import qualified Test.Tasty                           as Tasty
+import qualified Test.Tasty.Options                   as TastyOptions
+import qualified Test.Tasty.QuickCheck                as TastyQC
 
 -- Project imports
-import Contracts.Fund.Holding.MintingPolicy
-import Contracts.Fund.Holding.Validator
-import Contracts.Fund.MintingPolicy
-import Contracts.Fund.Validator
-import Contracts.InvestUnit.Validator
-import Contracts.Protocol.MintingPolicy
-import Contracts.Protocol.Validator
-import Contracts.SellOffer.MintingPolicy
-import Contracts.SellOffer.Validator
-import TestUtils.Automatic.TestRules
-import TestUtils.Constants
-import TestUtils.Helpers
-import TestUtils.HelpersMAYZ
+import           Contracts.Fund.Holding.MintingPolicy
+import           Contracts.Fund.Holding.Validator
+import           Contracts.Fund.MintingPolicy
+import           Contracts.Fund.Validator
+import           Contracts.InvestUnit.Validator
+import           Contracts.Protocol.MintingPolicy
+import           Contracts.Protocol.Validator
+import           Contracts.SwapOffer.MintingPolicy
+import           Contracts.SwapOffer.Validator
+import           TestUtils.Automatic.TestRules
+import           TestUtils.Constants
+import           TestUtils.Helpers
+import           TestUtils.HelpersMAYZ
 
 --------------------------------------------------------------------------------3
 
@@ -66,9 +66,9 @@ main = do
                         "InvestUnit Tests"
                         [investUnit_Validator_Tests tp ruleTree]
                     , Tasty.testGroup
-                        "SellOffer Tests"
-                        [ sellOffer_Policy_Tests tp ruleTree
-                        , sellOffer_Validator_Tests tp ruleTree
+                        "SwapOffer Tests"
+                        [ swapOffer_Policy_Tests tp ruleTree
+                        , swapOffer_Validator_Tests tp ruleTree
                         ]
                     ]
                 ]
