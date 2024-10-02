@@ -1,0 +1,38 @@
+{
+  "name": "mayz-contracts",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "plutus",
+  "userEnvProbe": "loginShell",
+  "workspaceFolder": "/home/plutus/workspace",
+  "shutdownAction": "stopCompose",
+  "postStartCommand": "/home/plutus/workspace/.devcontainer/scripts/on-start-container.sh",
+  "containerEnv": {
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "haskell.haskell",
+        "justusadam.language-haskell",
+        "hoovercj.haskell-linter",
+        "vigoo.stylish-haskell",
+        "arrterian.nix-env-selector",
+        "visortelle.haskell-spotlight",
+        "GitHub.copilot",
+        "GitHub.copilot-labs",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "haskell.formattingProvider": "stylish-haskell",
+        "haskell.trace.server": "messages",
+        "haskell.trace.client": "debug",
+        "haskell.manageHLS": "PATH",
+        "haskell.ghcupExecutablePath": "",
+        "nixEnvSelector.suggestion": true,
+        "haskell.hlint.logLevel": "log",
+        "haskell.hlint.executablePath": "hlint"
+      }
+    }
+  }
+}
+
+

@@ -1,0 +1,29 @@
+cradle:
+  cabal:
+
+    - path: "./src"
+      component: "lib:mayz-protocol"
+
+    - path: "./app"
+      component: "mayz-protocol:exe:cli"
+
+    - path: "./tests/Tests/UnitTests"
+      component: "mayz-protocol:test:UnitTests"
+
+    - path: "./tests"
+      component: "mayz-protocol:test:UnitTests"
+
+    - path: "./tests/Tests/PropertyBasedTests"
+      component: "mayz-protocol:test:PropertyBasedTests"
+
+    - path: "./tests/Tests/AutomaticTests"
+      component: "mayz-protocol:test:AutomaticTests"
+
+    - path: "./tests"
+      component: "mayz-protocol:test:UnitTests"
+
+    - path: "./tests/Tests/PerformanceTests"
+      component: "mayz-protocol:test:PerformanceTests"
+
+    - path: "./tests/Tests/TransactionsTests"
+      component: "mayz-protocol:test:TransactionsTests"

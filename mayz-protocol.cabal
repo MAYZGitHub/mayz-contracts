@@ -1,0 +1,497 @@
+cabal-version: 2.4
+name:          mayz-protocol-sc
+version:       1.0.5
+author:        Manuel Padilla
+maintainer:    manuelpad@gmail.com
+build-type:    Simple
+copyright:     © 2022 Manuel Padilla
+license:       Apache-2.0
+license-files: LICENSE
+
+---------------------------------
+flag verbose
+  description: Enable verbose output
+  default:     False
+  manual:      True
+
+---------------------------------
+flag defer-plugin-errors
+  description:
+    Defer errors from the plugin, useful for things like Haddock that can't handle it.
+
+  --TODO: set to False in production
+  default:     True
+  manual:      True
+
+---------------------------------
+-- Define a flag for controlling UPLC dumping
+flag dump-uplc
+  description: Enable dumping of UPLC files
+  default:     False
+  manual:      True
+
+---------------------------------
+-- flag no-use-serialize-onchain
+--   description:
+--     Use serialize data on chain code
+--   default:     False
+--   manual:      True
+---------------------------------
+common warnings-config
+  ghc-options:
+    -Wall -Wnoncanonical-monad-instances -Wincomplete-uni-patterns
+    -Wincomplete-record-updates -Wredundant-constraints -Widentities
+    -Wunused-matches -Wunused-binds -Wno-unused-packages
+    -Wunused-imports -fno-warn-orphans -Wunrecognised-pragmas
+
+---------------------------------
+common plutus-tx-config
+  ghc-options:
+    -fobject-code -fno-ignore-interface-pragmas
+    -fno-omit-interface-pragmas -fno-spec-constr -fno-specialise
+    -fno-strictness -fno-unbox-strict-fields
+    -fno-unbox-small-strict-fields -fno-full-laziness
+    -fno-expose-all-unfoldings
+
+  -- -fexpose-all-unfoldings
+  ---------------------------------
+  -- DEFAULT GHC RECOMENDATION:
+  -- https://plutus.cardano.intersectmbo.org/docs/using-plutus-tx/compiling-plutus-tx
+  ---------------------------------
+  ---------------------------------
+  -- DEFAULT Plutus Tx compiler options
+  -- https://plutus.cardano.intersectmbo.org/docs/delve-deeper/plutus-tx-compiler-options
+  ---------------------------------
+  -- -fplugin-opt PlutusTx.Plugin:conservative-optimisation=False
+  -- -fplugin-opt PlutusTx.Plugin:context-level=1
+  -- -fplugin-opt PlutusTx.Plugin:coverage-all=False
+  -- -fplugin-opt PlutusTx.Plugin:coverage-boolean=False
+  -- -fplugin-opt PlutusTx.Plugin:coverage-location=False
+  -- -fplugin-opt PlutusTx.Plugin:defer-errors=False
+  -- -fplugin-opt PlutusTx.Plugin:dump-compilation-trace
+  -- -fplugin-opt PlutusTx.Plugin:dump-pir=False
+  -- -fplugin-opt PlutusTx.Plugin:dump-tplc=False
+  -- -fplugin-opt PlutusTx.Plugin:dump-uplc
+  -- -fplugin-opt PlutusTx.Plugin:inline-constants
+  -- -fplugin-opt PlutusTx.Plugin:max-cse-iterations=4
+  -- -fplugin-opt PlutusTx.Plugin:max-simplifier-iterations-pir=12
+  -- -fplugin-opt PlutusTx.Plugin:max-simplifier-iterations-uplc=12
+  -- -fplugin-opt PlutusTx.Plugin:optimize
+  -- -fplugin-opt PlutusTx.Plugin:pedantic=False
+  -- -fplugin-opt PlutusTx.Plugin:preserve-logging=False
+  -- -fplugin-opt PlutusTx.Plugin:profile-all=None
+  -- -fplugin-opt PlutusTx.Plugin:relaxed-float-in
+  -- -fplugin-opt PlutusTx.Plugin:remove-trace=False
+  -- -fplugin-opt PlutusTx.Plugin:simplifier-beta
+  -- -fplugin-opt PlutusTx.Plugin:simplifier-inline
+  -- -fplugin-opt PlutusTx.Plugin:simplifier-remove-dead-bindings
+  -- -fplugin-opt PlutusTx.Plugin:simplifier-unwrap-cancel
+  -- -fplugin-opt PlutusTx.Plugin:strictify-bindings
+  -- -fplugin-opt PlutusTx.Plugin:target-version=1.0.0
+  -- -fplugin-opt PlutusTx.Plugin:typecheck
+  -- -fplugin-opt PlutusTx.Plugin:verbosity=2
+  ---------------------------------
+  ghc-options:
+
+  ---------------------------------
+  if flag(defer-plugin-errors)
+    ghc-options: -fplugin-opt PlutusTx.Plugin:defer-errors
+
+  ---------------------------------
+  if flag(dump-uplc)
+    ghc-options: -fplugin-opt PlutusTx.Plugin:dump-uplc
+
+---------------------------------
+-- https://plutus.cardano.intersectmbo.org/docs/using-plutus-tx/compiling-plutus-tx#extensions
+-- TODO: con esto activado no anda LedgerApiV2.unsafeFromBuiltinData 
+-- default-extensions: Strict
+---------------------------------
+common common-all-deps-and-languange
+  default-language:   Haskell2010
+  build-depends:
+    , aeson
+    , base
+    , base16-bytestring
+    , base64-bytestring
+    , bech32
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , flat
+    , freer-extras
+    , freer-simple
+    , hex-text
+    , lens
+    , MissingH
+    , old-locale
+    , openapi3
+    , prettyprinter
+    , random
+    , regex
+    , serialise
+    , split
+    , stm
+    , text
+    , time
+    , utf8-string
+
+  default-extensions:
+    NoImplicitPrelude
+    BangPatterns
+    NumericUnderscores
+    OverloadedStrings
+
+---------------------------------
+common common-deps-main-library
+  build-depends:
+    , cardano-addresses
+    , cardano-api
+    , cardano-binary
+    , cardano-crypto-class
+    , cardano-ledger-alonzo
+    , cardano-ledger-babbage
+    , cardano-ledger-core
+    , cardano-ledger-shelley
+    , cardano-node-emulator
+    , cardano-wallet-core
+    , data-default
+    , playground-common
+    , plutonomy
+    , plutus-chain-index-core
+    , plutus-contract
+    , plutus-core
+    , plutus-ledger
+    , plutus-ledger-api
+    , plutus-ledger-constraints
+    , plutus-pab
+    , plutus-script-utils
+    , plutus-simple-model
+    , plutus-tx
+    , plutus-tx-constraints
+    , plutus-tx-plugin
+    , QuickCheck
+    , tasty
+    , tasty-quickcheck
+
+---------------------------------
+common common-deps-test-suites
+  if flag(verbose)
+    cpp-options: -DVERBOSE
+
+  build-depends:
+    , cassava
+    , mtl
+    , plutonomy
+    , plutus-contract
+    , plutus-core
+    , plutus-ledger
+    , plutus-ledger-api
+    , plutus-ledger-constraints
+    , plutus-script-utils
+    , plutus-simple-model
+    , plutus-tx
+    , plutus-tx-plugin
+    , QuickCheck
+    , quickcheck-instances
+    , regex-compat
+    , regex-tdfa
+    , tasty
+    , tasty-hunit
+    , tasty-quickcheck
+    , transformers
+    , vector
+    , xlsx
+
+---------------------------------
+library
+  import:
+    common-all-deps-and-languange, common-deps-main-library, plutus-tx-config, warnings-config
+
+  -- cpp-options: -DNO_USE_SERIALISE_DATA
+  hs-source-dirs:  src
+  exposed-modules:
+    Generic.CLIHelpers
+    Generic.Constants
+    Generic.DeployHelpers
+    Generic.EmulatorHelpers
+    Generic.OffChainEval
+    Generic.OffChainEvalTesting
+    Generic.OffChainHelpers
+    Generic.OnChainHelpers
+    Generic.PABHelpers
+    Generic.Types
+    Protocol.BuyOrder.OffChain
+    Protocol.BuyOrder.OnChain
+    Protocol.BuyOrder.PABSimulator
+    Protocol.BuyOrder.Types
+    Protocol.Constants
+    Protocol.Delegation.OffChain
+    Protocol.Delegation.OnChain
+    Protocol.Delegation.PABSimulator
+    Protocol.Delegation.Types
+    Protocol.Deploy
+    Protocol.Fund.Helpers
+    Protocol.Fund.Holding.OnChain
+    Protocol.Fund.Holding.Types
+    Protocol.Fund.OffChain
+    Protocol.Fund.OnChain
+    Protocol.Fund.PABSimulator
+    Protocol.Fund.PABSimulatorCommissions
+    Protocol.Fund.PABSimulatorUser
+    Protocol.Fund.Types
+    Protocol.InvestUnit.OnChain
+    Protocol.InvestUnit.Types
+    Protocol.OffChainHelpers
+    Protocol.OnChainHelpers
+    Protocol.Others.OffChain
+    Protocol.Others.PABSimulator
+    Protocol.Others.PolicyFT
+    Protocol.Others.PolicyNFT
+    Protocol.PABContracts
+    Protocol.PABHelpers
+    Protocol.PABSimulator
+    Protocol.PABTypes
+    Protocol.Protocol.Helpers
+    Protocol.Protocol.OffChain
+    Protocol.Protocol.OnChain
+    Protocol.Protocol.PABSimulator
+    Protocol.Protocol.Types
+    Protocol.Script.OffChain
+    Protocol.Script.OnChain
+    Protocol.Script.PABSimulator
+    Protocol.Script.Types
+    Protocol.SellOffer.OffChain
+    Protocol.SellOffer.OnChain
+    Protocol.SellOffer.PABSimulator
+    Protocol.SellOffer.Types
+    Protocol.Types
+
+---------------------------------
+test-suite UnitTests
+  import:
+    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
+
+  build-depends:  mayz-protocol
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: tests/Tests/UnitTests tests
+  other-modules:
+    Contracts.Fund.Holding.MintingPolicy
+    Contracts.Fund.Holding.Validator
+    Contracts.Fund.MintingPolicy
+    Contracts.Fund.Validator
+    Contracts.InvestUnit.Validator
+    Contracts.Protocol.MintingPolicy
+    Contracts.Protocol.Validator
+    Contracts.SellOffer.MintingPolicy
+    Contracts.SellOffer.Validator
+    TestTree.Commissions
+    TestTree.ScaleAndRunding
+    TestTree.Values
+    TestUtils.Contracts.InitialData
+    TestUtils.Contracts.TxContext.Fund
+    TestUtils.Contracts.TxContext.FundHolding
+    TestUtils.Contracts.TxContext.InvestUnit
+    TestUtils.Contracts.TxContext.Protocol
+    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Helpers
+    TestUtils.HelpersMAYZ
+    TestUtils.TestContext.Asserts
+    TestUtils.TestContext.Evaluate
+    TestUtils.TestContext.Helpers
+    TestUtils.Types
+    TestUtils.TypesMAYZ
+
+---------------------------------
+test-suite PropertyBasedTests
+  import:
+    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
+
+  build-depends:  mayz-protocol
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: tests/Tests/PropertyBasedTests tests
+  other-modules:
+    Contracts.Fund.Holding.MintingPolicy
+    Contracts.Fund.Holding.Validator
+    Contracts.Fund.MintingPolicy
+    Contracts.Fund.Validator
+    Contracts.InvestUnit.Validator
+    Contracts.Protocol.MintingPolicy
+    Contracts.Protocol.Validator
+    Contracts.SellOffer.MintingPolicy
+    Contracts.SellOffer.Validator
+    TestTree.Commissions
+    TestTree.ScaleAndRunding
+    TestTree.Values
+    TestUtils.Constants
+    TestUtils.Contracts.InitialData
+    TestUtils.Contracts.TxContext.Fund
+    TestUtils.Contracts.TxContext.FundHolding
+    TestUtils.Contracts.TxContext.InvestUnit
+    TestUtils.Contracts.TxContext.Protocol
+    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Helpers
+    TestUtils.HelpersMAYZ
+    TestUtils.QuickCheckGen.QuickCheckGen
+    TestUtils.QuickCheckGen.QuickCheckGenMAYZ
+    TestUtils.TestContext.Asserts
+    TestUtils.TestContext.Evaluate
+    TestUtils.TestContext.Helpers
+    TestUtils.Types
+    TestUtils.TypesMAYZ
+
+---------------------------------
+test-suite AutomaticTests
+  import:
+    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
+
+  build-depends:  mayz-protocol
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: tests/Tests/AutomaticTests tests
+  other-modules:
+    Contracts.Fund.Holding.MintingPolicy
+    Contracts.Fund.Holding.Validator
+    Contracts.Fund.MintingPolicy
+    Contracts.Fund.Validator
+    Contracts.InvestUnit.Validator
+    Contracts.Protocol.MintingPolicy
+    Contracts.Protocol.Validator
+    Contracts.SellOffer.MintingPolicy
+    Contracts.SellOffer.Validator
+    TestUtils.Automatic.ContextGenerator
+    TestUtils.Automatic.Helpers
+    TestUtils.Automatic.HelpersMAYZ
+    TestUtils.Automatic.ParamsGenerators
+    TestUtils.Automatic.ParamsGeneratorsMAYZ
+    TestUtils.Automatic.TestCaseGenerator
+    TestUtils.Automatic.TestCases
+    TestUtils.Automatic.TestConfigTree
+    TestUtils.Automatic.TestRules
+    TestUtils.Automatic.TxGenerators
+    TestUtils.Automatic.Types
+    TestUtils.Constants
+    TestUtils.Contracts.InitialData
+    TestUtils.Contracts.TxSpecs.Fund
+    TestUtils.Contracts.TxSpecs.FundHolding
+    TestUtils.Contracts.TxSpecs.InvestUnit
+    TestUtils.Contracts.TxSpecs.Protocol
+    TestUtils.Contracts.TxSpecs.SellOffer
+    TestUtils.Helpers
+    TestUtils.HelpersMAYZ
+    TestUtils.QuickCheckGen.QuickCheckGen
+    TestUtils.QuickCheckGen.QuickCheckGenMAYZ
+    TestUtils.TestContext.Asserts
+    TestUtils.TestContext.Evaluate
+    TestUtils.TestContext.Helpers
+    TestUtils.Types
+    TestUtils.TypesMAYZ
+
+---------------------------------
+test-suite PerformanceTests
+  import:
+    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
+
+  build-depends:  mayz-protocol
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: tests/Tests/PerformanceTests tests
+  other-modules:
+    Helpers.PSM
+    Helpers.Validator
+    TestTree.PropertyTests
+    TestTree.UnitTests
+    TestUtils.Constants
+    TestUtils.Contracts.InitialData
+    TestUtils.Contracts.TxContext.Fund
+    TestUtils.Contracts.TxContext.FundHolding
+    TestUtils.Contracts.TxContext.InvestUnit
+    TestUtils.Contracts.TxContext.Protocol
+    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Helpers
+    TestUtils.HelpersMAYZ
+    TestUtils.QuickCheckGen.QuickCheckGen
+    TestUtils.QuickCheckGen.QuickCheckGenMAYZ
+    TestUtils.TestContext.Asserts
+    TestUtils.TestContext.Evaluate
+    TestUtils.TestContext.Helpers
+    TestUtils.Types
+    TestUtils.TypesMAYZ
+
+---------------------------------
+test-suite TransactionsTests
+  import:
+    common-all-deps-and-languange,  common-deps-test-suites, plutus-tx-config, warnings-config
+
+  build-depends:  mayz-protocol
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: tests/Tests/TransactionsTests tests
+  other-modules:
+    Helpers.Data
+    Protocol.Transactions
+    TestUtils.Constants
+    TestUtils.Contracts.InitialData
+    TestUtils.Contracts.TxContext.Fund
+    TestUtils.Contracts.TxContext.FundHolding
+    TestUtils.Contracts.TxContext.InvestUnit
+    TestUtils.Contracts.TxContext.Protocol
+    TestUtils.Contracts.TxContext.SellOffer
+    TestUtils.Helpers
+    TestUtils.HelpersMAYZ
+    TestUtils.QuickCheckGen.QuickCheckGen
+    TestUtils.QuickCheckGen.QuickCheckGenMAYZ
+    TestUtils.TestContext.Asserts
+    TestUtils.TestContext.Evaluate
+    TestUtils.TestContext.Helpers
+    TestUtils.Types
+    TestUtils.TypesMAYZ
+
+---------------------------------
+executable cli
+  import:
+    common-all-deps-and-languange, plutus-tx-config, warnings-config
+
+  main-is:        cli.hs
+  hs-source-dirs: app
+  build-depends:  mayz-protocol
+
+---------------------------------
+executable deployProtocol
+  import:
+    common-all-deps-and-languange, plutus-tx-config, warnings-config
+
+  main-is:        deployProtocol.hs
+  hs-source-dirs: app
+  build-depends:  mayz-protocol
+
+---------------------------------
+executable deployFundFactory
+  import:
+    common-all-deps-and-languange, plutus-tx-config, warnings-config
+
+  main-is:        deployFundFactory.hs
+  hs-source-dirs: app
+  build-depends:  mayz-protocol
+
+---------------------------------
+executable optimizeValidator
+  import:
+    common-all-deps-and-languange, plutus-tx-config, warnings-config
+
+  main-is:        optimizeValidator.hs
+  hs-source-dirs: app
+  build-depends:  mayz-protocol
+
+---------------------------------
+executable optimizeMintingPolicy
+  import:
+    common-all-deps-and-languange, plutus-tx-config, warnings-config
+
+  main-is:        optimizeMintingPolicy.hs
+  hs-source-dirs: app
+  build-depends:  mayz-protocol
+
+---------------------------------

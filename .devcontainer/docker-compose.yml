@@ -1,0 +1,24 @@
+version: '3.4'
+name: "mayz-contracts"
+services:
+  plutus:
+    image: manupadilla/${COMPOSE_PROJECT_NAME}_dev_image:latest
+     # container_name: ${COMPOSE_PROJECT_NAME}_dev_container
+    # build:
+    #   context: ubuntu_haskell
+    #   dockerfile: ../ubuntu_haskell/Dockerfile
+    #   args:
+    #     USER: plutus
+    #     WORK: /home/plutus/workspace
+    #     TOOLS: /home/plutus/tools
+    #     SCRIPTS: /home/plutus/tools/cardano-tools-scripts/scripts
+    volumes:
+      - ..:/home/plutus/workspace
+    env_file:
+      - .env
+    command:  /bin/bash -c "chmod +x /home/plutus/workspace/.devcontainer/scripts/on-create-container.sh && /home/plutus/workspace/.devcontainer/scripts/on-create-container.sh && while sleep 1000; do :; done"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
