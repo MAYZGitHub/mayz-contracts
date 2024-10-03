@@ -1,0 +1,45 @@
+Build profile: -w ghc-8.10.7 -O1
+In order, the following will be built (use -v for more details):
+ - mayz-protocol-contracts-1.0.5 (lib) (configuration changed)
+ - mayz-protocol-contracts-1.0.5 (test:PerformanceTests) (dependency rebuilt)
+Configuring library for mayz-protocol-contracts-1.0.5..
+Preprocessing library for mayz-protocol-contracts-1.0.5..
+Building library for mayz-protocol-contracts-1.0.5..
+Preprocessing test suite 'PerformanceTests' for mayz-protocol-contracts-1.0.5..
+Building test suite 'PerformanceTests' for mayz-protocol-contracts-1.0.5..
+Running 1 test suites...
+Test suite PerformanceTests: RUNNING...
+---------------
+Reading Deploy File: export/test/deploy.json
+Generating Test Params...
+Generating Scripts...
+---------------
+Performance Tests
+  Unit Tests
+    Signature validation
+      User 1 locks and user 2 takes with Good Oracle PK must succeed:              OK (0.02s)
+      User 1 locks and user 2 takes with Bad Oracle PK must fail:                  OK
+  Property-Based Tests
+    Testing resources usage
+      PowRational should use less than 3.5Mb:                                      OK (1.25s)
+        +++ OK, passed 100 tests.
+      CalculateDepositCommissionsUsingMonths should use less than 6.5Mb:           OK (0.14s)
+        +++ OK, passed 100 tests; 109 discarded.
+      Deposits should use less than 10Mb:                                          OK (0.39s)
+        +++ OK, passed 100 tests; 95 discarded.
+      Deposits should be valid:                                                    OK
+        +++ OK, passed 100 tests; 105 discarded.
+      PowRational Optimized should use less than 1.4Mb:                            OK (1.90s)
+        +++ OK, passed 100 tests.
+      CalculateDepositCommissionsUsingMonths Optimized should use less than 2.5Mb: OK (1.68s)
+        +++ OK, passed 100 tests; 127 discarded.
+      Deposits Optimized with 10 max tokens should use less than 6.2Mb:            OK (24.81s)
+        +++ OK, passed 100 tests; 101 discarded.
+      Deposits Optimized should be valid:                                          OK (0.01s)
+        +++ OK, passed 100 tests; 115 discarded.
+
+All 10 tests passed (30.23s)
+Test suite PerformanceTests: PASS
+Test suite logged to:
+/home/manuelpadilla/sources/reposUbuntu/MAYZ/mayz-contracts-v1.0.5/dist-newstyle/build/x86_64-linux/ghc-8.10.7/mayz-protocol-contracts-1.0.5/t/PerformanceTests/test/mayz-protocol-contracts-1.0.5-PerformanceTests.log
+1 of 1 test suites (1 of 1 test cases) passed.

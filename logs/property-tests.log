@@ -1,0 +1,197 @@
+Build profile: -w ghc-8.10.7 -O1
+In order, the following will be built (use -v for more details):
+ - mayz-protocol-contracts-1.0.5 (lib) (configuration changed)
+ - mayz-protocol-contracts-1.0.5 (test:PropertyBasedTests) (configuration changed)
+Configuring library for mayz-protocol-contracts-1.0.5..
+Preprocessing library for mayz-protocol-contracts-1.0.5..
+Building library for mayz-protocol-contracts-1.0.5..
+Configuring test suite 'PropertyBasedTests' for mayz-protocol-contracts-1.0.5..
+Preprocessing test suite 'PropertyBasedTests' for mayz-protocol-contracts-1.0.5..
+Building test suite 'PropertyBasedTests' for mayz-protocol-contracts-1.0.5..
+Running 1 test suites...
+Test suite PropertyBasedTests: RUNNING...
+---------------
+Reading Deploy File: export/test/deploy.json
+Generating Test Params...
+Generating Scripts...
+---------------
+Property-Based Tests
+  Contracts Tests
+    Protocol Policy Tests
+      TX NAME: Protocol_Create_Tx - REDEEMER: Protocol_MintID - Tests
+        Minting an invalid amount of ProtocolID NFT must fail:                                                  OK (1.13s)
+          +++ OK, passed 100 tests.
+        Spending a different UTxO must fail:                                                                    OK (1.11s)
+          +++ OK, passed 100 tests.
+    Protocol Validator Tests
+      TX NAME: Protocol_DatumUpdate_Tx - REDEEMER: Protocol_DatumUpdate - Tests
+        Changing the Protocol UTxO value must fail:                                                             OK (1.11s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with wrong signature must fail:                                             OK (1.07s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with correct signature must succeed:                                        OK (1.11s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with correct signature but invalid data must fail:                          OK (1.09s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with no signature but With Admin Token must succeed:                        OK (1.14s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with no signature but With Admin Token in incorrect output index must fail: OK (1.07s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with no signature no Admin Token but With Emergency Token must fail:        OK (1.09s)
+          +++ OK, passed 100 tests.
+      TX NAME: Protocol_UpdateMinADA_Tx - REDEEMER: Protocol_UpdateMinADA - Tests
+        Changing the Protocol UTxO value min ADA with wrong signature must fail:                                OK (1.03s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value min ADA with signature must succeed:                                   OK (1.08s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value min ADA with signature but valid data change must fail:                OK (1.08s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value min ADA with signature and invalid value must fail:                    OK (1.05s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value min ADA with wrong signature but admin token must succeed:             OK (1.07s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value min ADA with wrong signature but emergency token must fail:            OK (1.01s)
+          +++ OK, passed 100 tests.
+      TX NAME: Protocol_Emergency_Tx - REDEEMER: Protocol_Emergency - Tests
+        Changing the Protocol UTxO value With Emergency Token must succeed:                                     OK (1.05s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol UTxO value With Emergency Token in incorrect output index must fail:              OK (1.05s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with wrong signature must fail:                                             OK (1.03s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum with wrong signature With Emergency Token must succeed:                     OK (1.02s)
+          +++ OK, passed 100 tests.
+        Changing the Protocol Datum With Emergency Token but invalid data must succeed:                         OK (1.02s)
+          +++ OK, passed 100 tests.
+    Fund Policy Tests
+      TX NAME: Fund_Create_Tx - REDEEMER: Fund_MintID - Tests
+        Minting an invalid amount of FundID NFT must fail:                                                      OK (2.21s)
+          +++ OK, passed 100 tests.
+        Minting an invalid amount of InvestUnitID NFT must fail:                                                OK (2.09s)
+          +++ OK, passed 100 tests.
+        Different Fund UTxO Address from the one in Policy Param must fail:                                     OK (2.01s)
+          +++ OK, passed 100 tests.
+        Having the initial holdings count different from 0 must fail:                                           OK (2.07s)
+          +++ OK, passed 100 tests.
+        Paying trash tokens to the Fund UTxO must fail:                                                         OK (2.08s)
+          +++ OK, passed 100 tests.
+        Paying incorrect amount of MAYZ Tokens to the Fund UTxO must fail:                                      OK (2.05s)
+          +++ OK, passed 100 tests.
+        Not paying correct minADA to InvestUnit UTxO must fail:                                                 OK (2.09s)
+          +++ OK, passed 100 tests.
+      TX NAME: Fund_Delete_Tx - REDEEMER: Fund_BurnID - Tests
+        Burning an invalid amount of FundID NFT must fail:                                                      OK (3.49s)
+          +++ OK, passed 100 tests.
+        Burning an invalid amount of InvestUnitID NFT must fail:                                                OK (3.54s)
+          +++ OK, passed 100 tests.
+    Fund Validator Tests
+      TX NAME: Fund_DatumUpdate_Tx - REDEEMER: Fund_DatumUpdate - Tests
+        Updating admins with arbitrary list should succeed:                                                     OK (2.73s)
+          +++ OK, passed 100 tests.
+        Modifying Fund UTxO value must fail:                                                                    OK (2.77s)
+          +++ OK, passed 100 tests.
+        Modifying datum fields other than admins must fail:                                                     OK (2.77s)
+          +++ OK, passed 100 tests.
+      TX NAME: FundHolding_Create_Tx - REDEEMER: Fund_FundHoldingAdd - Tests
+        Adding a FundHolding with random creator to random input datum should succeed:                          OK (3.42s)
+          +++ OK, passed 100 tests.
+        Modifying Fund UTxO value must fail:                                                                    OK (3.44s)
+          +++ OK, passed 100 tests.
+      TX NAME: FundHolding_Delete_Tx - REDEEMER: Fund_FundHoldingDelete - Tests
+        Deleting a FundHolding with random creator from random input datum should succeed:                      OK (5.67s)
+          +++ OK, passed 100 tests.
+        Modifying Fund UTxO value must fail:                                                                    OK (3.15s)
+          +++ OK, passed 100 tests.
+    FundHolding Policy Tests
+      TX NAME: FundHolding_Create_Tx - REDEEMER: FundHolding_MintID - Tests
+        Minting an invalid amount of FundHoldingID NFT must fail:                                               OK (2.82s)
+          +++ OK, passed 100 tests.
+      TX NAME: FundHolding_Delete_Tx - REDEEMER: FundHolding_BurnID - Tests
+        Burning an invalid amount of FundHoldingID NFT must fail:                                               OK (3.73s)
+          +++ OK, passed 100 tests.
+    FundHolding Validator Tests
+      TX NAME: Fund_Deposit_Tx - REDEEMER: FundHolding_Deposit - Tests
+        Minted FT amount is as expected:                                                                        OK (3.89s)
+          +++ OK, passed 100 tests.
+        Deposit amount zero or negative must fail:                                                              OK (3.90s)
+          +++ OK, passed 100 tests.
+      TX NAME: Fund_Withdraw_Tx - REDEEMER: FundHolding_Withdraw - Tests
+        Burnt FT amount is as expected:                                                                         OK (3.85s)
+          +++ OK, passed 100 tests.
+        Withdraw amount zero or negative must fail:                                                             OK (3.92s)
+          +++ OK, passed 100 tests.
+        Value taken from FundHolding is as expected:                                                            OK (3.49s)
+          +++ OK, passed 100 tests.
+      TX NAME: FundHolding_Collect_Delegators_Commission_Tx - REDEEMER: FundHolding_Collect_Delegators_Commission - Tests
+        Withdraw delegators commissions amount is positive and within available:                                OK (3.00s)
+          +++ OK, passed 100 tests.
+      TX NAME: Fund_ReIndexing_Tx - REDEEMER: FundHolding_ReIndexing - Tests
+        Valid add/remove assets should succeed:                                                                 OK (4.21s)
+          +++ OK, passed 100 tests.
+    InvestUnit Validator Tests
+      TX NAME: Fund_ReIndexing_Tx - REDEEMER: InvestUnit_ReIndexing - Tests
+        ReIndexing varying initial invest unit, tokens to add, tokens to remove and prices should succeed:      OK (4.24s)
+          +++ OK, passed 100 tests.
+        ReIndexing changing the invest unit value must fail:                                                    OK (3.21s)
+          +++ OK, passed 100 tests.
+  Helpers Tests
+    Value Tests
+      Tests
+        flattenValue preserves total token count:                                                               OK
+          +++ OK, passed 100 tests.
+        flattenValue matches PlutusTx flattenValue:                                                             OK
+          +++ OK, passed 100 tests.
+        isEqValue behaves same as default equality:                                                             OK
+          +++ OK, passed 100 tests.
+        flattenValueToValue is the inverse of flattenValue:                                                     OK
+          +++ OK, passed 100 tests.
+    Comission Tests
+      Tests
+        Withdraw commissions respect Invest Unit granularity:                                                   OK
+          +++ OK, passed 100 tests.
+        Deposit commissions are always less than or equal to deposit amount:                                    OK
+          +++ OK, passed 100 tests.
+        Withdraw plus commissions is always greater than or equal to withdraw amount:                           OK
+          +++ OK, passed 100 tests.
+        Commission rate decreases over time:                                                                    OK (0.14s)
+          +++ OK, passed 100 tests.
+        Deposit and immediate withdraw results in loss:                                                         OK (0.01s)
+          +++ OK, passed 100 tests.
+        Higher commission rate results in lower user FT:                                                        OK (0.01s)
+          +++ OK, passed 100 tests.
+        Longer fund duration results in higher total commissions:                                               OK (0.01s)
+          +++ OK, passed 100 tests.
+    Scale and Runding Tests
+      Tests
+        Multiply-Divide Round Trip (1e6):                                                                       OK
+          +++ OK, passed 100 tests; 278 discarded.
+        Divide-Multiply Round Trip (1e6):                                                                       OK
+          +++ OK, passed 100 tests; 418 discarded.
+        Round Up >= Round Down (1e6):                                                                           OK
+          +++ OK, passed 100 tests; 403 discarded.
+        TxRatio truncate vs multiply_By_Scaled_1e6_And_RoundDown:                                               OK
+          +++ OK, passed 100 tests.
+        TxRatio truncate vs integer division:                                                                   OK
+          +++ OK, passed 100 tests; 10 discarded.
+        Multiply-Divide Round Trip (1e2):                                                                       OK
+          +++ OK, passed 100 tests; 352 discarded.
+        Divide-Multiply Round Trip (1e2):                                                                       OK
+          +++ OK, passed 100 tests; 322 discarded.
+        Round Up >= Round Down (1e2):                                                                           OK
+          +++ OK, passed 100 tests; 380 discarded.
+        TxRatio truncate vs multiply_By_Scaled_1e2_And_RoundDown:                                               OK
+          +++ OK, passed 100 tests.
+        Multiply-Divide Round Trip (BPx1e3):                                                                    OK
+          +++ OK, passed 100 tests; 338 discarded.
+        Divide-Multiply Round Trip (BPx1e3):                                                                    OK
+          +++ OK, passed 100 tests; 354 discarded.
+        Round Up >= Round Down (BPx1e3):                                                                        OK
+          +++ OK, passed 100 tests; 313 discarded.
+        TxRatio truncate vs multiply_By_Scaled_BPx1e3_And_RoundDown:                                            OK
+          +++ OK, passed 100 tests.
+
+All 71 tests passed (107.57s)
+Test suite PropertyBasedTests: PASS
+Test suite logged to:
+/home/manuelpadilla/sources/reposUbuntu/MAYZ/mayz-contracts-v1.0.5/dist-newstyle/build/x86_64-linux/ghc-8.10.7/mayz-protocol-contracts-1.0.5/t/PropertyBasedTests/test/mayz-protocol-contracts-1.0.5-PropertyBasedTests.log
+1 of 1 test suites (1 of 1 test cases) passed.

@@ -91,6 +91,15 @@ For more detailed output, you can use:
 cabal test UnitTests --test-show-details=always
 ```
 
+To save the test output to a file, you can use the '>' operator:
+```
+cabal test UnitTests --test-show-details=always > unit-tests.log
+```
+
+This command will run the tests and save the output to 'unit-tests.log' in the current directory.
+
+Current passing test results are stored in the `./logs/` directory. You can view the latest results here: [unit-tests.log](../logs/unit-tests.log)
+
 #### Test Parameters
 - `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.
 - `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
@@ -191,6 +200,16 @@ For more detailed output:
 ```
 cabal test PropertyBasedTests --test-show-details=always
 ```
+
+To save the test output to a file, you can use the '>' operator:
+```
+cabal test PropertyBasedTests --test-show-details=always > property-tests.log
+```
+
+This command will run the tests and save the output to 'property-tests.log' in the current directory.
+
+Current passing test results are stored in the `./logs/` directory. You can view the latest results here: [property-tests.log](../logs/property-tests.log)
+
 
 #### Test Parameters
 - `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.
@@ -303,6 +322,15 @@ For more detailed output:
 cabal test PerformanceTests --test-show-details=always
 ```
 
+To save the test output to a file, you can use the '>' operator:
+```
+cabal test PerformanceTests --test-show-details=always > performance-tests.log
+```
+
+This command will run the tests and save the output to 'performance-tests.log' in the current directory.
+
+Current passing test results are stored in the `./logs/` directory. You can view the latest results here: [performance-tests.log](../logs/performance-tests.log)
+
 #### Test Parameters
 - `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.
 - `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
@@ -395,6 +423,15 @@ For more detailed output:
 ```
 cabal test AutomaticTests --test-show-details=always
 ```
+
+To save the test output to a file, you can use the '>' operator:
+```
+cabal test AutomaticTests --test-show-details=always > automatic-tests.log
+```
+
+This command will run the tests and save the output to 'automatic-tests.log' in the current directory.
+
+Current passing test results are stored in the `./logs/` directory. You can view the latest results here: [automatic-tests.log](../logs/automatic-tests.log)
 
 #### Test Parameters
 - `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.

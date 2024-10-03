@@ -1,0 +1,320 @@
+Build profile: -w ghc-8.10.7 -O1
+In order, the following will be built (use -v for more details):
+ - mayz-protocol-contracts-1.0.5 (test:UnitTests) (first run)
+Preprocessing test suite 'UnitTests' for mayz-protocol-contracts-1.0.5..
+Building test suite 'UnitTests' for mayz-protocol-contracts-1.0.5..
+Running 1 test suites...
+Test suite UnitTests: RUNNING...
+---------------
+Reading Deploy File: export/test/deploy.json
+Generating Test Params...
+Generating Scripts...
+---------------
+Unit Tests
+  Contracts Tests
+    Protocol Tests
+      Protocol Policy Tests
+        TX NAME: Protocol_Create_Tx - REDEEMER: Protocol_MintID - Tests
+          Minting ID correctly must succeed:                                               OK (0.02s)
+          Invalid fund categories length must fail:                                        OK
+          Invalid fund category MAYZ requirement must fail:                                OK
+          Invalid fund category MaxUI requirement must fail:                               OK (0.01s)
+          Non-sequential or non-unique category numbers must fail:                         OK
+          Invalid required MAYZ for SwapOffer must fail:                                   OK
+          Invalid required MAYZ for buy order must fail:                                   OK (0.01s)
+          Invalid fund lifetime must fail:                                                 OK
+          Invalid fund lifetime minimum must fail:                                         OK
+          Invalid minimum commission fund per year must fail:                              OK (0.01s)
+          Invalid maximum commission fund per year must fail:                              OK
+          Invalid minimum commission for SwapOffer must fail:                              OK
+          Invalid maximum commission for SwapOffer must fail:                              OK
+          Invalid minimum commission for buy order must fail:                              OK (0.01s)
+          Invalid maximum commission for buy order must fail:                              OK
+          Invalid share distribution must fail:                                            OK
+      Protocol Validator Tests
+        TX NAME: Protocol_DatumUpdate_Tx - REDEEMER: Protocol_DatumUpdate - Tests
+          Update Datum with not change must succeed:                                       OK (0.01s)
+          Updating modifiable fields must succeed:                                         OK (0.01s)
+          Updating ProtocolT.pdScriptPolicyID_CS must fail:                                OK (0.01s)
+          Updating minAda must fail:                                                       OK
+          Changing value must fail:                                                        OK
+          Not signed by any must fail:                                                     OK (0.01s)
+          Not signed by admins must fail:                                                  OK
+          Too big range must fail:                                                         OK
+          No protocol output must fail:                                                    OK (0.01s)
+          Double satisfaction with 2 inputs from same address must fail:                   OK
+          Double satisfaction with both inputs had the same NFT (not realistic) must fail: OK
+        TX NAME: Protocol_UpdateMinADA_Tx - REDEEMER: Protocol_UpdateMinADA - Tests
+          Changing min ADA correctly must succeed:                                         OK
+    Fund Tests
+      Fund Policy Tests
+        TX NAME: Fund_Create_Tx - REDEEMER: Fund_MintID - Tests
+          Minting ID correctly must succeed:                                               OK (0.06s)
+          Not including Protocol input ref must fail:                                      OK (0.02s)
+          Not including two output must fail:                                              OK (0.01s)
+          Not including fund output must fail:                                             OK (0.02s)
+          Not including invest unit output must fail:                                      OK (0.02s)
+          Not including utxo in policy parameter as input must fail:                       OK (0.01s)
+          Mintin IU ID, but not minting Fund ID must fail:                                 OK (0.02s)
+          Minting Fund ID, but not minting IU ID must fail:                                OK (0.01s)
+          Minting a different amount IU ID must fail:                                      OK (0.02s)
+          Minting a different amount Fund ID must fail:                                    OK (0.01s)
+          Minting an extra asset with wrong token name must fail:                          OK (0.02s)
+          Minting an asset with wrong token name must fail:                                OK (0.02s)
+          Fund utxo address different from the one in policy param must fail:              OK (0.01s)
+          IU utxo address different from the one in policy param must fail:                OK (0.02s)
+          Fund with wrong Commissions in datum must fail:                                  OK
+          Fund with wrong Commissions Table values in datum must fail:                     OK (0.02s)
+          Fund with wrong Commissions Table lenght in datum must fail:                     OK (0.02s)
+          Fund with wrong Category in datum must fail:                                     OK (0.02s)
+          Having initial holdings count different from 0 must fail:                        OK (0.02s)
+          Having initial wrong deadline must fail:                                         OK (0.02s)
+          Having initial deadline < beginAt must fail:                                     OK
+          Having initial wrong fund lifetime must fail:                                    OK (0.02s)
+          Fund with wrong MAYZ in datum must fail:                                         OK (0.01s)
+          MAYZ in fund output value not according to FundCategory of datum must fail:      OK (0.02s)
+          Fund output value without Fund ID must fail:                                     OK (0.01s)
+          Fund output value with Fund ID other token name must fail:                       OK (0.02s)
+          Fund output value without minAda specified in datum must fail:                   OK (0.02s)
+          Fund output value with extra tokens must fail:                                   OK
+          IU output value without IU ID must fail:                                         OK (0.02s)
+          IU output value with IU ID other token name must fail:                           OK (0.01s)
+          IU output value without minAda specified in datum must fail:                     OK
+          IU output value with extra tokens must fail:                                     OK (0.01s)
+        TX NAME: Fund_Delete_Tx - REDEEMER: Fund_BurnID - Tests
+          Burning ID correctly must succeed:                                               OK (0.05s)
+          Burning IU ID, but not burning fund ID must fail:                                OK (0.03s)
+          Burning Fund ID but not burning invest unit ID must fail:                        OK (0.03s)
+        TX NAME: Fund_Deposit_Tx - REDEEMER: Fund_MintFT - Tests
+          Minting FT correctly must succeed:                                               OK (0.02s)
+          Not having Fund UTxO as ref input must fail:                                     OK (0.02s)
+          Not having FundHolding UTxO as input must fail:                                  OK (0.02s)
+          Incorrect redeemer for FundHolding UTxO must fail:                               OK (0.02s)
+          Minting another token name must fail:                                            OK (0.02s)
+          Minting extra token must fail:                                                   OK (0.02s)
+          Minting more FT must fail:                                                       OK (0.01s)
+          Minting less FT must fail:                                                       OK (0.03s)
+          Minting FT with Fund before beginAt must fail:                                   OK (0.03s)
+          Minting FT with Fund after deadline must fail:                                   OK (0.03s)
+          Minting FT with Closed Fund must fail:                                           OK (0.03s)
+        TX NAME: Fund_Withdraw_Tx - REDEEMER: Fund_MintFT - Tests
+          Burning FT correctly must succeed:                                               OK (0.04s)
+          Not having Fund UTxO as ref input must fail:                                     OK (0.03s)
+          Not having FundHolding UTxO as input must fail:                                  OK (0.01s)
+          Incorrect redeemer for FundHolding UTxO must fail:                               OK (0.03s)
+          Burning another token name must fail:                                            OK (0.03s)
+          Burning extra token must fail:                                                   OK (0.02s)
+          Burning more FT must fail:                                                       OK (0.01s)
+          Burning less FT must fail:                                                       OK (0.03s)
+      Fund Validator Tests
+        TX NAME: Fund_DatumUpdate_Tx - REDEEMER: Fund_DatumUpdate - Tests
+          Update Datum with not change must succeed:                                       OK (0.02s)
+          Emptying the list of admins must succeed:                                        OK (0.01s)
+          Changing FundPolicyID must fail:                                                 OK (0.02s)
+          Changing Fund UTxO value must fail:                                              OK (0.02s)
+        TX NAME: Fund_UpdateMinADA_Tx - REDEEMER: Fund_UpdateMinADA - Tests
+          Changing min ADA correctly must succeed:                                         OK (0.01s)
+        TX NAME: FundHolding_Create_Tx - REDEEMER: Fund_FundHoldingAdd - Tests
+          Add FundHolding correctly must succeed:                                          OK (0.03s)
+          Not minting FundHolding ID must fail:                                            OK (0.02s)
+          Changing Fund UTxO value must fail:                                              OK (0.03s)
+          Not signed by admin must fail:                                                   OK (0.03s)
+          Not incrementing count must fail:                                                OK (0.02s)
+          Not incrementing index must fail:                                                OK (0.03s)
+        TX NAME: FundHolding_Delete_Tx - REDEEMER: Fund_FundHoldingDelete - Tests
+          Delete FundHolding correctly must succeed:                                       OK (0.05s)
+          Not burning FundHolding ID must fail:                                            OK (0.03s)
+          Minting another FundHolding ID must fail:                                        OK (0.03s)
+          Not decreasing holdingsCount must fail:                                          OK (0.04s)
+          Increasing holdingsCount must fail:                                              OK (0.04s)
+          Changing Fund UTxO value must fail:                                              OK (0.03s)
+        TX NAME: Fund_Finish_Tx - REDEEMER: Fund_Finish - Tests
+          Finish Fund correctly must succeed:                                              OK (0.01s)
+        TX NAME: Fund_Delete_Tx - REDEEMER: Fund_Delete - Tests
+          Delete correctly must succeed:                                                   OK (0.05s)
+          Not burning FundID must fail:                                                    OK (0.03s)
+          Minting another FundID must fail:                                                OK (0.03s)
+          Double satisfaction must fail:                                                   OK (0.03s)
+    FundHolding Tests
+      FundHolding Policy Tests
+        TX NAME: FundHolding_Create_Tx - REDEEMER: FundHolding_MintID - Tests
+          Minting ID correctly must succeed:                                               OK (0.03s)
+          Not including Fund UTxO input must fail:                                         OK (0.02s)
+          Not including FundHolding UTxO output must fail:                                 OK (0.03s)
+          Not setting valid Redeemer for consuming Fund Datum must fail:                   OK (0.03s)
+          Including a wrong FundHolding Datum must fail:                                   OK (0.01s)
+          Including a wrong FundHolding Value must fail:                                   OK (0.03s)
+          Including a wrong FundHolding UTxO Address must fail:                            OK (0.02s)
+        TX NAME: FundHolding_Delete_Tx - REDEEMER: FundHolding_BurnID - Tests
+          Burning ID correctly must succeed:                                               OK (0.05s)
+      FundHolding Validator Tests
+        TX NAME: FundHolding_UpdateMinADA_Tx - REDEEMER: FundHolding_UpdateMinADA - Tests
+          Changing min ADA correctly must succeed:                                         OK (0.02s)
+        TX NAME: Fund_Deposit_Tx - REDEEMER: FundHolding_Deposit - Tests
+          Depositing correctly must succeed:                                               OK (0.04s)
+          Depositing without minting FT must fail:                                         OK (0.03s)
+          Depositing without increasing FT minted subtotal must fail:                      OK (0.03s)
+          Depositing without paying invest units must fail:                                OK (0.03s)
+          Depositing date outside valid range must fail:                                   OK (0.03s)
+          Depositing with invalid range must fail:                                         OK (0.03s)
+        TX NAME: Fund_Withdraw_Tx - REDEEMER: FundHolding_Withdraw - Tests
+          Withdrawing correctly must succeed:                                              OK (0.03s)
+          Withdrawing without burning FT must fail:                                        OK (0.03s)
+          Withdrawing without updating FT minted subtotal must fail:                       OK (0.03s)
+          Withdrawing without user recovering commissions must fail:                       OK (0.03s)
+        TX NAME: FundHolding_Collect_Protocol_Commission_Tx - REDEEMER: FundHolding_Collect_Protocol_Commission - Tests
+          Collecting commissions correctly must succeed:                                   OK (0.02s)
+          Collecting commissions without updating remaining commissions must fail:         OK
+          Collecting commissions without updating FundHolding value must fail:             OK (0.03s)
+          Trying to collect more commissions than the available must fail:                 OK (0.02s)
+          Trying to collect commissions without adding admin signatory must fail:          OK (0.03s)
+          Collecting commissions outside valid range must fail:                            OK (0.03s)
+        TX NAME: FundHolding_Collect_Managers_Commission_Tx - REDEEMER: FundHolding_Collect_Managers_Commission - Tests
+          Collecting commissions correctly must succeed:                                   OK (0.02s)
+          Collecting commissions without updating remaining commissions must fail:         OK (0.03s)
+          Collecting commissions without updating FundHolding value must fail:             OK (0.02s)
+          Trying to collect more commissions than the available must fail:                 OK (0.03s)
+          Trying to collect commissions without adding admin signatory must fail:          OK (0.01s)
+          Collecting commissions outside valid range must fail:                            OK (0.03s)
+        TX NAME: FundHolding_Collect_Delegators_Commission_Tx - REDEEMER: FundHolding_Collect_Delegators_Commission - Tests
+          Collecting commissions correctly must succeed:                                   OK (0.02s)
+          Collecting commissions without updating remaining commissions must fail:         OK (0.03s)
+          Collecting commissions without updating FundHolding value must fail:             OK (0.03s)
+          Trying to collect more commissions than the available must fail:                 OK (0.03s)
+          Trying to collect commissions without adding admin signatory must fail:          OK (0.03s)
+          Collecting commissions outside valid range must fail:                            OK (0.02s)
+        TX NAME: Fund_ReIndexing_Tx - REDEEMER: FundHolding_ReIndexing - Tests
+          Re-index correctly must succeed:                                                 OK (0.04s)
+          Not including protocol input ref must fail:                                      OK (0.03s)
+          Not including some FundHolding as ref must fail:                                 OK (0.03s)
+          Not including invest unit input must fail:                                       OK (0.02s)
+          Not having a FundHolding output must fail:                                       OK (0.04s)
+          Updating FundHolding must fail:                                                  OK (0.03s)
+          Not updating the FundHolding value must fail:                                    OK (0.04s)
+          Having an incorrect redeemer for the Invest Unit validator must fail:            OK (0.02s)
+        TX NAME: FundHolding_BalanceAssets_Tx - REDEEMER: FundHolding_BalanceAssets - Tests
+          Balancing assets correctly must succeed:                                         OK (0.03s)
+          Incorrect redeemer with more items in commissions list must fail:                OK (0.04s)
+          Incorrect redeemer with less items in commissions list invalid must fail:        OK (0.04s)
+          Incorrect redeemer with sum total of commision not zero (plus zero) must fail:   OK (0.04s)
+          Incorrect redeemer with sum total of commision not zero (less zero) must fail:   OK (0.03s)
+        TX NAME: FundHolding_Delete_Tx - REDEEMER: FundHolding_Delete - Tests
+          Delete FundHolding correctly must succeed:                                       OK (0.05s)
+          Not empty FundHolding value must fail:                                           OK (0.03s)
+          Not including fund admin sign must fail:                                         OK (0.03s)
+          Not including Fund UTXO as input must fail:                                      OK (0.03s)
+          Not including Fund UTXO as output must fail:                                     OK (0.05s)
+          Not burning FundHolding ID must fail:                                            OK (0.05s)
+          Too big range must fail:                                                         OK (0.03s)
+    InvestUnit Tests
+      InvestUnit Validator Tests
+        TX NAME: Fund_ReIndexing_Tx - REDEEMER: InvestUnit_ReIndexing - Tests
+          ReIndexing correctly must succeed:                                               OK (0.03s)
+          Validation interval not having LowerBound must fail:                             OK (0.04s)
+          Not including Protocol UTxO as InputRef must fail:                               OK (0.02s)
+          InvestUnit tokens to add not having a price must fail:                           OK (0.03s)
+          InvestUnit tokens to remove not having a price must fail:                        OK (0.03s)
+          Add other prices in the list does not bother and must succeed:                   OK (0.03s)
+          Total price of tokens to add lower than tokens to remove must fail:              OK (0.04s)
+          Same Total price of tokens to add and tokens to remove must succeed:             OK (0.03s)
+          Total price of tokens to remove lower than tokens to add must succeed:           OK (0.03s)
+          Including wrong InvestUnit in InvestUnit UTxO's Datum must fail:                 OK (0.03s)
+          Changing the value of the output InvestUnit UTxO must fail:                      OK (0.04s)
+          Using an incorrect Oracle signature must fail:                                   OK (0.03s)
+          Using an incorrect Oracle time range must fail:                                  OK (0.04s)
+          Not including FundHolding ReIndexing Redeemer must fail:                         OK (0.03s)
+          Not including Fund UTxO as InputRef must fail:                                   OK (0.04s)
+          Not including FundHolding UTxO as Input must fail:                               OK
+        TX NAME: InvestUnit_UpdateMinADA_Tx - REDEEMER: InvestUnit_UpdateMinADA - Tests
+          Changing min ADA correctly must succeed:                                         OK (0.02s)
+        TX NAME: Fund_Delete_Tx - REDEEMER: InvestUnit_Delete - Tests
+          Delete correctly must succeed:                                                   OK (0.05s)
+    SwapOffer Tests
+      SwapOffer Policy Tests
+        TX NAME: SwapOffer_Create_Tx - REDEEMER: SwapOffer_MintID - Tests
+          Minting ID correctly must succeed:                                               OK
+          SwapOffer with total_FT_Earned different from 0 in datum must fail:              OK
+          SwapOffer with total_ADA_Earned different from 0 in datum must fail:             OK (0.01s)
+          SwapOffer with wrong comissionsin in datum must fail:                            OK
+          SwapOffer with minimum allowed commission in datum must succeed:                 OK
+          SwapOffer with maximum allowed commission in datum must succeed:                 OK
+          SwapOffer with wrong MAYZ in datum must fail:                                    OK
+        TX NAME: SwapOffer_Delete_Tx - REDEEMER: SwapOffer_BurnID - Tests
+          Burning ID correctly must succeed:                                               OK (0.02s)
+      SwapOffer Validator Tests
+        TX NAME: SwapOffer_UpdateStatus_Tx - REDEEMER: SwapOffer_UpdateStatus - Tests
+          Updating Datum correctly must succeed:                                           OK
+        TX NAME: SwapOffer_UpdateAskedCommissionRate_Tx - REDEEMER: SwapOffer_UpdateAskedCommissionRate - Tests
+          Updating Asked Commission correctly must succeed:                                OK (0.01s)
+        TX NAME: SwapOffer_UpdateSellRestrictions_Tx - REDEEMER: SwapOffer_UpdateSellRestrictions - Tests
+          Updating Sell Restrictions correctly must succeed:                               OK
+        TX NAME: SwapOffer_UpdateMinADA_Tx - REDEEMER: SwapOffer_UpdateMinADA - Tests
+          Changing min ADA correctly must succeed:                                         OK
+        TX NAME: SwapOffer_Deposit_Tx - REDEEMER: SwapOffer_Deposit - Tests
+          Depositing correctly must succeed:                                               OK (0.01s)
+        TX NAME: SwapOffer_Withdraw_Tx - REDEEMER: SwapOffer_Withdraw - Tests
+          Withdrawing correctly must succeed:                                              OK (0.01s)
+        TX NAME: SwapOffer_SwapFTxADA_Tx - REDEEMER: SwapOffer_SwapFTxADA - Tests
+          Swapping FT for ADA correctly must succeed:                                      OK
+        TX NAME: SwapOffer_SwapADAxFT_Tx - REDEEMER: SwapOffer_SwapADAxFT - Tests
+          Swapping ADA for FT correctly must succeed:                                      OK
+        TX NAME: SwapOffer_Delete_Tx - REDEEMER: SwapOffer_Delete - Tests
+          Deleting correctly must succeed:                                                 OK
+  Helpers Tests
+    Value Tests
+      Tests
+        FlattenValue to list of tuples:                                                    OK
+    Comission Tests
+      Tests
+        SetAndLoosePrecisionGetOnlyNum:                                                    OK
+        SetAndLoosePrecision1e6GetOnlyNumerator:                                           OK
+        powInteger:                                                                        OK
+        powRational:                                                                       OK
+        Calculate Deposit Commissions
+          Integral remaining months:                                                       OK
+          Fractional remaining months:                                                     OK
+          Less than one remaining month:                                                   OK
+        Calculate Withdraw Commissions
+          Integral remaining months:                                                       OK
+          Fractional remaining months:                                                     OK
+          Less than one remaining month:                                                   OK
+    Scale and Runding Tests
+      Tests
+        Multiply 100 by 1.05 and round up:                                                 OK
+        Multiply 100 by 1.049999 and round up:                                             OK
+        Multiply 100 by 1.05 and round down:                                               OK
+        Multiply 100 by 1.049999 and round down:                                           OK
+        Divide 105 by 1 safely:                                                            OK
+        Divide 105 by 1.05 safely:                                                         OK
+        Multiply 1000000 by 0.000001 and round up:                                         OK
+        Divide 1 by 0.000001 safely:                                                       OK
+        Divide 1000001 by 1 safely:                                                        OK
+        Multiply 1 by 1 and round up:                                                      OK
+        Multiply max integer by 1 and round up:                                            OK
+        Divide 1 by max integer safely:                                                    OK
+        Multiply 0 by any number and round up:                                             OK
+        Divide 0 by any number safely:                                                     OK
+        Divide with remainder:                                                             OK
+        Multiply_By_Scaled_1e6_And_RoundUp positive:                                       OK
+        Multiply_By_Scaled_1e6_And_RoundUp negative:                                       OK
+        Multiply_By_Scaled_1e6_And_RoundUp positive with remainder:                        OK
+        Multiply_By_Scaled_1e6_And_RoundUp negative with remainder:                        OK
+        Multiply_By_Scaled_1e6_And_RoundDown positive:                                     OK
+        Multiply_By_Scaled_1e6_And_RoundDown negative:                                     OK
+        Multiply_By_Scaled_1e6_And_RoundDown positive with remainder:                      OK
+        Multiply_By_Scaled_1e6_And_RoundDown negative with remainder:                      OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe positive / positive:                        OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe positive / positive with rounding:          OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe negative / positive:                        OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe negative / positive with rounding:          OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe positive / negative:                        OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe negative / negative:                        OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe small positive / large positive:            OK
+        Divide_By_Scaled_1e6_And_RoundDownSafe small negative / large positive:            OK
+        Multiply large number close to overflow:                                           OK
+
+All 239 tests passed (4.79s)
+Test suite UnitTests: PASS
+Test suite logged to:
+/home/manuelpadilla/sources/reposUbuntu/MAYZ/mayz-contracts-v1.0.5/dist-newstyle/build/x86_64-linux/ghc-8.10.7/mayz-protocol-contracts-1.0.5/t/UnitTests/test/mayz-protocol-contracts-1.0.5-UnitTests.log
+1 of 1 test suites (1 of 1 test cases) passed.
