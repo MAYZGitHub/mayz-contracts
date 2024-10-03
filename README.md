@@ -26,7 +26,7 @@
 ## Introduction
 Welcome to the MAYZ Protocol Smart Contracts Repository. This repository contains the core smart contracts that power the MAYZ Protocol, a decentralized finance (DeFi) ecosystem built on the Cardano blockchain. Our contracts are written in Plutus, Cardano's native smart contract language, aiming to democratize finance by providing a permissionless platform for creating and managing investment funds, facilitating liquidity, and empowering users through innovative mechanisms.
 
-For a detailed overview of the protocol's smart contracts, datums, redeemers, and their interactions, please refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) Documentation.
+For a detailed overview of the protocol's smart contracts, datums, redeemers, and their interactions, please refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.
 
 ## Current Status
 
@@ -66,7 +66,7 @@ Our protocol utilizes advanced smart contracts for secure and efficient operatio
 - **Delegation Contract**: Manages MAYZ token delegations to funds.
 - **Script Contract**: Oversees deployed scripts on-chain.
 
-For detailed information on each contract, refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) Documentation.
+For detailed information on each contract, refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.
 
 ## Key Concepts
 - **Investment Unit (IU)**: Defines token composition of each fund.
