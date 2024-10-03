@@ -152,11 +152,11 @@ testDeposit commissionsTable_Numerator1e6 deadline date deposit fundFT_AC valueO
     ------------------
         !(_, commissionsFT, _) = FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
     ------------------
-        !valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In (T.iuValues investUnit) deposit True
+        !valueOf_TokensForDeposit_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In (T.iuValues investUnit) deposit True
     ------------------
         !valueFor_FT_Commissions = LedgerValue.assetClassValue fundFT_AC commissionsFT
     ------------------
-        !valueFor_FundHoldingDatum_Control_With_Tokens_And_FT = valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value <> valueFor_FT_Commissions -- valueOf_FundHoldingDatum_In -- <> valueOf_TokensForDeposit <> valueFor_FT_Commissions
+        !valueFor_FundHoldingDatum_Control_With_Tokens_And_FT = valueOf_TokensForDeposit_Plus_FundHolding_Value <> valueFor_FT_Commissions -- valueOf_FundHoldingDatum_In -- <> valueOf_TokensForDeposit <> valueFor_FT_Commissions
     ------------------
         isCorrect_Output_FundHolding_Value :: LedgerValue.Value -> LedgerValue.Value -> Bool
         isCorrect_Output_FundHolding_Value valueFor_FundHoldingDatum_Control valueOf_FundHoldingDatum_Out' =
