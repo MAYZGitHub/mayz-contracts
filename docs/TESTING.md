@@ -47,6 +47,9 @@
     - [Overview](#overview-2)
     - [Key Concepts](#key-concepts-1)
     - [Running Automatic Tests](#running-automatic-tests)
+      - [Test Parameters](#test-parameters-4)
+      - [Configuration File](#configuration-file)
+    - [Log Parser Tool](#log-parser-tool)
     - [Test Structure and PATH Relation](#test-structure-and-path-relation)
     - [Current Test Coverage](#current-test-coverage)
     - [Scope and Limitations](#scope-and-limitations)
@@ -54,6 +57,7 @@
     - [Main Components](#main-components)
     - [Key Functions](#key-functions)
     - [Rule Definition](#rule-definition)
+      - [Configuration File](#configuration-file-1)
     - [Test Case Generation Process](#test-case-generation-process)
     - [Specific Test Categories](#specific-test-categories)
     - [Test Parameters and Generators](#test-parameters-and-generators)
@@ -81,13 +85,22 @@ To run the unit tests, use the following command from the project root:
 ```
 cabal test UnitTests
 ```
+
 For more detailed output, you can use:
 ```
 cabal test UnitTests --test-show-details=always
 ```
+
 #### Test Parameters
 - `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.
 - `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
+
+Example:
+```
+cabal test UnitTests -j1 --test-options='-p /Protocol/'
+```
+
+This runs unit tests sequentially, only for tests containing "Protocol" in their name.
 
 ### Test Structure
 
@@ -168,14 +181,13 @@ Some of the key aspects tested in our unit tests include:
 Property-based tests complement unit tests by generating random inputs to verify that certain properties or invariants hold true across a wide range of scenarios. This approach helps uncover edge cases and unexpected behaviors that might be missed by traditional unit testing.
 
 ### Running Property-Based Tests
-To run the property-based tests, use the following command:
 
+To run the property-based tests, use the following command:
 ```
 cabal test PropertyBasedTests
 ```
 
 For more detailed output:
-
 ```
 cabal test PropertyBasedTests --test-show-details=always
 ```
@@ -185,12 +197,13 @@ cabal test PropertyBasedTests --test-show-details=always
 - `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
 - `--test-options='--quickcheck-tests=n'`: Sets the number of test cases QuickCheck should generate for each property. Replace 'n' with the desired number (e.g., 100, 1000).
 
-**Example**:
+Example:
 ```
 cabal test PropertyBasedTests -j1 --test-options='-p /Protocol/ --quickcheck-tests=1000'
 ```
 
 This runs property-based tests sequentially, only for tests containing "Protocol" in their name, with 1000 test cases per property.
+s
 
 ### Test Structure
 Property-based tests are organized similarly to unit tests, grouped by contract or component:
@@ -279,14 +292,13 @@ Property-based testing complements our unit tests by providing a more exhaustive
 Performance tests are designed to evaluate the resource usage and efficiency of critical components within the MAYZ Protocol. These tests ensure that the protocol operates within acceptable resource limits, particularly important for on-chain operations where computational costs directly translate to transaction fees.
 
 ### Running Performance Tests
-To run the performance tests, use the following command:
 
+To run the performance tests, use the following command:
 ```
 cabal test PerformanceTests
 ```
 
 For more detailed output:
-
 ```
 cabal test PerformanceTests --test-show-details=always
 ```
@@ -296,10 +308,12 @@ cabal test PerformanceTests --test-show-details=always
 - `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
 - `--test-options='--quickcheck-tests=n'`: Sets the number of test cases QuickCheck should generate for each property. Replace 'n' with the desired number (e.g., 100, 1000).
 
-**Example**:
+Example:
 ```
 cabal test PerformanceTests -j1 --test-options='-p /Deposits/ --quickcheck-tests=1000'
 ```
+
+This runs performance tests sequentially, only for tests containing "Deposits" in their name, with 1000 test cases per property.
 
 ### Test Structure
 The performance tests are organized into two main categories:
@@ -373,21 +387,70 @@ Automatic tests form the foundation of the MAYZ Protocol's testing strategy. The
 ### Running Automatic Tests
 
 To run the automatic tests, use the following command:
-
 ```
 cabal test AutomaticTests
 ```
 
-For more detailed output and control:
+For more detailed output:
+```
+cabal test AutomaticTests --test-show-details=always
+```
+
+#### Test Parameters
+- `-j1`: This parameter limits the number of jobs to 1, ensuring tests run sequentially. Useful for debugging or when tests might interfere with each other.
+- `--test-options='-p /pattern/'`: This option allows you to run only tests matching a specific pattern. Replace 'pattern' with the desired test name or pattern.
+- `--test-options='--quickcheck-tests=n'`: Sets the number of test cases QuickCheck should generate for each property. Replace 'n' with the desired number (e.g., 100, 1000).
+
+Example:
+```
+cabal test AutomaticTests -j1 --test-options='-p // --quickcheck-tests=1'
+```
+
+This runs automatic tests sequentially, with 1 test case per property.
 
 ```
-cabal test AutomaticTests --test-show-details=always -j1 --test-options='-p "/Fund Tests/" --quickcheck-tests=1'
+cabal test AutomaticTests -j1 --test-options='-p /Deposits/ --quickcheck-tests=1000'
 ```
 
-Test Parameters:
-- `-j1`: Limits job execution to 1, ensuring sequential test runs.
-- `--test-options='-p "/Fund Tests/"'`: Filters tests to run only those matching the "Fund Tests" pattern.
-- `--quickcheck-tests=1'`: Sets the number of test cases generated by QuickCheck for each property.
+This runs automatic tests sequentially, only for tests containing "Deposits" in their name, with 1000 test cases per property.
+
+#### Configuration File
+The automatic tests rely on a configuration file that defines the rules and expected errors for each test case. This file is crucial for the proper execution and validation of the tests.
+
+File Location: `tests/config/tests.xlsx`
+
+**Note**: The path to this configuration file is currently not configurable and is hardcoded in the test suite. Ensure this file is present and up-to-date before running the automatic tests.
+
+The Excel file contains the following key information:
+- Test case specifications
+- Expected outcomes for each test scenario
+- Error messages to be matched against test results
+- Rules for validating test outcomes
+
+Check more about the [Rule Definitions](#rule-definition).
+
+It's essential to keep this configuration file synchronized with any changes made to the smart contracts or test scenarios. Regular updates to this file ensure that the automatic tests accurately reflect the current state and requirements of the MAYZ Protocol.
+
+### Log Parser Tool
+
+To assist in creating and maintaining the configuration file, we provide a log parser tool. This tool can parse the output of automatic tests and generate an initial Excel file with test rules.
+
+Location: `tests/tools/`
+
+The log parser tool automates the process of:
+1. Analyzing test output logs
+2. Extracting information about test failures
+3. Generating an Excel file that can be used as a starting point for the `tests/config/tests.xlsx` configuration
+
+For detailed instructions on using the log parser tool, refer to its README file:
+[Log Parser Tool README](../tests/tools/README.md)
+
+This tool is particularly useful when:
+- Setting up initial test configurations
+- Updating test rules after significant changes to the protocol
+- Analyzing and incorporating new failure cases into the test suite
+
+While the generated Excel file provides a good starting point, it's crucial to review and refine the rules manually to ensure they accurately reflect the expected behavior of the MAYZ Protocol.
 
 ### Test Structure and PATH Relation
 
@@ -460,6 +523,9 @@ Rules are defined in an Excel spreadsheet with the following key columns:
 - OUTCOME: Expected result (TestSuccess, TestFailure, TestNone)
 - MESSAGE: Expected error message for failures
 - SOURCE: The source of the error (e.g., SelfRedeemer, CombinedRedeemerResults)
+
+#### Configuration File
+File Location: `tests/config/tests.xlsx`
 
 ### Test Case Generation Process
 
