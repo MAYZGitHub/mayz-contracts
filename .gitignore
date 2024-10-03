@@ -32,9 +32,6 @@ cabal.project.local~
 shell-1.1.0.nix
 .pre-commit-config.yaml
 
-
-tests/tools
-
 docs/PABSimulator.txt
 docs/README DEV.txt
 
