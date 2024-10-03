@@ -53,6 +53,7 @@ investUnit_Validator_Tests = do
         [
             investUnit_Validator_Redeemer_ReIndexing_Tests tp
             , investUnit_Validator_Redeemer_UpdateMinADA_Tests tp
+            , investUnit_Validator_Redeemer_Delete_Tests tp
         ]
 
 --------------------------------------------------------------------------------
@@ -95,6 +96,24 @@ investUnit_Validator_Redeemer_UpdateMinADA_Tests tp =
                     ctx = investUnit_UpdateMinADA_TxContext tp toAlter_minAda
                 in
                     []
+
+--------------------------------------------------------------------------------
+
+investUnit_Validator_Redeemer_Delete_Tests :: TestParams -> Tasty.TestTree
+investUnit_Validator_Redeemer_Delete_Tests tp =
+    let ------------------------
+        txName = show Fund_Delete_Tx
+        selectedRedeemer = RedeemerLogValidator (Just InvestUnit_Delete_TestRedeemer)
+        redeemerName = getRedeemerNameFromLog selectedRedeemer
+        ------------------------
+    in
+        Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
+                let
+                    --TODO:
+                    ctx = investUnit_Delete_TxContext tp
+                in
+                    []
+
 
 --------------------------------------------------------------------------------
 
@@ -204,7 +223,7 @@ prop_reIndex_changeValueFail tp selectedRedeemer ctx inputIU addIU =
                     |> setValidyRange (createValidRange (tpReIdxDate tp))
         results <- testContextWrapper tp ctx'
         (Just selectedRedeemer, results)
-            `assertResultsContainAnyOf` ["not isCorrect_Output_InvestDatum_Value_NotChanged"]
+            `assertResultsContainAnyOf` ["not isCorrect_Output_InvestUnit_Value_NotChanged"]
     where
         randomPriceIUAndValue :: QC.Gen (T.InvestUnit, T.InvestUnit, LedgerApiV2.Value)
         randomPriceIUAndValue = do

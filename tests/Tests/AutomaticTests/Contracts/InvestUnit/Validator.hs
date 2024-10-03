@@ -47,6 +47,8 @@ investUnit_Validator_Tests tp ruleTree =
             investUnit_Validator_Redeemer_ReIndexing_Tests tp ruleTree
             , investUnit_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree
             , investUnit_Validator_Redeemer_Emergency_Tests tp ruleTree
+            , investUnit_Validator_Redeemer_Delete_Tests tp ruleTree
+
         ]
 
 --------------------------------------------------------------------------------
@@ -129,5 +131,22 @@ investUnit_Validator_Redeemer_Emergency_Tests tp _ =
         ------------------------
      in
         adminTokens_Tests_Gen tp txName selectedRedeemer (P.const defaultTxSpecs) InvestUnitT.mkEmergencyRedeemer (tpTokenAdminPolicy_CS tp) (tpTokenEmergencyAdminPolicy_CS tp) T.protocolTokenAdmin_TN T.protocolTokenEmergencyAdmin_TN True True
+
+--------------------------------------------------------------------------------
+
+investUnit_Validator_Redeemer_Delete_Tests :: TestParams -> RuleTree -> Tasty.TestTree
+investUnit_Validator_Redeemer_Delete_Tests tp ruleTree =
+    let
+        ------------------------
+        txName = show Fund_Delete_Tx
+        txSpecs = investUnit_Delete_TxSpecs tp
+        defaultTestCaseParams = generateTestCaseParams txSpecs
+        selectedRedeemer = RedeemerLogValidator (Just InvestUnit_Delete_TestRedeemer)
+        ------------------------
+        redeemerTestConfigTree = getTestConfigTree tp txSpecs
+        updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
+        ------------------------
+    in
+        transaction_Tests_Gen tp selectedRedeemer txName (P.const txSpecs) [] [] updatedTestConfigTree defaultTestCaseParams
 
 --------------------------------------------------------------------------------

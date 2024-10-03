@@ -52,6 +52,7 @@ investUnit_Validator_Tests tp =
         [
             investUnit_Validator_Redeemer_ReIndexing_Tests tp
             , investUnit_Validator_Redeemer_UpdateMinADA_Tests tp
+            , investUnit_Validator_Redeemer_Delete_Tests tp
         ]
 
 --------------------------------------------------------------------------------
@@ -282,7 +283,7 @@ investUnit_Validator_Redeemer_ReIndexing_Tests tp =
                                         |> setOutputs [fundHolding_UTxO_After_Reidx_MockData tp investUnit_Initial investUnit_AfterReIdx, wrongUTxO]
                             results <- testContextWrapper tp ctx'
                             (Just selectedRedeemer, results)
-                                    `assertResultsContainAnyOf` ["not isCorrect_Output_InvestDatum_Value_NotChanged"]
+                                    `assertResultsContainAnyOf` ["not isCorrect_Output_InvestUnit_Value_NotChanged"]
                         , Tasty.testCase "Using an incorrect Oracle signature must fail" $ do
                             let
                                 wrongOraclePrivateKey =
@@ -384,6 +385,28 @@ investUnit_Validator_Redeemer_UpdateMinADA_Tests tp =
                 in
                     [
                         Tasty.testCase "Changing min ADA correctly must succeed" $ do
+                            let ctx' = ctx
+                            results <- testContextWrapper tp ctx'
+                            (Nothing, results)
+                                `assertResultsContainAnyOf` []
+                    ]
+
+--------------------------------------------------------------------------------
+
+investUnit_Validator_Redeemer_Delete_Tests :: TestParams -> Tasty.TestTree
+investUnit_Validator_Redeemer_Delete_Tests tp =
+    let ------------------------
+        txName = show Fund_Delete_Tx
+        selectedRedeemer = RedeemerLogValidator (Just InvestUnit_Delete_TestRedeemer)
+        redeemerName = getRedeemerNameFromLog selectedRedeemer
+        ------------------------
+    in
+        Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
+                let
+                    ctx = investUnit_Delete_TxContext tp 
+                in
+                    [
+                        Tasty.testCase "Delete correctly must succeed" $ do
                             let ctx' = ctx
                             results <- testContextWrapper tp ctx'
                             (Nothing, results)

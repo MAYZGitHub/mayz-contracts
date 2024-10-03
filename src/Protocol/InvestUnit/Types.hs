@@ -181,11 +181,23 @@ PlutusTx.makeIsDataIndexed
     [('ValidatorRedeemerEmergencyType, 0)]
 
 --------------------------------------------------------------------------------2
+data ValidatorRedeemerDeleteType = ValidatorRedeemerDeleteType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
+
+instance Eq ValidatorRedeemerDeleteType where
+    {-# INLINABLE (==) #-}
+    r1 == r2 = r1 == r2
+
+PlutusTx.makeIsDataIndexed
+    ''ValidatorRedeemerDeleteType
+    [('ValidatorRedeemerDeleteType, 0)]
+
+--------------------------------------------------------------------------------22
 
 data ValidatorRedeemer
     = ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType
     | ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType
     | ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType
+    | ValidatorRedeemerDelete ValidatorRedeemerDeleteType
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemer where
@@ -193,13 +205,15 @@ instance Eq ValidatorRedeemer where
     ValidatorRedeemerUpdateMinADA rmf1 == ValidatorRedeemerUpdateMinADA rmf2 = rmf1 == rmf2
     ValidatorRedeemerReIndexing rmf1 == ValidatorRedeemerReIndexing rmf2     = rmf1 == rmf2
     ValidatorRedeemerEmergency rmf1 == ValidatorRedeemerEmergency rmf2       = rmf1 == rmf2
+    ValidatorRedeemerDelete rmf1 == ValidatorRedeemerDelete rmf2             = rmf1 == rmf2
     _ == _                                                                   = False
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemer
     [ ('ValidatorRedeemerReIndexing, 0),
         ('ValidatorRedeemerUpdateMinADA, 1),
-        ('ValidatorRedeemerEmergency, 2)
+        ('ValidatorRedeemerEmergency, 2),
+        ('ValidatorRedeemerDelete, 3)
     ]
 
 --------------------------------------------------------------------------------2
@@ -208,6 +222,7 @@ getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
 getValidatorRedeemerName (Just (ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType {}))  = Just "ReIndexing"
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
 getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))       = Just "Emergency"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType {}))          = Just "Delete"
 getValidatorRedeemerName _                                                                        = Nothing
 
 --------------------------------------------------------------------------------2
@@ -239,5 +254,11 @@ mkEmergencyRedeemer =
     LedgerApiV2.Redeemer $
         LedgerApiV2.toBuiltinData $
             ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType
+
+mkDeleteRedeemer :: LedgerApiV2.Redeemer
+mkDeleteRedeemer =
+    LedgerApiV2.Redeemer $
+        LedgerApiV2.toBuiltinData $
+            ValidatorRedeemerDelete ValidatorRedeemerDeleteType
 
 --------------------------------------------------------------------------------2

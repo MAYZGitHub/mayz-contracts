@@ -108,17 +108,36 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         ------------------
                         !fundID_AC = LedgerValue.AssetClass (fundPolicy_CS, T.fundID_TN)
                         ------------------
-                        !inputRef_TxOut_And_FundDatum =
-                            case OnChainHelpers.getTxOuts_And_DatumTypes_From_TxOuts_By_AC
-                                @FundT.ValidatorDatum @FundT.FundDatumType
-                                ctx
-                                inputsRef_TxOuts
-                                fundID_AC
-                                FundT.getFund_DatumType of
-                                [x] -> x
-                                _   -> traceError "Expected exactly one Fund input ref"
+                        getFundDatumAndAdmins :: T.ValidatorRedeemer -> FundT.FundDatumType
+                        getFundDatumAndAdmins redeemer'  =
+                            case redeemer' of
+                                T.ValidatorRedeemerDelete _ -> 
+                                    let !inputs_Others_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
+                                            let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+                                            in  OnChainHelpers.isScriptAddress address && address /= investUnit_Validator_Address]
+                                        input_TxOut_And_FundDatum = case OnChainHelpers.getTxOuts_And_DatumTypes_From_TxOuts_By_AC
+                                            @FundT.ValidatorDatum @FundT.FundDatumType
+                                            ctx
+                                            inputs_Others_TxOuts
+                                            fundID_AC
+                                            FundT.getFund_DatumType of
+                                                [x] -> x
+                                                _   -> traceError "Expected exactly one Fund input"
+                                        fundDatum_In' = OnChainHelpers.getDatum_In_TxOut_And_Datum input_TxOut_And_FundDatum
+                                    in fundDatum_In'
+                                _ -> 
+                                    let inputRef_TxOut_And_FundDatum = case OnChainHelpers.getTxOuts_And_DatumTypes_From_TxOuts_By_AC
+                                            @FundT.ValidatorDatum @FundT.FundDatumType
+                                            ctx
+                                            inputsRef_TxOuts
+                                            fundID_AC
+                                            FundT.getFund_DatumType of
+                                                [x] -> x
+                                                _   -> traceError "Expected exactly one Fund input ref"
+                                        fundDatum_In' = OnChainHelpers.getDatum_In_TxOut_And_Datum inputRef_TxOut_And_FundDatum
+                                    in fundDatum_In'
                         ------------------
-                        !fundDatum_In = OnChainHelpers.getDatum_In_TxOut_And_Datum inputRef_TxOut_And_FundDatum
+                        !fundDatum_In = getFundDatumAndAdmins redeemer
                         ------------------
                         validateAdminAction :: Bool
                         !validateAdminAction =
@@ -148,7 +167,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.oridTime riuriOracleReIdx_Data))
                                         && traceIfFalse "not isCorrect_Exchange_WithSamePriceADA" isCorrect_Exchange_WithSamePriceADA
                                         && traceIfFalse "not isCorrect_Output_InvestUnit_Datum_WithTokensExchanged" isCorrect_Output_InvestUnit_Datum_WithTokensExchanged
-                                        && traceIfFalse "not isCorrect_Output_InvestDatum_Value_NotChanged" isCorrect_Output_InvestDatum_Value_NotChanged
+                                        && traceIfFalse "not isCorrect_Output_InvestUnit_Value_NotChanged" isCorrect_Output_InvestUnit_Value_NotChanged
                                         ------------------
                                     where
                                         ------------------
@@ -241,8 +260,8 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                                 !investUnitDatum_Out = OnChainHelpers.getDatum_In_TxOut_And_Datum output_Own_TxOut_And_InvestUnitDatum
                                             in  investUnitDatum_Out `OnChainHelpers.isUnsafeEqDatums` investUnitDatum_Control
                                         ------------------
-                                        isCorrect_Output_InvestDatum_Value_NotChanged :: Bool
-                                        isCorrect_Output_InvestDatum_Value_NotChanged =
+                                        isCorrect_Output_InvestUnit_Value_NotChanged :: Bool
+                                        isCorrect_Output_InvestUnit_Value_NotChanged =
                                             let
                                                 !valueOf_InvestUnitDatum_Out = OnChainHelpers.getValue_In_TxOut_And_Datum output_Own_TxOut_And_InvestUnitDatum
                                             in  valueOf_InvestUnitDatum_Out `OnChainHelpers.isEqValue` valueFor_InvestUnitDatum_Control_NotChanged
@@ -304,6 +323,18 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             let !valueOf_InvestUnitDatum_Out = OnChainHelpers.getValue_In_TxOut_And_Datum output_Own_TxOut_And_InvestUnitDatum
                                                 !valueFor_InvestUnitDatum_Control = valueOf_InvestUnitDatum_In <> LedgerAda.lovelaceValueOf (newMinADA - T.iudMinADA investUnitDatum_In)
                                             in valueOf_InvestUnitDatum_Out `OnChainHelpers.isEqValue` valueFor_InvestUnitDatum_Control
+
+                                (T.ValidatorRedeemerDelete _) ->
+                                        ------------------
+                                        -- it runs along with Fund ID Policy  (PolicyRedeemerBurnID)
+                                        -- it runs along with Fund Validator (ValidatorRedeemerDelete)
+                                        ------------------
+                                    traceIfFalse "not isBurningInvestUnitID" isBurningInvestUnitID
+                                    where
+                                        ------------------
+                                        isBurningInvestUnitID :: Bool
+                                        !isBurningInvestUnitID = OnChainHelpers.isNFT_Burning_With_AC investUnitID_AC info
+                                        ------------------
                                 _ -> False
 
 --------------------------------------------------------------------------------2
