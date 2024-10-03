@@ -806,11 +806,6 @@ fundHolding_ReIndexing_TxSpecs  = investUnit_ReIndexing_TxSpecs
 
 fundHolding_BalanceAssets_TxSpecs :: TestParams -> [TxParam] -> TxSpecs
 fundHolding_BalanceAssets_TxSpecs tp txParams =
--- setInputsRef [fund_UTxO_MockData tp]
--- setInputsAndAddRedeemers [(input_FundHolding1_UTxO, FundHoldingT.mkBalanceAssetsRedeemer), (input_FundHolding2_UTxO, FundHoldingT.mkBalanceAssetsRedeemer)]
--- setOutputs [output_FundHolding1_UTxO, output_FundHolding2_UTxO]
--- setSignatories (tpFundAdmins tp)
--- setValidyRange (createValidRange (tpTransactionDate tp))
  let
         --------------------------
         -- UTxO Mock Data --
@@ -866,7 +861,7 @@ fundHolding_BalanceAssets_TxSpecs tp txParams =
              txOut_With_TestEntity_Gen tp (output_FundHolding2_UTxO extras) FundHolding_TestEntity op
         -----------------
         consume_FundHolding1_ValidRedeemerData = FundHoldingT.mkBalanceAssetsRedeemer [0,0]
-        consume_FundHolding1_InvalidRedeemerData = Nothing
+        consume_FundHolding1_InvalidRedeemerData = Just $ FundHoldingT.mkBalanceAssetsRedeemer [1,-1]
         consume_FundHolding1_InvalidRedeemerType = Just FundHoldingT.mkDeleteRedeemer
         consume_FundHolding1_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------
@@ -881,7 +876,7 @@ fundHolding_BalanceAssets_TxSpecs tp txParams =
                 extras
         -----------------
         consume_FundHolding2_ValidRedeemerData = FundHoldingT.mkBalanceAssetsRedeemer [0,0]
-        consume_FundHolding2_InvalidRedeemerData = Nothing
+        consume_FundHolding2_InvalidRedeemerData = Just $ FundHoldingT.mkBalanceAssetsRedeemer [1,-1]
         consume_FundHolding2_InvalidRedeemerType = Just FundHoldingT.mkDeleteRedeemer
         consume_FundHolding2_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
         -----------------

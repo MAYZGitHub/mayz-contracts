@@ -286,22 +286,6 @@ fundHolding_BalanceAssets_TxContext tp =
             , LedgerApiV2.txOutValue = input_FundHolding2_Value
             }
         -----------------
-        !inputs_Own_TxOuts_And_FundHoldingDatums = [input_FundHolding1_UTxO, input_FundHolding2_UTxO]
-        !outputs_Own_TxOuts_And_FundHoldingDatums = [output_FundHolding1_UTxO, output_FundHolding2_UTxO]
-        !inputs_Values_And_FundHoldingDatums =  [(LedgerApiV2.txOutValue txOut_And_Datum, FundHoldingT.getFundHolding_DatumType_From_UTxO txOut_And_Datum)  | !txOut_And_Datum <- inputs_Own_TxOuts_And_FundHoldingDatums]
-        !outputs_Values_And_FundHoldingDatums =  [(LedgerApiV2.txOutValue txOut_And_Datum, FundHoldingT.getFundHolding_DatumType_From_UTxO txOut_And_Datum)  | !txOut_And_Datum <- outputs_Own_TxOuts_And_FundHoldingDatums]
-        ------------------
-        isCorrect_Outputs_FundHoldingDatums_NotChanged :: Bool
-        !isCorrect_Outputs_FundHoldingDatums_NotChanged =
-            let
-                !fundHoldingDatums_In = snd <$> inputs_Values_And_FundHoldingDatums
-                !fundHoldingDatums_Out = snd <$> outputs_Values_And_FundHoldingDatums
-                !_ =  unsafePerformIOTraceIf swTrace $ "fundHoldingDatums_In: " ++ show fundHoldingDatums_In
-                !_ =  unsafePerformIOTraceIf swTrace $ "fundHoldingDatums_Out: " ++ show fundHoldingDatums_Out
-                ------------------
-            in all (uncurry OnChainHelpers.isUnsafeEqDatums) (zip fundHoldingDatums_In fundHoldingDatums_Out)
-        ------------------
-        !_ =  unsafePerformIOTraceIf swTrace $ "isCorrect_Outputs_FundHoldingDatums_NotChanged: " ++ show isCorrect_Outputs_FundHoldingDatums_NotChanged
     in do
         mkContext
             |> setInputsRef [fund_UTxO_With_Added_FundHolding_MockData tp,

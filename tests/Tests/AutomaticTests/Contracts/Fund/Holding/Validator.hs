@@ -57,8 +57,8 @@ fundHolding_Validator_Tests tp ruleTree =
         , fundHolding_Validator_Redeemer_Collect_Managers_Commission_Tests tp ruleTree
         , fundHolding_Validator_Redeemer_Collect_Delegators_Commission_Tests tp ruleTree
         , fundHolding_Validator_Redeemer_ReIndexing_Tests tp ruleTree
-        , -- , fundHolding_Validator_Redeemer_BalanceAssets_Tests tp ruleTree
-          fundHolding_Validator_Redeemer_Emergency_Tests tp ruleTree
+        , fundHolding_Validator_Redeemer_BalanceAssets_Tests tp ruleTree
+        , fundHolding_Validator_Redeemer_Emergency_Tests tp ruleTree
         , fundHolding_Validator_Redeemer_Delete_Tests tp ruleTree
         ]
 

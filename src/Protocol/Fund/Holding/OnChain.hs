@@ -57,6 +57,13 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
                     ------------------
                     -- it runs along with Fund Validator (ValidatorRedeemerFundHoldingAdd)
                     ------------------
+                    -- Que se consuma FundDatum con redeemer correcto (AddHolding)
+                    -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
+                    -- Que se genere salida con nuevo HoldingDatum en Holding Val (Holding Val está indicada en FundDatum)
+                    -- Que el HoldingDatum sea correcto
+                    -- Que se mintee Holding ID con own póliza
+                    -- Que el HoldingDatum tenga el Holding ID
+                    ------------------
                     traceIfFalse "not isMintingFundHoldingID" isMintingFundHoldingID &&
                     traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingAdd ) &&
                     traceIfFalse "not isCorrect_Output_FundHolding_Datum" isCorrect_Output_FundHolding_Datum &&
@@ -138,6 +145,11 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
                     -- it runs along with Fund Validator (ValidatorRedeemerFundHoldingDelete)
                     ------------------
                     -- it runs along with FundHolding Validator (ValidatorRedeemerDelete)
+                    ------------------
+                    -- Que se consuma FundDatum con redeemer correcto (DeleteHolding)
+                    -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
+                    -- Que se queme Holding ID con own póliza
+                    -- que no haya tokens en el FundHolding
                     ------------------
                     traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                     && traceIfFalse "not isCorrect_Redeemer_Fund" (isCorrect_Redeemer_Fund isFundValidatorRedeemerFundHoldingDelete)
@@ -327,6 +339,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                 ------------------
                                 -- it runs along with FundHolding ID Policy (PolicyRedeemerBurnID)
                                 ------------------
+                                -- que sea fund admin, eso lo controla la validacion del Fund
+                                -- Que se queme Holding ID con la correcta póliza indicada en FundDatum
+                                -- Para identificar el correcto FundDatum necesita la póliza Fund ID que está en los parámetros de esta póliza.
+                                -- que no haya tokens en el fundHOlding. Se verifica en la poliza de PolicyRedeemerBurnID
+                                ------------------
                                 traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                 && traceIfFalse "not isBurningFundHoldingID" isBurningFundHoldingID
                                 ------------------
@@ -423,22 +440,25 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                             ---------------------
                                             -- it runs alone
                                             ---------------------
+                                            -- Que sea Fund Admin
+                                            -- Ya esta controlado que haya mas de un input, por lo tanto hay al menos misma cantidad de outputs
+                                            -- La cantidad de FT modificadas, somas y restas en el array alterCommissionsFT, tiene que ser 0
+                                            -- Que se modifique datum correctamente: si se alteraron FT Commissions, que se hayan movido proporcionalmente a los rates
+                                            -- Que la suma total de los values de salida sea igual a la suma total de los values de entrada
+                                            -- Que cada value de salida tiene lo que dice el datum de minADA, la cantidad de FT y el funHoldingID correspondiente
+                                            ---------------------------------
                                             validateFundAdminAction fundDatum_In
-                                            && traceIfFalse "not cantInputs == cantOutputs" (cantInputs == cantOutputs && length alterCommissionsFT == cantOutputs)
+                                            && traceIfFalse "not cantInputs == cantOutputs" (cantInputs == cantOutputs)
+                                            && traceIfFalse "not len alterCommissionsFT == cantOutputs" (length alterCommissionsFT == cantOutputs)
                                             && traceIfFalse "not isCorrect_Outputs_Commissions_SameTotal" isCorrect_Outputs_Commissions_SameTotal
-                                            && traceIfFalse "not isCorrect_Outputs_FundHoldingDatums" isCorrect_Outputs_FundHoldingDatums
-                                            && traceIfFalse "not isCorrect_Output_FundHolding_Datums_Values_SameTotal" isCorrect_Output_FundHolding_Values_SameTotal
-                                            && traceIfFalse "not isCorrect_Output_FundHolding_Datums_Values" isCorrect_Output_FundHolding_Values
+                                            && traceIfFalse "not isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate" isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate
+                                            && traceIfFalse "not isCorrect_Output_FundHolding_Values_SameTotal" isCorrect_Output_FundHolding_Values_SameTotal
+                                            && traceIfFalse "not isCorrect_Output_FundHolding_Values" isCorrect_Output_FundHolding_Values
                                             ------------------
                                             where
                                                 ------------------
                                                 !outputs_Own_TxOuts = [txOut | !txOut <- outputs_txOuts,
                                                     LedgerApiV2.txOutAddress txOut == fundHolding_Validator_Address]
-                                                ------------------
-                                                !_outputs_txOuts_index0 =
-                                                    if null outputs_Own_TxOuts
-                                                        then traceError "Expected at least one own output"
-                                                        else head outputs_Own_TxOuts
                                                 ------------------
                                                 !inputs_Own_TxOuts_And_FundHoldingDatums = OnChainHelpers.getTxOuts_And_DatumTypes_From_TxOuts_By_CS
                                                         @T.ValidatorDatum @T.FundHoldingDatumType
@@ -470,43 +490,17 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                 ------------------
                                                 isCorrect_Outputs_Commissions_SameTotal :: Bool
                                                 !isCorrect_Outputs_Commissions_SameTotal = sum alterCommissionsFT == 0
-                                                    -- let
-                                                    --     sumAndSubtractTotal :: Integer -> (Integer, Integer) -> Integer
-                                                    --     sumAndSubtractTotal !accValue (!inValue, !outValue) =
-                                                    --         ((accValue + inValue) - outValue)
-                                                    --     -- Perform the fold to sum and subtract
-                                                    --     !finalValue = foldl sumAndSubtractTotal 0 (zip (T.hdSubtotal_FT_Commissions <$> fundHoldingDatums_In) (T.hdSubtotal_FT_Commissions <$> fundHoldingDatums_Out))
-                                                    -- in
-                                                    --     -- Check that the final accumulated value is zero for all tokens
-                                                    --     finalValue == 0
                                                 ------------------
-                                                isCorrect_Outputs_FundHoldingDatums :: Bool
-                                                !isCorrect_Outputs_FundHoldingDatums =
-                                                    -- let
-                                                    --     ------------------
-                                                    --     -- no los ordeno, se supone vienen ordenados en la tx
-                                                    --     -- fundHoldingDatums_In_Sorted = sort (snd <$> inputs_Values_And_FundHoldingDatums)
-                                                    --     -- fundHoldingDatums_Out_Sorted = sort (snd <$> outputs_Values_And_FundHoldingDatums)
-                                                    --     ------------------
-                                                    --     -- !fundHoldingDatums_In = snd <$> inputs_Values_And_FundHoldingDatums
-                                                    --     -- !fundHoldingDatums_Out = snd <$> outputs_Values_And_FundHoldingDatums
-                                                    --     ------------------
-                                                    --     fundHoldingDatums_Control = zipWith3 FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved
-                                                    --                                 fundHoldingDatums_In
-                                                    --                                 fundHoldingDatums_Out
-                                                    --                                 rbCommissionsFT
-                                                    -- in
-                                                    --     all (uncurry OnChainHelpers.isUnsafeEqDatums) (zip fundHoldingDatums_Control fundHoldingDatums_Out)
+                                                isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate :: Bool
+                                                !isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate =
                                                     let
                                                         {-
                                                             Validate Fund Holding Datum updates:
                                                             1. Create control datum using input datum, new commission (commissionFT), and new rate from output datum
-                                                            2. Check if control datum matches output datum
-                                                            3. Verify proportional change in commissions and rates:
+                                                            2. Verify proportional change in commissions and rates:
                                                                - If old commission was 0, accept any new rate
                                                                - Otherwise, ensure (newCommissions * oldRate) == (oldCommissions * newRate)
-                                                            4. Both checks (datum equality and proportional change) must pass for validation to succeed
-                                                            Note: This allows initialization of empty datums and maintains proportion for non-zero cases
+                                                            3. Check if control datum matches output datum
                                                         -}
                                                         validateDatum :: T.FundHoldingDatumType -> T.FundHoldingDatumType -> Integer -> Bool
                                                         validateDatum !datumIn !datumOut !alter_Commission_FT =
@@ -522,18 +516,14 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                                 isProportionalChange = (oldCommissions == 0) || ((newCommissions * oldRate) == (oldCommissions * newRate))
                                                             in
                                                                 OnChainHelpers.isUnsafeEqDatums datumControl datumOut && isProportionalChange
+                                                        ------------------
                                                         validateAll :: [T.FundHoldingDatumType] -> [T.FundHoldingDatumType] -> [Integer] -> Bool
                                                         validateAll [] [] []                    = True
                                                         validateAll (din:dis) (dout:dos) (c:cs) = validateDatum din dout c && validateAll dis dos cs
                                                         validateAll _ _ _                       = False
+                                                        ------------------
                                                     in
                                                         validateAll fundHoldingDatums_In fundHoldingDatums_Out alterCommissionsFT
-                                                ------------------
-                                                -- !valueOf_FundHoldingDatums_In = foldl (<>) (LedgerAda.lovelaceValueOf 0) $ fst <$> inputs_Values_And_FundHoldingDatums
-                                                -- !valueOf_FundHoldingDatums_Out = foldl (<>) (LedgerAda.lovelaceValueOf 0) $ fst <$> outputs_Values_And_FundHoldingDatums
-                                                ------------------
-                                                -- isCorrect_Output_FundHolding_Datums_Values_SameTotal :: Bool
-                                                -- !isCorrect_Output_FundHolding_Datums_Values_SameTotal = valueOf_FundHoldingDatums_In == valueOf_FundHoldingDatums_Out
                                                 ------------------
                                                 isCorrect_Output_FundHolding_Values_SameTotal :: Bool
                                                 !isCorrect_Output_FundHolding_Values_SameTotal =
@@ -565,7 +555,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                                 !fundHoldingID_AC'= LedgerValue.AssetClass (fundHoldingPolicyID_CS, fundHoldingID_TN')
                                                                 ------------------
                                                             in  OnChainHelpers.isNFT_With_AC_InValue valueOf_FundHoldingDatum_Out' fundHoldingID_AC'
-                                                                -- min ADA tiene que ser al menos lo que marca el datum, puede ser más, en el caso de que se haya usado ADA para la InvestUnit
+                                                                -- min ADA tiene que ser al menos lo que marca el datum, puede ser más, en el caso de que se haya usado ADA como token dentro de la InvestUnit
                                                                 && OnChainHelpers.getValueOfLovelace valueOf_FundHoldingDatum_Out' >= minADA
                                                                 && OnChainHelpers.getAmt_With_AC_InValue valueOf_FundHoldingDatum_Out' fundFT_AC == commissionsFT
                                         _ -> False
@@ -624,11 +614,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             !(userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) =
                                                                 FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
                                                             ------------------
-                                                            !valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In investUnitTokens deposit True
+                                                            !valueOf_TokensForDeposit_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In investUnitTokens deposit True
                                                             ------------------
                                                             !valueFor_FT_Commissions = LedgerValue.assetClassValue fundFT_AC commissionsFT
                                                             ------------------
-                                                            !valueFor_FundHoldingDatum_Control_With_Tokens_And_FT = valueOf_TokensForDeposit_Plus_FundHoldingDatum_Value <> valueFor_FT_Commissions
+                                                            !valueFor_FundHoldingDatum_Control_With_Tokens_And_FT = valueOf_TokensForDeposit_Plus_FundHolding_Value <> valueFor_FT_Commissions
                                                             ------------------
                                                             !fundHoldingDatum_Control_With_Deposit = FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Rate1e6_PerMonth
                                                             ------------------
@@ -661,9 +651,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             !commissionsForUserFT_calculated = FundHelpers.calculateWithdrawCommissionsAvailable commissionsTable_Numerator1e6 deadline date withdraw investUnit_Granularity
                                                             !commissions_FT_Rate1e6_PerMonth_calculated = FundHelpers.calculateWithdrawCommissionsRate deadline date commissionsForUserFT
                                                             ------------------
-                                                            !valueOf_TokensForWithdraw_Plus_FundHoldingDatum_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value valueOf_FundHoldingDatum_In investUnitTokens (negate withdrawPlusComissions) False
+                                                            !valueOf_TokensForWithdraw_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In investUnitTokens (negate withdrawPlusComissions) False
                                                             !valueFor_FT_CommissionsToGetBack = LedgerValue.assetClassValue fundFT_AC commissionsForUserFT
-                                                            !valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions = valueOf_TokensForWithdraw_Plus_FundHoldingDatum_Value <> negate valueFor_FT_CommissionsToGetBack
+                                                            !valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions = valueOf_TokensForWithdraw_Plus_FundHolding_Value <> negate valueFor_FT_CommissionsToGetBack
                                                             ------------------
                                                             !fundHoldingDatum_Control_With_Withdraw  = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFT commissions_FT_Rate1e6_PerMonth_calculated
                                                             ------------------
@@ -786,6 +776,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ---------------------
                                                             -- it runs alone
                                                             ---------------------
+                                                            -- Que sea Fund Admin
+                                                            -- Que el FundHoldingDatum regrese a FundHolding Val (se hace automaticamente al buscar outputs en same address)
+                                                            -- Que el FundHoldingDatum se actualiza correctamente
+                                                            -- Que el FundHoldingDatum value cambie con el min ADA nuevo
+                                                            -- no hay restricciones temporales
+                                                            ------------------
                                                             validateFundAdminAction fundDatum_In
                                                             && traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not min ADA > 0" (newMinADA > 0)
