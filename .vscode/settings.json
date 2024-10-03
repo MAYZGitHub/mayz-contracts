@@ -7,7 +7,7 @@
 		// "--respectful=true"
 	],
 	"[haskell]": {
-		"editor.defaultFormatter": "vigoo.stylish-haskell"
+		"editor.defaultFormatter": "haskell.haskell"
 	},
 	"haskell.manageHLS": "GHCup",
 	"haskell.formattingProvider": "fourmolu",
