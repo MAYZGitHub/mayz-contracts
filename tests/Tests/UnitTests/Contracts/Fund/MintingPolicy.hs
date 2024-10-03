@@ -51,9 +51,9 @@ fund_Policy_Tests tp =
         "Fund Policy Tests"
         [
              fund_Policy_Redeemer_MintID_Tests tp
-            -- , fund_Policy_Redeemer_BurnID_Tests tp
-            -- , fund_Policy_Redeemer_MintFT_Tests tp
-            -- , fund_Policy_Redeemer_BurnFT_Tests tp
+            , fund_Policy_Redeemer_BurnID_Tests tp
+            , fund_Policy_Redeemer_MintFT_Tests tp
+            , fund_Policy_Redeemer_BurnFT_Tests tp
         ]
 
 --------------------------------------------------------------------------------
