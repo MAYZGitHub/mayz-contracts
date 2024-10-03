@@ -1,7 +1,7 @@
-# Re-indexing Methodology for Investment Funds
+# MAYZ Protocol: Re-indexing Methodology for Investment Funds
 
 ## Table of Contents
-- [Re-indexing Methodology for Investment Funds](#re-indexing-methodology-for-investment-funds)
+- [MAYZ Protocol: Re-indexing Methodology for Investment Funds](#mayz-protocol-re-indexing-methodology-for-investment-funds)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Investment Unit](#investment-unit)
@@ -47,7 +47,6 @@
     - [1.5 Calculate Aggregate Value of Added ADA (AV\_ADA)](#15-calculate-aggregate-value-of-added-ada-av_ada)
   - [Calculate Final Balance](#calculate-final-balance)
   - [Conclusion](#conclusion)
-
 
 ## Introduction
 

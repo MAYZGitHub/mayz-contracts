@@ -4,6 +4,9 @@
 - [MAYZ Protocol: Smart Contracts](#mayz-protocol-smart-contracts)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
+  - [Current Status](#current-status)
+    - [Testnet Release](#testnet-release)
+    - [Upcoming Mainnet Release](#upcoming-mainnet-release)
   - [Key Features](#key-features)
   - [Architecture Overview](#architecture-overview)
   - [Smart Contracts](#smart-contracts)
@@ -23,7 +26,17 @@
 ## Introduction
 Welcome to the MAYZ Protocol Smart Contracts Repository. This repository contains the core smart contracts that power the MAYZ Protocol, a decentralized finance (DeFi) ecosystem built on the Cardano blockchain. Our contracts are written in Plutus, Cardano's native smart contract language, aiming to democratize finance by providing a permissionless platform for creating and managing investment funds, facilitating liquidity, and empowering users through innovative mechanisms.
 
-For a detailed overview of the protocol's smart contracts, datums, redeemers, and their interactions, please refer to the Smart Contracts Documentation.
+For a detailed overview of the protocol's smart contracts, datums, redeemers, and their interactions, please refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md). Documentation.
+
+## Current Status
+
+### Testnet Release
+We are excited to announce that the MAYZ Protocol is currently live on the Cardano testnet. You can interact with our decentralized application (dApp) at https://testnet.mayz.io/. This testnet release allows users to explore the protocol's features, create and manage funds, and participate in swap offers in a risk-free environment.
+
+### Upcoming Mainnet Release
+We are preparing for our mainnet release, which will make the MAYZ Protocol fully operational on the Cardano main network. Stay tuned for the official announcement and launch date.
+
+We encourage community members to join our Discord server for the latest updates on the mainnet release and to participate in final testing and feedback rounds.
 
 ## Key Features
 - **Decentralized Investment Funds**: Create, manage, and participate in investment funds composed of Cardano native tokens.
@@ -53,7 +66,7 @@ Our protocol utilizes advanced smart contracts for secure and efficient operatio
 - **Delegation Contract**: Manages MAYZ token delegations to funds.
 - **Script Contract**: Oversees deployed scripts on-chain.
 
-For detailed information on each contract, refer to the [Smart Contracts Documentation](./docs/SMART-CONTRACTS.md).
+For detailed information on each contract, refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) Documentation.
 
 ## Key Concepts
 - **Investment Unit (IU)**: Defines token composition of each fund.
@@ -63,7 +76,7 @@ For detailed information on each contract, refer to the [Smart Contracts Documen
 - **Commission System**: Paid upfront for the remaining fund lifetime, with partial refunds upon early withdrawal.
 - **Delegation**: MAYZ token holders can delegate tokens to funds to earn a share of commissions.
 
-For in-depth explanations, see our [Key Concepts Guide](./docs/KEY-CONCEPTS.md)..
+For in-depth explanations, see our Key Concepts Guide [TODO]
 
 ## Repository Structure
 ```
@@ -99,7 +112,6 @@ mayz-protocol-contracts/
 ```
 
 ## Development Environment
-- **Haskell version**: [specify version]
 - **The Glorious Glasgow Haskell Compilation System**: version 8.10.7
 - **Cabal library**: compiled using version 3.6.2.0
 
@@ -108,29 +120,38 @@ To set up the development environment:
 2. Run `cabal build` to compile the contracts
 
 ## Testing
-We employ a comprehensive testing strategy:
-- Unit tests for individual contract functions
-- Property-based tests for edge cases
-- Performance tests for resource optimization
 
-TODO: hablar de automatic test, agregar comandos para ejecutar todos y cada uno de los test
+We employ a comprehensive testing strategy with four main test suites:
 
-Run tests with:
-```
+1. **Unit Tests**: Verify individual components and functions for correctness.
+2. **Property-Based Tests**: Ensure system properties hold under various inputs.
+3. **Performance Tests**: Evaluate resource usage and optimization.
+4. **Automatic Tests**: Generate and run complex test scenarios automatically.
+
+For detailed information on our testing approach, test cases, and how to run tests, please refer to our [Testing](./docs/TESTING.md) Documentation.
+
+Run all tests with:
+
+```bash
 cabal test
 ```
 
-For more information, refer to the [Testing Documentation](./docs/TESTING.mdd).
+To run a specific test suite:
+```bash
+cabal test <suite-name>
+```
+
+Replace <suite-name> with UnitTests, PropertyBasedTests, PerformanceTests, or AutomaticTests.
 
 ## Deployment
-For detailed deployment instructions, refer to the [Deployment Guide](./docs/DEPLOYMENT.md).
+For detailed deployment instructions, refer to the Deployment Guide [TODO].
 
 ## Security Considerations
 - **Rounding errors**: Commission calculations use high-precision arithmetic.
 - **Oracle dependency**: Price manipulations are mitigated through multi-source oracles.
 - **Multi-UTXO design**: Enhances concurrency and resists certain types of attacks.
 
-We are committed to ongoing security audits. For more information, see our [Security Policy](./docs/SECURITY.md).
+We are committed to ongoing security audits. For more information, see our Security Policy [TODO].
 
 ## Token Economics
 The $MAYZ token serves multiple crucial functions:
@@ -139,7 +160,7 @@ The $MAYZ token serves multiple crucial functions:
 - **Delegation**: Delegate $MAYZ to funds to earn a share of commissions.
 - **Incentivization**: Reward active participants and align community interests.
 
-For more information, see the [Token Economics Documentation](./docs/TOKENOMICS.md).
+For more information, see the [Token Economics](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics) Documentation.
 
 ## Oracle Integration
 Our oracle system:
@@ -148,15 +169,13 @@ Our oracle system:
 - Provides real-time updates for fair valuations and swaps
 - Integrates with smart contracts for on-chain price verification
 
-For more information, refer to the [Oracle Documentation](./docs/ORACLE.md).
+For more information, refer to the Oracle Documentation [TODO]
 
 ## Development Roadmap
-[TODO: Include key points from the development roadmap section]
 
-For our full development roadmap, visit the [Project Roadmap](./docs/ROADMAP.md).
+For our full development roadmap, visit the [Project Roadmap](https://mayz.gitbook.io/mayz-whitepaper-v2/mayz/development-roadmap).
 
 ## Community and Support
-[TODO: Include all relevant links. Add link to dApp]
 
 Join our vibrant community and stay updated:
 - [Website](https://mayz.io)
@@ -167,25 +186,19 @@ Join our vibrant community and stay updated:
 For technical support, open a ticket in our GitHub repository or reach out on [Discord](https://discord.gg/mayzprotocol).
 
 ## Contributing
-We welcome contributions. Please follow these steps:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-Ensure your code adheres to our style guide and passes all tests. See our [Contributing Guidelines](./docs/CONTRIBUTING.md) for more information.
+See our Contributing Guidelines [TODO] for more information.
 
 ## Additional Documentation
 - **Re-indexing Basics**: Overview of the fund re-indexing process. [Link](./docs/REINDEXING-BASICS.md).
 - **Re-indexing Deep Dive**: Detailed explanation of re-indexing methodology. [Link](./docs/REINDEXING-DEEP.md).
 - **Smart Contracts Documentation**: Comprehensive guide to all contracts, datums, and redeemers. [Link](./docs/SMART-CONTRACTS.md).
 - **Testing Documentation**: Detailed information on our testing approach. [Link](./docs/TESTING.md).
-- **Key Concepts Guide**: In-depth explanations of core protocol concepts. [Link](./docs/KEY-CONCEPTS.md).
-- **Deployment Guide**: Instructions for deploying MAYZ Protocol. [Link](./docs/DEPLOYMENT.md).
-- **Token Economics Documentation**: Detailed breakdown of the MAYZ token ecosystem. [Link](./docs/TOKENOMICS.md).
-- **Oracle Documentation**: Information on our oracle implementation. [Link](./docs/ORACLE.md).
-- **Project Roadmap**: Future development plans for MAYZ Protocol. [Link](./docs/ROADMAP.md).
-- **Contributing Guidelines**: See our Contributing Guidelines. [Link](./docs/CONTRIBUTING.md).
+- **Whitepaper Documentation**: Detailed information about MAYZ Protocol. [Whitepaper v2](https://mayz.gitbook.io/mayz-whitepaper-v2)
+- **Key Concepts Guide**: In-depth explanations of core protocol concepts. [TODO].
+- **Deployment Guide**: Instructions for deploying MAYZ Protocol. [TODO].
+- **Token Economics Documentation**: Detailed breakdown of the MAYZ token ecosystem. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics).
+- **Oracle Documentation**: Information on our oracle implementation. [TODO].
+- **Project Roadmap**: Future development plans for MAYZ Protocol. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/mayz/development-roadmap).
+- **Contributing Guidelines**: See our Contributing Guidelines. [TODO].
 
 For more documentation, refer to the docs/ directory. If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.gg/mayzprotocol).
