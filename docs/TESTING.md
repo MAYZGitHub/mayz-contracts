@@ -1,8 +1,10 @@
-# MAYZ Protocol Testing Documentation
+# MAYZ Protocol: Testing Documentation
+
 ## Table of Contents
-- [MAYZ Protocol Testing Documentation](#mayz-protocol-testing-documentation)
+
+- [MAYZ Protocol: Testing Documentation](#mayz-protocol-testing-documentation)
   - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
+  - [Introduction](#introduction)
   - [Unit Tests](#unit-tests)
     - [Description](#description)
     - [Running Unit Tests](#running-unit-tests)
@@ -12,7 +14,7 @@
     - [Key Test Cases](#key-test-cases)
     - [Relevant Information](#relevant-information)
   - [Property-Based Tests](#property-based-tests)
-    - [Overview](#overview-1)
+    - [Overview](#overview)
     - [Running Property-Based Tests](#running-property-based-tests)
       - [Test Parameters](#test-parameters-1)
     - [Test Structure](#test-structure-1)
@@ -29,7 +31,7 @@
     - [Limitations and Considerations](#limitations-and-considerations)
     - [Conclusion](#conclusion)
   - [Performance Tests](#performance-tests)
-    - [Overview](#overview-2)
+    - [Overview](#overview-1)
     - [Running Performance Tests](#running-performance-tests)
       - [Test Parameters](#test-parameters-2)
     - [Test Structure](#test-structure-2)
@@ -42,7 +44,7 @@
     - [Interpreting Results](#interpreting-results)
     - [Conclusion](#conclusion-1)
   - [Automatic Tests](#automatic-tests)
-    - [Overview](#overview-3)
+    - [Overview](#overview-2)
     - [Key Concepts](#key-concepts-1)
     - [Running Automatic Tests](#running-automatic-tests)
     - [Test Structure and PATH Relation](#test-structure-and-path-relation)
@@ -58,7 +60,7 @@
     - [Limitations and Considerations](#limitations-and-considerations-1)
     - [Future Enhancements](#future-enhancements)
   
-## Overview
+## Introduction
 
 The MAYZ Protocol employs a comprehensive testing strategy to ensure the correctness, security, and performance of its smart contracts and associated components. Our testing approach includes four main test suites:
 1. Unit Tests
