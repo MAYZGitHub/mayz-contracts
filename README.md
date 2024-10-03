@@ -87,8 +87,7 @@ mayz-protocol-contracts/
 │   ├── cli.hs
 │   └── deploy.hs
 ├── docs/
-│   ├── REINDEXING-BASICS.md
-│   └── REINDEXING-DEEP.md
+│   └── Documentation files (.md)
 ├── export/
 │   ├── test/
 │       ├── various Plutus scripts (.plutus)
@@ -201,4 +200,6 @@ See our Contributing Guidelines [TODO] for more information.
 - **Project Roadmap**: Future development plans for MAYZ Protocol. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/mayz/development-roadmap).
 - **Contributing Guidelines**: See our Contributing Guidelines. [TODO].
 
-For more documentation, refer to the docs/ directory. If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.gg/mayzprotocol).
+For more documentation, refer to the `docs/` directory.  
+
+If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.gg/mayzprotocol).
