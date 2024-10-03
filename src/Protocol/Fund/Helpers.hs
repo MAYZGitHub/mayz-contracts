@@ -419,7 +419,7 @@ getDecimalsInInvestUnit !tokens = go tokens 1
             | otherwise = 100
 ------------------
 {-
-Overall Function: createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value
+Overall Function: createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value
 
 Purpose:
 Calculates the new value for a FundHolding after a deposit or withdrawal operation,
@@ -442,9 +442,9 @@ Example:
 For an invest unit with token A = 455 (4.55) and a deposit of 1000:
 New amount of token A = (455 * 1000) / 100 = 4550
 -}
-{-# INLINEABLE createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value #-}
-createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value :: LedgerValue.Value -> [T.InvestUnitToken] -> Integer -> Bool -> LedgerValue.Value
-createValue_WithTokensFrom_InvestUnit_Plus_FundHoldingDatum_Value (LedgerValue.Value !mp) investUnitTokens !amount !swRoundUp =
+{-# INLINEABLE createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value #-}
+createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value :: LedgerValue.Value -> [T.InvestUnitToken] -> Integer -> Bool -> LedgerValue.Value
+createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value (LedgerValue.Value !mp) investUnitTokens !amount !swRoundUp =
     LedgerValue.Value mapCSResult
     where
         !listMapCS = TxAssocMap.toList mp
