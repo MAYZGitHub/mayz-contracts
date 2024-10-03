@@ -14,7 +14,7 @@ import           Prelude                                  as P hiding (negate, (
 
 -- IOG imports
 import qualified Plutus.V2.Ledger.Api                     as LedgerApiV2
-import           PlutusTx.Prelude                         (negate, (<>))
+import           PlutusTx.Prelude                         (negate, (<>), head)
 
 -- Project imports
 import qualified Generic.OnChainHelpers                   as OnChainHelpers
@@ -245,11 +245,17 @@ fundHolding_ReIndexing_TxContext  = investUnit_ReIndexing_TxContext
 
 --------------------------------------------------------------------------------
 
-fundHolding_BalanceAssets_TxContext :: TestParams -> LedgerApiV2.ScriptContext
-fundHolding_BalanceAssets_TxContext tp =
+fundHolding_BalanceAssets_TxContext :: TestParams -> [Integer] -> [Integer] -> [Integer] -> LedgerApiV2.ScriptContext
+fundHolding_BalanceAssets_TxContext tp depositsInit depositsAfter redeemerCommissionsFT =
     let
         --------------------
         swTrace = False
+        --------------------
+        depositsInit_1 = P.head depositsInit
+        depositsInit_2 = P.head (tail depositsInit)
+        --------------------
+        depositsAfter_1 = P.head depositsAfter
+        depositsAfter_2 = P.head (tail depositsAfter)
         --------------------
         input_Fund_UTxO = fund_UTxO_MockData tp
         input_Fund_Datum = FundT.getFund_DatumType_From_UTxO input_Fund_UTxO
@@ -262,35 +268,37 @@ fundHolding_BalanceAssets_TxContext tp =
         base_FundHolding_UTxO = fundHolding_UTxO_With_NoDeposits_MockData tp
         base_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO base_FundHolding_UTxO
         --------------------
-        input_FundHolding1_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 0 deposit_MockData (tpDepositDate tp)
+        input_FundHolding1_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 0 depositsInit_1 (tpDepositDate tp)
         input_FundHolding1_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding1_UTxO
         input_FundHolding1_Value = LedgerApiV2.txOutValue input_FundHolding1_UTxO
         -----------------
-        input_FundHolding2_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 1 deposit_MockData (tpDepositDate tp)
+        input_FundHolding2_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 1 depositsInit_2 (tpDepositDate tp)
         input_FundHolding2_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding2_UTxO
         input_FundHolding2_Value = LedgerApiV2.txOutValue input_FundHolding2_UTxO
         -----------------
-        output_FundHolding1_Datum = input_FundHolding1_Datum
-        output_FundHolding1_UTxO = input_FundHolding1_UTxO
-            { LedgerApiV2.txOutDatum =
-                LedgerApiV2.OutputDatum $
-                    FundHoldingT.mkDatum output_FundHolding1_Datum
-            , LedgerApiV2.txOutValue = input_FundHolding1_Value
-            }
-        -----------------
-        output_FundHolding2_Datum = input_FundHolding2_Datum
-        output_FundHolding2_UTxO = input_FundHolding2_UTxO
-            { LedgerApiV2.txOutDatum =
-                LedgerApiV2.OutputDatum $
-                    FundHoldingT.mkDatum output_FundHolding2_Datum
-            , LedgerApiV2.txOutValue = input_FundHolding2_Value
-            }
+        output_FundHolding1_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 0 depositsAfter_1 (tpDepositDate tp)
+        output_FundHolding2_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 1 depositsAfter_2 (tpDepositDate tp)
+        -- output_FundHolding1_Datum = input_FundHolding1_Datum
+        -- output_FundHolding1_UTxO = input_FundHolding1_UTxO
+        --     { LedgerApiV2.txOutDatum =
+        --         LedgerApiV2.OutputDatum $
+        --             FundHoldingT.mkDatum output_FundHolding1_Datum
+        --     , LedgerApiV2.txOutValue = input_FundHolding1_Value
+        --     }
+        -- -----------------
+        -- output_FundHolding2_Datum = input_FundHolding2_Datum
+        -- output_FundHolding2_UTxO = input_FundHolding2_UTxO
+        --     { LedgerApiV2.txOutDatum =
+        --         LedgerApiV2.OutputDatum $
+        --             FundHoldingT.mkDatum output_FundHolding2_Datum
+        --     , LedgerApiV2.txOutValue = input_FundHolding2_Value
+        --     }
         -----------------
     in do
         mkContext
             |> setInputsRef [fund_UTxO_With_Added_FundHolding_MockData tp,
                         uTxOForValidatorAsReference tp (tpFundHoldingValidator tp)]
-            |> setInputsAndAddRedeemers [(input_FundHolding1_UTxO, FundHoldingT.mkBalanceAssetsRedeemer [0,0]), (input_FundHolding2_UTxO, FundHoldingT.mkBalanceAssetsRedeemer [0,0])]
+            |> setInputsAndAddRedeemers [(input_FundHolding1_UTxO, FundHoldingT.mkBalanceAssetsRedeemer redeemerCommissionsFT), (input_FundHolding2_UTxO, FundHoldingT.mkBalanceAssetsRedeemer redeemerCommissionsFT)]
             |> setOutputs [output_FundHolding1_UTxO, output_FundHolding2_UTxO]
             |> setSignatories (tpFundAdmins tp)
             |> setValidyRange (createValidRange (tpTransactionDate tp))
