@@ -128,7 +128,7 @@ We employ a comprehensive testing strategy with four main test suites:
 3. **Performance Tests**: Evaluate resource usage and optimization.
 4. **Automatic Tests**: Generate and run complex test scenarios automatically.
 
-For detailed information on our testing approach, test cases, and how to run tests, please refer to our [Testing](./docs/TESTING.md) Documentation.
+For detailed information on our testing approach, test cases, and how to run tests, please refer to our [Testing](./docs/TESTING.md) documentation.
 
 Run all tests with:
 
@@ -160,7 +160,7 @@ The $MAYZ token serves multiple crucial functions:
 - **Delegation**: Delegate $MAYZ to funds to earn a share of commissions.
 - **Incentivization**: Reward active participants and align community interests.
 
-For more information, see the [Token Economics](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics) Documentation.
+For more information, see the [Token Economics](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics) documentation.
 
 ## Oracle Integration
 Our oracle system:
@@ -169,7 +169,7 @@ Our oracle system:
 - Provides real-time updates for fair valuations and swaps
 - Integrates with smart contracts for on-chain price verification
 
-For more information, refer to the Oracle Documentation [TODO]
+For more information, refer to the Oracle documentation [TODO]
 
 ## Development Roadmap
 
