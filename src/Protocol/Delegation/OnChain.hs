@@ -65,7 +65,11 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash !tok
                 T.PolicyRedeemerMintID _ ->
                         ---------------------
                         -- it runs alone
-                        ---------------------
+                         ------------------
+                        -- que se mintee ID de Delegation, con esta poliza, 1 unidad, con nombre de token que venga en datum del protocolo
+                        -- que vaya a la direccion del contrato correcta. La direccion puede estar en el datum del protocolo
+                        -- que tenga el value correcto, con ID, con MAYZ delegados y con min ADA, segun Datum. De esta forma tambien se valida el Datum un poco
+                        ------------------
                         traceIfFalse "not isMintingDelegationID" isMintingDelegationID &&
                         traceIfFalse "not isCorrect_Output_Delegation_Datum" isCorrect_Output_Delegation_Datum &&
                         traceIfFalse "not isCorrect_Output_Delegation_Value" isCorrect_Output_Delegation_Value &&
@@ -126,6 +130,9 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash !tok
                 T.PolicyRedeemerBurnID _ ->
                         ---------------------
                         -- it runs along with Delegation Validator (ValidatorRedeemerDelete)
+                        ---------------------
+                        -- que se queme ID del Buy Order, 1 unidad. Creo que con esto es suficiente.
+                        -- que se este ejecutando validador correcto. No seria necesario. Si se quema es por que sale de algun lado.
                         ---------------------
                         traceIfFalse "not isBurningDelegationID" isBurningDelegationID
                         ---------------------
@@ -198,7 +205,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenMAYZ_AC) !datumRaw !re
         validateDelete = traceIfFalse "not isBurningDelegationID" isBurningDelegationID
                 ---------------------
                 -- it runs along with Delegation Policy ID (PolicyRedeemerBurnID)
-                ---------------------
+                ------------------
+                -- get back all MAYZ and delete datum utxo. Burn delegation ID. only delegator can do it
+                -- check that there is one input and zero output in this contract
+                -- check that ID is burning
+                ------------------
             where
                 ------------------
                 isBurningDelegationID :: Bool
@@ -236,7 +247,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenMAYZ_AC) !datumRaw !re
                 validateUpdateMinADA _ =
                         ---------------------
                         -- it runs alone
-                        ---------------------
+                        ------------------
+                        -- change min ada value. Only admin can do it
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with new minAda
+                        -- check value changed ADA
+                        ------------------
                         traceIfFalse "not isCorrect_Output_Delegation_Datum_With_MinADAChanged" isCorrect_Output_Delegation_Datum_With_MinADAChanged
                         && traceIfFalse "not isCorrect_Output_Delegation_Value_With_MinADAChanged" isCorrect_Output_Delegation_Value_With_MinADAChanged
                         ------------------
@@ -256,22 +272,32 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenMAYZ_AC) !datumRaw !re
             ----------------
                 validateDeposit :: T.ValidatorRedeemer  -> Bool
                 validateDeposit (T.ValidatorRedeemerDeposit (T.ValidatorRedeemerDepositType !vrdDelegated_Mayz_Change))  =
-                    ---------------------
-                        -- it runs alone
                         ---------------------
-                    traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged vrdDelegated_Mayz_Change)
-                    && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged vrdDelegated_Mayz_Change)
-                    ------------------
+                        -- it runs alone
+                        ------------------
+                        -- add some MAYZ. Only delegator can do it.
+                        -- check that there is one input and one output in this contract: no estoy revisando si hay una sola entrada... hace falta ?
+                        -- check datum update with deposit
+                        -- check value changed with deposit
+                        ------------------
+                        traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged vrdDelegated_Mayz_Change)
+                        && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged vrdDelegated_Mayz_Change)
+                        ------------------
                 validateDeposit _   = False
                 ------------------
                 validateWithdraw :: T.ValidatorRedeemer  -> Bool
                 validateWithdraw (T.ValidatorRedeemerWithdraw (T.ValidatorRedeemerWithdrawType !vrdwDelegated_Mayz_Change))  =
-                    ---------------------
-                        -- it runs alone
                         ---------------------
-                    traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged (negate vrdwDelegated_Mayz_Change))
-                    && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged (negate vrdwDelegated_Mayz_Change))
-                    ------------------
+                        -- it runs alone
+                        ------------------
+                        -- get back some MAYZ. Only delegator can do it.
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with withdraw ... me parece que no hay cambios que se hagan en el datum en esta tx
+                        -- check value changed with withdraw
+                        ------------------
+                        traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged (negate vrdwDelegated_Mayz_Change))
+                        && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged (negate vrdwDelegated_Mayz_Change))
+                        ------------------
                 validateWithdraw _   = False
                 ------------------
                 isCorrect_Output_Delegation_Datum_With_DelegationChanged:: Integer -> Bool

@@ -74,6 +74,10 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !buyOrder_Validator_Hash !token
                         ---------------------
                         -- it runs alone
                         ---------------------
+                        -- que se mintee ID de Buy Order, con esta poliza, 1 unidad, con nombre de token que venga en datum del protocolo
+                        -- que se cree datum correcto (parametros dentro de rangos permitidos, totales en cero, seller que firma la tx)
+                        -- que vaya a la direccion del contrato correcta. La direccion puede estar en el datum del protocolo
+                        ---------------------
                         traceIfFalse "not isMintingBuyOrderID" isMintingBuyOrderID &&
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum" isCorrect_Output_BuyOrder_Datum &&
                         traceIfFalse "not isCorrect_Output_BuyOrder_Value" isCorrect_Output_BuyOrder_Value &&
@@ -162,6 +166,9 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS !buyOrder_Validator_Hash !token
                         ---------------------
                         -- it runs along with Buy Order Validator (ValidatorRedeemerDelete)
                         ---------------------
+                        -- que se queme ID del Buy Order, 1 unidad. Creo que con esto es suficiente.
+                        -- que se este ejecutando validador correcto. No seria necesario. Si se quema es por que sale de algun lado.
+                        ---------------------
                         traceIfFalse "not isBurningBuyOrderID" isBurningBuyOrderID
                         ---------------------
                     where
@@ -243,6 +250,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 ---------------------
                 -- it runs along with Buy Order Policy ID (PolicyRedeemerBurnID)
                 ---------------------
+                -- get back all FT and tokens and delete datum utxo. Burn order ID. only buyer can do it
+                -- check that there is one input and zero output in this contract
+                -- check that ID is burning
+                ------------------
                 traceIfFalse "not isBurningBuyOrderID" isBurningBuyOrderID
                 ------------------
             where
@@ -323,7 +334,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 ------------------
                 isOrderOpen :: Bool
                 !isOrderOpen = T.bodOrder_Status buyOrder_Datum_In == T.buyOrder_Status_Open
-                ----------------
+                ----------------d
                 isCorrect_Output_BuyOrder_Value_NotChanged :: Bool
                 isCorrect_Output_BuyOrder_Value_NotChanged =
                     let !valueFor_BuyOrder_Out_Control = LedgerApiV2.txOutValue input_TxOut_BeingValidated
@@ -348,6 +359,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                         ---------------------
                         -- it runs alone
                         ---------------------
+                        -- change status to open or close. Only buyer can do it
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with new status
+                        -- check value not changed
+                        ----------------
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum_With_StatusChanged" isCorrect_Output_BuyOrder_Datum_With_StatusChanged
                         && traceIfFalse "not isCorrect_Output_BuyOrder_Value_NotChanged" isCorrect_Output_BuyOrder_Value_NotChanged
                         ------------------
@@ -365,6 +381,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                         ---------------------
                         -- it runs alone
                         ---------------------
+                        -- change offered commission rate. Only buyer can do it. Must be in the range of protocol datum commissionRateForBuyOrdersRange
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with new commissions rate. Must be in the range of protocol datum commissionRateForBuyOrdersRange
+                        -- check value not changed
+                        ----------------
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum_With_CommissionChanged" isCorrect_Output_BuyOrder_Datum_With_CommissionChanged
                         && traceIfFalse "not isCorrect_Output_BuyOrder_Value_NotChanged" isCorrect_Output_BuyOrder_Value_NotChanged
                         && traceIfFalse "not isInRange commissionBuyOrder_InBPx1e3" (ProtocolT.isInRange commissionBuyOrder_InBPx1e3 (T.bodOfferedCommission_InBPx1e3 buyOrder_Datum_Out))
@@ -384,6 +405,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 validateRedeemerUpdateMinADA (T.ValidatorRedeemerUpdateMinADA _)  =
                         ---------------------
                         -- it runs alone
+                        ---------------------
+                        -- change min ada value. Only buyer can do it
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with new minAda
+                        -- check value changed ADA
                         ---------------------
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum_With_MinADAChanged" isCorrect_Output_BuyOrder_Datum_With_MinADAChanged
                         && traceIfFalse "not isCorrect_Output_BuyOrder_Value_With_MinADAChanged" isCorrect_Output_BuyOrder_Value_With_MinADAChanged
@@ -408,6 +434,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                         ---------------------
                         -- it runs alone
                         ---------------------
+                        --  add Tokens. Only buyer can do it.
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with withdraw ... me parece que no hay cambios que se hagan en el datum en esta tx
+                        -- check value changed with withdraw
+                        ---------------------
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum_NotChanged" isCorrect_Output_BuyOrder_Datum_NotChanged
                         && traceIfFalse "not isCorrect_Output_BuyOrder_Value_With_Deposit" isCorrect_Output_BuyOrder_Value_With_Deposit
                         ------------------
@@ -426,6 +457,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 validateRedeemerWithdraw (T.ValidatorRedeemerWithdraw (T.ValidatorRedeemerWithdrawType !newWithdraw))  =
                         ---------------------
                         -- it runs alone
+                        ---------------------
+                        -- get back some FT or Tokens. Only buyer can do it.
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with withdraw ... me parece que no hay cambios que se hagan en el datum en esta tx
+                        -- check value changed with withdraw
                         ---------------------
                         traceIfFalse "not isCorrect_Output_BuyOrder_Datum_NotChanged" isCorrect_Output_BuyOrder_Datum_NotChanged
                         && traceIfFalse "not isCorrect_Output_BuyOrder_Value_With_Withdraw" isCorrect_Output_BuyOrder_Value_With_Withdraw
@@ -446,6 +482,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                         ---------------------
                         -- it runs alone
                         ---------------------
+                        -- if order is open, user give FT and get Tokens and commission. Use a price for conversion FT to ADA and tokens offered to ADA provided by oracle. Must check signatura and validity time
+                        -- check that there is one input and one output in this contract
+                        -- check datum update with swap. Totals calculated
+                        -- check commissions
+                        -- check value changed FT and ADA
+                        -- check price, validity time and signature
+                        ------------------
                         traceIfFalse "not isOrderOpen" isOrderOpen
                         && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rfoOracle_Signature)
                         && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rfoOracle_Data) )
