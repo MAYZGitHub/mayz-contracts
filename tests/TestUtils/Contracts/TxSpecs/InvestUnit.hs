@@ -17,6 +17,7 @@ import qualified Plutus.V2.Ledger.Api                 as LedgerApiV2
 -- Project imports
 import qualified Generic.OnChainHelpers               as OnChainHelpers
 import qualified Protocol.Fund.Holding.Types          as FundHoldingT
+import qualified Protocol.Fund.Types                  as FundT
 import qualified Protocol.InvestUnit.OnChain          as InvestUnit
 import qualified Protocol.InvestUnit.Types            as InvestUnitT
 import qualified Protocol.Types                       as T
@@ -191,6 +192,100 @@ investUnit_UpdateMinADA_TxSpecs tp txParams =
             , tsExtras = [("Valid Min ADA positive", True), ("Invalid Min ADA negative", True)]
             }
 
+--------------------------------------------------------------------------------
 
+investUnit_Delete_TxSpecs ::  TestParams -> TxSpecs
+investUnit_Delete_TxSpecs tp =
+    -----------------
+    let input_Fund_UTxO_gen op _ =
+            txOut_With_TestEntity_Gen
+                tp
+                (fund_UTxO_MockData tp)
+                Fund_TestEntity
+                op
+        -----------------
+        consume_Fund_ValidRedeemerData = FundT.mkDeleteRedeemer
+        consume_Fund_InvalidRedeemerData = Nothing
+        consume_Fund_InvalidRedeemerType =
+            Just FundT.mkUpdateMinADARedeemer
+        consume_Fund_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        -----------------
+        consume_Fund_UTxO_gen =
+            consume_TxOut_Gen
+                input_Fund_UTxO_gen
+                consume_Fund_ValidRedeemerData
+                consume_Fund_InvalidRedeemerData
+                consume_Fund_InvalidRedeemerType
+                consume_Fund_InvalidRedeemerNonExist
+        -----------------
+        input_InvestUnit_UTxO_gen op _ =
+            txOut_With_TestEntity_Gen
+                tp
+                (investUnit_UTxO_MockData tp)
+                InvestUnit_TestEntity
+                op
+        -----------------
+        consume_InvestUnit_ValidRedeemerData = InvestUnitT.mkDeleteRedeemer
+        consume_InvestUnit_InvalidRedeemerData = Nothing
+        consume_InvestUnit_InvalidRedeemerType =
+            Just InvestUnitT.mkUpdateMinADARedeemer
+        consume_InvestUnit_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
+        -----------------
+        consume_InvestUnit_UTxO_gen =
+            consume_TxOut_Gen
+                input_InvestUnit_UTxO_gen
+                consume_InvestUnit_ValidRedeemerData
+                consume_InvestUnit_InvalidRedeemerData
+                consume_InvestUnit_InvalidRedeemerType
+                consume_InvestUnit_InvalidRedeemerNonExist
+        -----------------
+        burn_FundID_gen op _ =
+            mint_Value_With_TestToken_Gen
+                tp
+                (FundID_TestToken, Fund_BurnID_TestRedeemer) 1
+                op
+        -----------------
+        burn_InvestUnitID_gen op _ =
+            mint_Value_With_TestToken_Gen
+                tp
+                (InvestUnitID_TestToken, Fund_BurnID_TestRedeemer) 1
+                op
+        -----------------
+        signatures_gen' op _ = signatures_gen tp (tpFundAdmins tp) op
+        -----------------
+        validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
+     in -----------------
+        TxSpecs
+            { tsInputsRef = []
+            , tsInputsRefScripts = [uTxOForMintingAsReference tp (tpFundPolicy tp), uTxOForValidatorAsReference tp (tpFundValidator tp), uTxOForValidatorAsReference tp (tpInvestUnitValidator tp)]
+            , tsInputs =
+                [
+                    ( Fund_TestEntity
+                    , consume_Fund_UTxO_gen
+                    , Fund_Delete_TestRedeemer
+                    ),
+                    ( InvestUnit_TestEntity
+                    , consume_InvestUnit_UTxO_gen
+                    , InvestUnit_Delete_TestRedeemer
+                    )
+                ]
+            , tsInputsFromWallet = []
+            , tsOutputs = []
+            , tsMints =
+                [
+                    ( FundID_TestToken
+                    , burn_FundID_gen
+                    , Fund_BurnID_TestRedeemer
+                    )
+                    ,
+                    ( InvestUnitID_TestToken
+                    , burn_InvestUnitID_gen
+                    , Fund_BurnID_TestRedeemer
+                    )
+                ]
+            , tsUseSignatures = Just signatures_gen'
+            , tsUseValidityRange = Just validityRange_gen'
+            , tsExtras = []
+            }
 
 --------------------------------------------------------------------------------

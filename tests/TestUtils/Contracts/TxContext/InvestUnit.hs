@@ -16,7 +16,9 @@ import qualified Plutus.V2.Ledger.Api            as LedgerApiV2
 
 -- Project imports
 import qualified Generic.OnChainHelpers          as OnChainHelpers
+import qualified Protocol.Constants              as T
 import qualified Protocol.Fund.Holding.Types     as FundHoldingT
+import qualified Protocol.Fund.Types             as FundT
 import qualified Protocol.InvestUnit.OnChain     as InvestUnit
 import qualified Protocol.InvestUnit.Types       as InvestUnitT
 import           TestUtils.Contracts.InitialData
@@ -74,5 +76,28 @@ investUnit_UpdateMinADA_TxContext tp newMinADA =
             |> setOutputs [output_UTxO]
             |> setSignatories (tpFundAdmins tp)
             |> setValidyRange (createValidRange (tpTransactionDate tp))
+
+--------------------------------------------------------------------------------
+
+investUnit_Delete_TxContext :: TestParams -> LedgerApiV2.ScriptContext
+investUnit_Delete_TxContext tp =
+    mkContext
+        |> setInputsRef [uTxOForValidatorAsReference tp (tpFundValidator tp), uTxOForValidatorAsReference tp (tpInvestUnitValidator tp), uTxOForMintingAsReference tp (tpFundPolicy tp)]
+        |> setInputsAndAddRedeemers [(fund_UTxO_MockData tp, FundT.mkDeleteRedeemer), (investUnit_UTxO_MockData tp, InvestUnitT.mkDeleteRedeemer)]
+        |> setMintAndAddRedeemers
+            [
+                ( LedgerApiV2.singleton
+                    (FundT.fdFundPolicy_CS (fund_DatumType_MockData tp))
+                    T.fundID_TN
+                    (negate 1)
+                    <> LedgerApiV2.singleton
+                        (FundT.fdFundPolicy_CS (fund_DatumType_MockData tp))
+                        T.investUnitID_TN
+                        (negate 1)
+                , FundT.mkBurnIDRedeemer
+                )
+            ]
+        |> setSignatories (tpFundAdmins tp)
+        |> setValidyRange (createValidRange (tpTransactionDate tp))
 
 --------------------------------------------------------------------------------
