@@ -277,6 +277,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                 (T.PolicyRedeemerBurnID _) ->
                     ------------------
                     -- it runs along with Fund Validator (ValidatorRedeemerDelete)
+                    -- it runs along with InvestUnit Validator (ValidatorRedeemerDelete)
                     ------------------
                     -- Que se quemen todos los Fund IDs con own póliza
                     -- No hay control adicional sobre los MAYZ, se supone que quien hace la tx, es un Fund Admin y el recupera los MAYZ o los envia a cualquier lado
@@ -482,6 +483,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             (T.ValidatorRedeemerDelete _) ->
                                 ------------------
                                 -- it runs along with Fund ID Policy  (PolicyRedeemerBurnID)
+                                -- it runs along with InvestUnit Validator (ValidatorRedeemerDelete)
                                 ------------------
                                 -- Que sea Fund Admin
                                 -- que el fondo tenga CERO holdings
