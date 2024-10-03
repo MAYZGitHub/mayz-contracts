@@ -24,6 +24,7 @@ import           TestUtils.Automatic.HelpersMAYZ
 import           TestUtils.Automatic.Types
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxSpecs.FundHolding
+import           TestUtils.Contracts.TxSpecs.InvestUnit
 import           TestUtils.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
@@ -95,73 +96,7 @@ fund_Create_TxSpecs tp =
 --------------------------------------------------------------------------------
 
 fund_Delete_TxSpecs :: TestParams -> TxSpecs
-fund_Delete_TxSpecs tp =
-     -----------------
-    let input_Fund_UTxO_gen op _ =
-            txOut_With_TestEntity_Gen
-                tp
-                (fund_UTxO_MockData tp)
-                Fund_TestEntity
-                op
-        -----------------
-        consume_Fund_ValidRedeemerData = FundT.mkDeleteRedeemer
-        consume_Fund_InvalidRedeemerData = Nothing
-        consume_Fund_InvalidRedeemerType =
-            Just FundT.mkUpdateMinADARedeemer
-        consume_Fund_InvalidRedeemerNonExist = Just fakeRedeemerEmpty
-        -----------------
-        consume_Fund_UTxO_gen =
-            consume_TxOut_Gen
-                input_Fund_UTxO_gen
-                consume_Fund_ValidRedeemerData
-                consume_Fund_InvalidRedeemerData
-                consume_Fund_InvalidRedeemerType
-                consume_Fund_InvalidRedeemerNonExist
-        -----------------
-        burn_FundID_gen op _ =
-            mint_Value_With_TestToken_Gen
-                tp
-                (FundID_TestToken, Fund_BurnID_TestRedeemer) 1
-                op
-        -----------------
-        burn_InvestUnitID_gen op _ =
-            mint_Value_With_TestToken_Gen
-                tp
-                (InvestUnitID_TestToken, Fund_BurnID_TestRedeemer) 1
-                op
-        -----------------
-        signatures_gen' op _ = signatures_gen tp (tpFundAdmins tp) op
-        -----------------
-        validityRange_gen' op _ = validityRange_gen tp (tpTransactionDate tp) op
-     in -----------------
-        TxSpecs
-            { tsInputsRef = []
-            , tsInputsRefScripts = [uTxOForMintingAsReference tp (tpFundPolicy tp), uTxOForValidatorAsReference tp (tpFundValidator tp)]
-            , tsInputs =
-                [
-                    ( Fund_TestEntity
-                    , consume_Fund_UTxO_gen
-                    , Fund_Delete_TestRedeemer
-                    )
-                ]
-            , tsInputsFromWallet = []
-            , tsOutputs = []
-            , tsMints =
-                [
-                    ( FundID_TestToken
-                    , burn_FundID_gen
-                    , Fund_BurnID_TestRedeemer
-                    )
-                    ,
-                    ( InvestUnitID_TestToken
-                    , burn_InvestUnitID_gen
-                    , Fund_BurnID_TestRedeemer
-                    )
-                ]
-            , tsUseSignatures = Just signatures_gen'
-            , tsUseValidityRange = Just validityRange_gen'
-            , tsExtras = []
-            }
+fund_Delete_TxSpecs = investUnit_Delete_TxSpecs
 
 --------------------------------------------------------------------------------
 

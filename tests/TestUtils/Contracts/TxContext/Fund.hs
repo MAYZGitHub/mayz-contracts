@@ -23,6 +23,7 @@ import qualified Protocol.Fund.Helpers                     as FundHelpers
 import qualified Protocol.Fund.Types                       as FundT
 import           TestUtils.Contracts.InitialData
 import           TestUtils.Contracts.TxContext.FundHolding
+import           TestUtils.Contracts.TxContext.InvestUnit 
 import           TestUtils.Helpers
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
@@ -47,25 +48,7 @@ fund_Create_TxContext tp =
 --------------------------------------------------------------------------------
 
 fund_Delete_TxContext :: TestParams -> LedgerApiV2.ScriptContext
-fund_Delete_TxContext tp =
-    mkContext
-        |> setInputsRef [uTxOForValidatorAsReference tp (tpFundValidator tp), uTxOForMintingAsReference tp (tpFundPolicy tp)]
-        |> setInputsAndAddRedeemers [(fund_UTxO_MockData tp, FundT.mkDeleteRedeemer)]
-        |> setMintAndAddRedeemers
-            [
-                ( LedgerApiV2.singleton
-                    (FundT.fdFundPolicy_CS (fund_DatumType_MockData tp))
-                    T.fundID_TN
-                    (negate 1)
-                    <> LedgerApiV2.singleton
-                        (FundT.fdFundPolicy_CS (fund_DatumType_MockData tp))
-                        T.investUnitID_TN
-                        (negate 1)
-                , FundT.mkBurnIDRedeemer
-                )
-            ]
-        |> setSignatories (tpFundAdmins tp)
-        |> setValidyRange (createValidRange (tpTransactionDate tp))
+fund_Delete_TxContext =  investUnit_Delete_TxContext
 
 --------------------------------------------------------------------------------
 
