@@ -496,16 +496,6 @@ testContextWrapperTrace tp ctx =
     let results = testContext (findValidator tp) (findMintingPolicy tp) (findValidatorRedeemerNameMaybe tp) (findMintingPolicyRedeemerNameMaybe tp) ctx True
     in results
 
--- testContextWrapperLecacy :: TestParams ->  LedgerApiV2.ScriptContext -> [(Maybe RedeemerLog, (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Maybe Integer))]
--- testContextWrapperLecacy tp ctx  =
---     let results = testContext (findValidator tp) (findMintingPolicy tp) (findValidatorRedeemerNameMaybe tp) (findMintingPolicyRedeemerNameMaybe tp) ctx False
---     in  unsafePerformIO results
-
--- testContextWrapperLecacyTrace :: TestParams ->  LedgerApiV2.ScriptContext -> [(Maybe RedeemerLog, (LedgerApiV2.LogOutput, P.Either LedgerApiV2.EvaluationError LedgerApiV2.ExBudget, Maybe Integer))]
--- testContextWrapperLecacyTrace tp ctx  =
---     let results = testContext (findValidator tp) (findMintingPolicy tp) (findValidatorRedeemerNameMaybe tp) (findMintingPolicyRedeemerNameMaybe tp) ctx True
---     in  unsafePerformIO results
-
 --------------------------------------------------------------------------------
 
 findValidator :: TestParams -> LedgerApiV2.ScriptHash -> Maybe LedgerApiV2.Validator
