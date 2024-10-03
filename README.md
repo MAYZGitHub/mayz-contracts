@@ -20,8 +20,8 @@
   - [Oracle Integration](#oracle-integration)
   - [Development Roadmap](#development-roadmap)
   - [Community and Support](#community-and-support)
-  - [Contributing](#contributing)
   - [Additional Documentation](#additional-documentation)
+  - [Contributing](#contributing)
 
 ## Introduction
 Welcome to the MAYZ Protocol Smart Contracts Repository. This repository contains the core smart contracts that power the MAYZ Protocol, a decentralized finance (DeFi) ecosystem built on the Cardano blockchain. Our contracts are written in Plutus, Cardano's native smart contract language, aiming to democratize finance by providing a permissionless platform for creating and managing investment funds, facilitating liquidity, and empowering users through innovative mechanisms.
@@ -184,22 +184,22 @@ Join our vibrant community and stay updated:
 
 For technical support, open a ticket in our GitHub repository or reach out on [Discord](https://discord.gg/mayzprotocol).
 
-## Contributing
-See our Contributing Guidelines [TODO] for more information.
-
 ## Additional Documentation
+- **Whitepaper Documentation**: Detailed information about MAYZ Protocol. [Whitepaper v2](https://mayz.gitbook.io/mayz-whitepaper-v2)
+- **Smart Contracts Documentation**: Comprehensive guide to all contracts, datums, and redeemers. [Link](./docs/SMART-CONTRACTS.md).
 - **Re-indexing Basics**: Overview of the fund re-indexing process. [Link](./docs/REINDEXING-BASICS.md).
 - **Re-indexing Deep Dive**: Detailed explanation of re-indexing methodology. [Link](./docs/REINDEXING-DEEP.md).
-- **Smart Contracts Documentation**: Comprehensive guide to all contracts, datums, and redeemers. [Link](./docs/SMART-CONTRACTS.md).
 - **Testing Documentation**: Detailed information on our testing approach. [Link](./docs/TESTING.md).
-- **Whitepaper Documentation**: Detailed information about MAYZ Protocol. [Whitepaper v2](https://mayz.gitbook.io/mayz-whitepaper-v2)
+- **Project Roadmap**: Future development plans for MAYZ Protocol. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/mayz/development-roadmap).
+- **Token Economics Documentation**: Detailed breakdown of the MAYZ token ecosystem. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics).
 - **Key Concepts Guide**: In-depth explanations of core protocol concepts. [TODO].
 - **Deployment Guide**: Instructions for deploying MAYZ Protocol. [TODO].
-- **Token Economics Documentation**: Detailed breakdown of the MAYZ token ecosystem. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics).
 - **Oracle Documentation**: Information on our oracle implementation. [TODO].
-- **Project Roadmap**: Future development plans for MAYZ Protocol. [Link](https://mayz.gitbook.io/mayz-whitepaper-v2/mayz/development-roadmap).
 - **Contributing Guidelines**: See our Contributing Guidelines. [TODO].
 
 For more documentation, refer to the `docs/` directory.  
 
 If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.gg/mayzprotocol).
+
+## Contributing
+See our Contributing Guidelines [TODO] for more information.
