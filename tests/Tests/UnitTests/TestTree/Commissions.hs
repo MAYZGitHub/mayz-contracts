@@ -140,7 +140,7 @@ test_powRational = do
 
 test_deposit_integralRemainingMonths :: Tasty.Assertion
 test_deposit_integralRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 120_000
+    let commission_PerYear_InBPx1e3 = 120_000
         monthsCurrentReal = 2
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -150,25 +150,25 @@ test_deposit_integralRemainingMonths = do
         deposit = 1_000_000
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserDeposit commissionPerYearInBPx1e3 deposit monthsRemainingReal
+        userFT = calculateFTForUserDeposit commission_PerYear_InBPx1e3 deposit monthsRemainingReal
 
         commissionsFT = deposit - userFT
-        commissionsRatePerMonth = TxRatio.unsafeRatio commissionsFT monthsRemainingReal
-        commissions_FT_Rate1e6_PerMonth =
-            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+        commissions_FT_Release_PerMonth = TxRatio.unsafeRatio commissionsFT monthsRemainingReal
+        commissions_FT_Release_PerMonth_1e6 =
+            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
-        (userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateDepositCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 deposit
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    -- DebugTrace.trace ("commissionsTable_Numerator1e6: " ++ show (commissionsTable_Numerator1e6)) $
+    -- DebugTrace.trace ("commissions_Table_Numerator_1e6: " ++ show (commissions_Table_Numerator_1e6)) $
     --      DebugTrace.trace ("userFT: " ++ show (userFT)) $
     --         DebugTrace.trace ("monthsRemainingReal: " ++ show ((monthsTotalReal - monthsCurrentReal))) $
     --             DebugTrace.trace ("monthsRemainingCalc: " ++ show (monthsRemaining)) $
@@ -177,12 +177,12 @@ test_deposit_integralRemainingMonths = do
     --             DebugTrace.trace ("ms: " ++ show (LedgerApiV2.getPOSIXTime $ deadline - date)) $
     --             DebugTrace.trace ("div: " ++ show (LedgerApiV2.getPOSIXTime (deadline - date) `divide` msPerMonth)) $
 
-    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6')
 
 test_deposit_fractionalRemainingMonths :: Tasty.Assertion
 test_deposit_fractionalRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 300_000
+    let commission_PerYear_InBPx1e3 = 300_000
         monthsCurrentReal = 2
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -192,30 +192,30 @@ test_deposit_fractionalRemainingMonths = do
         deposit = 222
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserDeposit commissionPerYearInBPx1e3 deposit monthsRemainingReal
+        userFT = calculateFTForUserDeposit commission_PerYear_InBPx1e3 deposit monthsRemainingReal
 
         commissionsFT = deposit - userFT
-        commissionsRatePerMonth = TxRatio.unsafeRatio commissionsFT monthsRemainingReal
-        commissions_FT_Rate1e6_PerMonth =
-            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+        commissions_FT_Release_PerMonth = TxRatio.unsafeRatio commissionsFT monthsRemainingReal
+        commissions_FT_Release_PerMonth_1e6 =
+            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
-        (userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateDepositCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 deposit
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6')
 
 test_deposit_zeroRemainingMonths :: Tasty.Assertion
 test_deposit_zeroRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 1_000_000
+    let commission_PerYear_InBPx1e3 = 1_000_000
         monthsCurrentReal = 5
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -225,23 +225,23 @@ test_deposit_zeroRemainingMonths = do
         deposit = 300
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserDeposit commissionPerYearInBPx1e3 deposit monthsRemainingReal
+        userFT = calculateFTForUserDeposit commission_PerYear_InBPx1e3 deposit monthsRemainingReal
         commissionsFT = deposit - userFT
-        commissions_FT_Rate1e6_PerMonth = 0
+        commissions_FT_Release_PerMonth_1e6 = 0
 
-        (userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateDepositCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 deposit
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, userFT', commissionsFT', commissions_FT_Release_PerMonth_1e6')
 
 --------------------------------------------------------------------------------
 -- Unit Tests for Withdrawing
@@ -249,7 +249,7 @@ test_deposit_zeroRemainingMonths = do
 
 test_withdraw_integralRemainingMonths :: Tasty.Assertion
 test_withdraw_integralRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 120_000
+    let commission_PerYear_InBPx1e3 = 120_000
         monthsCurrentReal = 2
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -259,21 +259,21 @@ test_withdraw_integralRemainingMonths = do
         withdraw = 100
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserWithdraw commissionPerYearInBPx1e3 withdraw monthsRemainingReal
+        userFT = calculateFTForUserWithdraw commission_PerYear_InBPx1e3 withdraw monthsRemainingReal
 
         commissionsForUserFTToGetBack = withdraw - userFT
         withdrawPlusCommissionsGetBack = withdraw + commissionsForUserFTToGetBack
-        commissionsRatePerMonth = TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemainingReal
-        commissions_FT_Rate1e6_PerMonth =
-            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+        commissions_FT_Release_PerMonth = TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemainingReal
+        commissions_FT_Release_PerMonth_1e6 =
+            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
         !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnit_Initial)
 
-        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateWithdrawCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 withdraw
@@ -281,12 +281,12 @@ test_withdraw_integralRemainingMonths = do
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6')
 
 test_withdraw_fractionalRemainingMonths :: Tasty.Assertion
 test_withdraw_fractionalRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 300_000
+    let commission_PerYear_InBPx1e3 = 300_000
         monthsCurrentReal = 2
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -296,20 +296,20 @@ test_withdraw_fractionalRemainingMonths = do
         withdraw = 222
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserWithdraw commissionPerYearInBPx1e3 withdraw monthsRemainingReal
+        userFT = calculateFTForUserWithdraw commission_PerYear_InBPx1e3 withdraw monthsRemainingReal
         commissionsForUserFTToGetBack = withdraw - userFT
         withdrawPlusCommissionsGetBack = withdraw + commissionsForUserFTToGetBack
-        commissionsRatePerMonth = TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemainingReal
-        commissions_FT_Rate1e6_PerMonth =
-            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+        commissions_FT_Release_PerMonth = TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemainingReal
+        commissions_FT_Release_PerMonth_1e6 =
+            OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
         !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnit_Initial)
 
-        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateWithdrawCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 withdraw
@@ -317,12 +317,12 @@ test_withdraw_fractionalRemainingMonths = do
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6')
 
 test_withdraw_zeroRemainingMonths :: Tasty.Assertion
 test_withdraw_zeroRemainingMonths = do
-    let commissionPerYearInBPx1e3 = 1_000_000
+    let commission_PerYear_InBPx1e3 = 1_000_000
         monthsCurrentReal = 5
         date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
         monthsTotalReal = 5
@@ -332,18 +332,18 @@ test_withdraw_zeroRemainingMonths = do
         withdraw = 100
 
         !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
-        userFT = calculateFTForUserWithdraw commissionPerYearInBPx1e3 withdraw monthsRemainingReal
+        userFT = calculateFTForUserWithdraw commission_PerYear_InBPx1e3 withdraw monthsRemainingReal
         commissionsForUserFTToGetBack = withdraw - userFT
         withdrawPlusCommissionsGetBack = withdraw + commissionsForUserFTToGetBack
-        commissions_FT_Rate1e6_PerMonth = 0
+        commissions_FT_Release_PerMonth_1e6 = 0
 
         !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnit_Initial)
 
-        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth') =
+        (commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6') =
             FundHelpers.calculateWithdrawCommissionsUsingMonths
-                commissionsTable_Numerator1e6
+                commissions_Table_Numerator_1e6
                 deadline
                 date
                 withdraw
@@ -351,7 +351,7 @@ test_withdraw_zeroRemainingMonths = do
 
         !monthsRemainingCalculated = FundHelpers.getRemainingMonths deadline date
 
-    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)
-        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Rate1e6_PerMonth')
+    (monthsRemainingReal, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)
+        Tasty.@?= (monthsRemainingCalculated, commissionsForUserFTToGetBack', commisswithdrawPlusCommissionsGetBackionsFT', commissions_FT_Release_PerMonth_1e6')
 
 --------------------------------------------------------------------------------

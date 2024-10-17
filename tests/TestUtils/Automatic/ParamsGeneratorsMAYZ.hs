@@ -122,8 +122,8 @@ dependentWithdrawParam name minWithdraw maxWithdraw validGranularity useValidAmo
                                 let investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit investUnitTokens
                                 let monthsRemainingPlusOne = FundHelpers.getRemainingMonths deadlineDate' beginDate' + 1
                                 let den = 120_000_000
-                                let commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission') den month | month <- [0 .. monthsRemainingPlusOne]]
-                                let (userFT, _commissionsFT, _rate) = FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadlineDate' depositDate' deposit'
+                                let commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission') den month | month <- [0 .. monthsRemainingPlusOne]]
+                                let (userFT, _commissionsFT, _rate) = FundHelpers.calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadlineDate' depositDate' deposit'
                                 !_ <- debugTraceIf swTraceTxParamsGenererator ("useValidAmount - validGranularity: " ++ show (useValidAmount, validGranularity, investUnit_Granularity, userFT, minWithdraw, maxWithdraw))
                                 if useValidAmount then
                                     if validGranularity then

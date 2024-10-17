@@ -199,8 +199,8 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !beginAt = T.fdBeginAt fundDatum_Out
                         !deadline = T.fdDeadline fundDatum_Out
                         !closedAt = Nothing
-                        !commissionPerYearInBPx1e3 = T.fdCommissionPerYearInBPx1e3 fundDatum_Out
-                        !commissionsTable_Numerator1e6 = T.fdCommissionsTable_Numerator1e6 fundDatum_Out
+                        !commission_PerYear_InBPx1e3 = T.fdCommission_PerYear_InBPx1e3 fundDatum_Out
+                        !commissions_Table_Numerator_1e6 = T.fdCommissions_Table_Numerator_1e6 fundDatum_Out
                         !holdingsCount = 0
                         !holdingsIndex = 0
                         ---------------------
@@ -218,8 +218,8 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 beginAt
                                 deadline
                                 closedAt
-                                commissionPerYearInBPx1e3
-                                commissionsTable_Numerator1e6
+                                commission_PerYear_InBPx1e3
+                                commissions_Table_Numerator_1e6
                                 holdingsCount
                                 holdingsIndex
                                 requiredMAYZ
@@ -240,7 +240,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 && traceIfFalse "not isDateNotReached deadline" (OnChainHelpers.isDateNotReached deadline info)
                                 && traceIfFalse "not deadline > beginAt" (deadline > beginAt)
                                 && traceIfFalse "not isInRange fundLifeTime" (ProtocolT.isInRange fundLifeTime (deadline - beginAt))
-                                && traceIfFalse "not isInRange commissionFund_PerYear_InBPx1e3" (ProtocolT.isInRange commissionFund_PerYear_InBPx1e3 commissionPerYearInBPx1e3)
+                                && traceIfFalse "not isInRange commissionFund_PerYear_InBPx1e3" (ProtocolT.isInRange commissionFund_PerYear_InBPx1e3 commission_PerYear_InBPx1e3)
                         ------------------
                         isCorrect_Output_CommissionsTable :: Bool
                         !isCorrect_Output_CommissionsTable =
@@ -248,11 +248,11 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 !monthsRemainingPlusOne = monthsRemaining +1
                                 -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
                                 den = 120_000_000
-                                commissionsTable_Numerator1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den monthsRemainingPlusOne
+                                commissions_Table_Numerator_1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemainingPlusOne
                             in
                             -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
                             -- that is why there are 2 elements in the table more than the life of the fund
-                            monthsRemainingPlusOne + 1 == length commissionsTable_Numerator1e6 && head (reverse  commissionsTable_Numerator1e6) == commissionsTable_Numerator1e6_lastElement
+                            monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse  commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
                         ------------------
                         isCorrect_Output_Fund_Value :: Bool
                         !isCorrect_Output_Fund_Value =

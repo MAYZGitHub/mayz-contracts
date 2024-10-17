@@ -290,7 +290,7 @@ genValidProtocolDatumType tp = do
 --             <*> QC.arbitrary -- fdBeginAt
 --             <*> QC.arbitrary -- fdDeadline
 --             <*> QC.arbitrary -- fdClosedAt
---             <*> QC.arbitrary -- fdCommissionsTable_Numerator1e6
+--             <*> QC.arbitrary -- fdCommissions_Table_Numerator_1e6
 --             <*> QC.arbitrary -- fdHoldingsCount
 --             <*> QC.arbitrary -- fdHoldingsIndex
 --             <*> QC.arbitrary -- fdMinADA
@@ -320,7 +320,7 @@ genValidFundHoldingDatumType tp = do
     -- subtotal_FT_Commissions <- abs <$> QC.arbitrary
     -- -- We multiply by 100 to get bigger values.
     -- subtotal_FT_Commissions_Acumulated <- abs . (* 100) <$> QC.arbitrary
-    -- subtotal_FT_Commissions_Rate1e6_PerMonth <- abs <$> QC.arbitrary
+    -- subtotal_FT_Commissions_Release_PerMonth_1e6 <- abs <$> QC.arbitrary
     -- -- We force the next three values for always giving a positive amount
     -- -- of available commissions at the given date and fund deadline.
     -- let
@@ -329,7 +329,7 @@ genValidFundHoldingDatumType tp = do
     --     date = tpCollectCommissionsDate tp
     --     deadline = FundT.fdDeadline fund_DatumType_
     --     monthsRemainingRational = FundHelpers.getRemainingMonths deadline date
-    --     rate = TxRatio.unsafeRatio subtotal_FT_Commissions_Rate1e6_PerMonth 1_000_000
+    --     rate = TxRatio.unsafeRatio subtotal_FT_Commissions_Release_PerMonth_1e6 1_000_000
     --     commisionsReady =
     --         TxRatio.fromInteger subtotal_FT_Commissions_Acumulated
     --             PlutusTx.- (TxRatio.fromInteger monthsRemainingRational * rate)
@@ -354,7 +354,7 @@ genValidFundHoldingDatumType tp = do
     --     subtotal_FT_Minted
     --     subtotal_FT_Commissions
     --     subtotal_FT_Commissions_Acumulated
-    --     subtotal_FT_Commissions_Rate1e6_PerMonth
+    --     subtotal_FT_Commissions_Release_PerMonth_1e6
     --     subtotal_FT_Commissions_Collected_Protocol
     --     subtotal_FT_Commissions_Collected_Managers
     --     subtotal_FT_Commissions_Collected_Delegators

@@ -93,7 +93,7 @@ data FundHoldingDatumType
           , hdSubtotal_FT_Minted_Accumulated               :: Integer
           , hdSubtotal_FT_Minted                           :: Integer
           , hdSubtotal_FT_Commissions                      :: Integer
-          , hdSubtotal_FT_Commissions_Rate1e6_PerMonth     :: Integer
+          , hdSubtotal_FT_Commissions_Release_PerMonth_1e6     :: Integer
           , hdSubtotal_FT_Commissions_Collected_Protocol   :: Integer
           , hdSubtotal_FT_Commissions_Collected_Managers   :: Integer
           , hdSubtotal_FT_Commissions_Collected_Delegators :: Integer
@@ -108,7 +108,7 @@ instance Eq FundHoldingDatumType where
             && hdSubtotal_FT_Minted_Accumulated ps1 == hdSubtotal_FT_Minted_Accumulated ps2
             && hdSubtotal_FT_Minted ps1 == hdSubtotal_FT_Minted ps2
             && hdSubtotal_FT_Commissions ps1 == hdSubtotal_FT_Commissions ps2
-            && hdSubtotal_FT_Commissions_Rate1e6_PerMonth ps1 == hdSubtotal_FT_Commissions_Rate1e6_PerMonth ps2
+            && hdSubtotal_FT_Commissions_Release_PerMonth_1e6 ps1 == hdSubtotal_FT_Commissions_Release_PerMonth_1e6 ps2
             && hdSubtotal_FT_Commissions_Collected_Protocol ps1 == hdSubtotal_FT_Commissions_Collected_Protocol ps2
             && hdSubtotal_FT_Commissions_Collected_Managers ps1 == hdSubtotal_FT_Commissions_Collected_Managers ps2
             && hdSubtotal_FT_Commissions_Collected_Delegators ps1 == hdSubtotal_FT_Commissions_Collected_Delegators ps2
@@ -167,7 +167,7 @@ mkFundHolding_Datum
     subtotal_FT_AcumDeposits
     subtotal_FT_Minted
     subtotal_FT_Commissions
-    subtotal_FT_Commissions_Rate1e6_PerMonth
+    subtotal_FT_Commissions_Release_PerMonth_1e6
     subtotal_FT_Commissions_Collected_Protocol
     subtotal_FT_Commissions_Collected_Managers
     subtotal_FT_Commissions_Collected_Delegators
@@ -178,7 +178,7 @@ mkFundHolding_Datum
                 subtotal_FT_AcumDeposits
                 subtotal_FT_Minted
                 subtotal_FT_Commissions
-                subtotal_FT_Commissions_Rate1e6_PerMonth
+                subtotal_FT_Commissions_Release_PerMonth_1e6
                 subtotal_FT_Commissions_Collected_Protocol
                 subtotal_FT_Commissions_Collected_Managers
                 subtotal_FT_Commissions_Collected_Delegators

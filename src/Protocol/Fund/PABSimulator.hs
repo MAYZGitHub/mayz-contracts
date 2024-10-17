@@ -338,7 +338,7 @@ pabFundPrepare isAdminMenu (walletNro, walletCount) protocolPABParams fundPABPar
             MonadIOClass.liftIO $ P.putStrLn "--------------------------------"
             deadline <-  MonadIOClass.liftIO $ CLIHelpers.getTime "Deadline in Milisecconds" nowPlus2Year 0
             ---------------------
-            commissionPerYearInBPx1e3 <-  MonadIOClass.liftIO $ CLIHelpers.getIntWithDefault "Commissions per year in pb x 1e3 (1.000 = 0.01% / 10.000.000 = 100%)" 1000
+            commission_PerYear_InBPx1e3 <-  MonadIOClass.liftIO $ CLIHelpers.getIntWithDefault "Commissions per year in pb x 1e3 (1.000 = 0.01% / 10.000.000 = 100%)" 1000
             ---------------------
             uiPriceADA <-  MonadIOClass.liftIO $ CLIHelpers.getIntWithDefault "IU(uFT) ADA Price" 10_000_000
             ---------------------
@@ -355,7 +355,7 @@ pabFundPrepare isAdminMenu (walletNro, walletCount) protocolPABParams fundPABPar
                                 T.pfppBeginAt = now,
                                 T.pfppDeadline = deadline,
                                 T.pfppClosedAt = Nothing,
-                                T.pfppCommissionPerYearInBPx1e3 = commissionPerYearInBPx1e3,
+                                T.pfppCommission_PerYear_InBPx1e3 = commission_PerYear_InBPx1e3,
                                 T.pfppInvestUnit = investUnit,
                                 T.pfppInvestUnitPriceADA = uiPriceADA
                             }

@@ -353,7 +353,7 @@ data PABFundPrepareParams
           , pfppBeginAt                   :: LedgerApiV2.POSIXTime
           , pfppDeadline                  :: LedgerApiV2.POSIXTime
           , pfppClosedAt                  :: Maybe LedgerApiV2.POSIXTime
-          , pfppCommissionPerYearInBPx1e3 :: Integer
+          , pfppCommission_PerYear_InBPx1e3 :: Integer
           , pfppInvestUnit                :: T.InvestUnit
           , pfppInvestUnitPriceADA        :: Integer
           }
@@ -870,7 +870,7 @@ examplePABFundPrepareParams =
             pfppBeginAt = examplePOSIXTime,
             pfppDeadline = examplePOSIXTime,
             pfppClosedAt = Just examplePOSIXTime,
-            pfppCommissionPerYearInBPx1e3 = exampleInteger,
+            pfppCommission_PerYear_InBPx1e3 = exampleInteger,
             pfppInvestUnit = exampleInvestUnit,
             pfppInvestUnitPriceADA = exampleInteger
         }

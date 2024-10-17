@@ -160,11 +160,11 @@ endPointFundPrepare T.PABFundPrepareParams {..} = PlutusContract.handleError Off
         !deadline = pfppDeadline
         !closedAt = pfppClosedAt
         --
-        !commissionPerYearInBPx1e3 = pfppCommissionPerYearInBPx1e3
+        !commission_PerYear_InBPx1e3 = pfppCommission_PerYear_InBPx1e3
         !monthsRemainingPlusOne = FundHelpers.getRemainingMonths deadline beginAt + 1
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         !den = 120_000_000
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0..monthsRemainingPlusOne]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0..monthsRemainingPlusOne]]
         ---
         !holdingsCount = 0
         !holdingsIndex = 0
@@ -182,8 +182,8 @@ endPointFundPrepare T.PABFundPrepareParams {..} = PlutusContract.handleError Off
             beginAt
             deadline
             closedAt
-            commissionPerYearInBPx1e3
-            commissionsTable_Numerator1e6
+            commission_PerYear_InBPx1e3
+            commissions_Table_Numerator_1e6
             holdingsCount
             holdingsIndex
             requiredMAYZ
@@ -465,7 +465,7 @@ endPointFundHoldingAdd T.PABFundHoldingAddParams {..} = PlutusContract.handleErr
                         FundHoldingT.hdSubtotal_FT_Minted_Accumulated = 0,
                         FundHoldingT.hdSubtotal_FT_Minted = 0,
                         FundHoldingT.hdSubtotal_FT_Commissions = 0,
-                        FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth  = 0,
+                        FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6  = 0,
                         FundHoldingT.hdSubtotal_FT_Commissions_Collected_Protocol = 0,
                         FundHoldingT.hdSubtotal_FT_Commissions_Collected_Managers = 0,
                         FundHoldingT.hdSubtotal_FT_Commissions_Collected_Delegators = 0,
@@ -602,16 +602,16 @@ endPointFundDeposit T.PABFundDepositParams {..} = PlutusContract.handleError Off
         P.$ PlutusContract.throwError @DataText.Text $ OffChainHelpers.stringToStrictText $ TextPrintf.printf "You dont have enough tokens to deposit"
     ---------------------
     let !deadline = FundT.fdDeadline fundDatum_In
-        -- !commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 fundDatum_In
-        !commissionsTable_Numerator1e6 = FundT.fdCommissionsTable_Numerator1e6 fundDatum_In
+        -- !commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 fundDatum_In
+        !commissions_Table_Numerator_1e6 = FundT.fdCommissions_Table_Numerator_1e6 fundDatum_In
     ---------------------
         !monthsRemaining =  FundHelpers.getRemainingMonths deadline now
     ---------------------
-        !(userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) = FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline now deposit
+        !(userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = FundHelpers.calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline now deposit
     ------------------
     PlutusContract.logInfo @P.String $ TextPrintf.printf "deposit: %s" (P.show deposit)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "monthsRemaining: %s" (P.show monthsRemaining)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionPerYearInBPx1e3: %s" (P.show commissionPerYearInBPx1e3)
+    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commission_PerYear_InBPx1e3: %s" (P.show commission_PerYear_InBPx1e3)
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionesPerDayPct: %s" (OffChainHelpers.displayRational 8 commissionesPerDayPct)
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionesPerDayPct': %s" (OffChainHelpers.displayRational 8 commissionesPerDayPct')
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsAcumulated: %s" (OffChainHelpers.displayRational 8 commissionsAcumulated)
@@ -619,13 +619,7 @@ endPointFundDeposit T.PABFundDepositParams {..} = PlutusContract.handleError Off
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"
     PlutusContract.logInfo @P.String $ TextPrintf.printf "userFT: %s" (P.show userFT)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsFT: %s" (P.show commissionsFT)
-    PlutusContract.logInfo @P.String $ TextPrintf.printf "commissions_FT_Rate1e6_PerMonth: %s" (P.show commissions_FT_Rate1e6_PerMonth)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay: %s" (OffChainHelpers.displayRational 8 commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay': %s" (OffChainHelpers.displayRational 8 commissionsRatePerDay')
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay numerator: %s" (P.show $ TxRatio.numerator commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay denominator: %s" (P.show $ TxRatio.denominator commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay' numerator: %s" (P.show $ TxRatio.numerator commissionsRatePerDay')
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay' denominator: %s" (P.show $ TxRatio.denominator commissionsRatePerDay')
+    PlutusContract.logInfo @P.String $ TextPrintf.printf "commissions_FT_Release_PerMonth_1e6: %s" (P.show commissions_FT_Release_PerMonth_1e6)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"
     ---------------------
     let !fundFT_AC = LedgerValue.AssetClass (fundPolicy_CS,  fundFT_TN)
@@ -645,7 +639,7 @@ endPointFundDeposit T.PABFundDepositParams {..} = PlutusContract.handleError Off
     ---------------------
         !fundHoldingDatum_In = (\(_, _, dat) -> dat) uTxO_With_FundHoldingDatum
     ---------------------
-    let !fundHoldingDatum_Out = FundHoldingT.FundHoldingDatum $ FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Rate1e6_PerMonth
+    let !fundHoldingDatum_Out = FundHoldingT.FundHoldingDatum $ FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Release_PerMonth_1e6
     ---------------------
     PlutusContract.logInfo @P.String $ TextPrintf.printf "fundHoldingDatum_In: %s" (P.show fundHoldingDatum_In)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"
@@ -758,30 +752,18 @@ endPointFundWithdraw T.PABFundWithdrawParams {..} = PlutusContract.handleError O
         !investUnitTokens = T.iuValues investUnit
     ---------------------
     let !deadline = FundT.fdDeadline fundDatum_In
-        -- !commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 fundDatum_In
-        !commissionsTable_Numerator1e6 = FundT.fdCommissionsTable_Numerator1e6 fundDatum_In
+        -- !commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 fundDatum_In
+        !commissions_Table_Numerator_1e6 = FundT.fdCommissions_Table_Numerator_1e6 fundDatum_In
      ---------------------
         !monthsRemaining =  FundHelpers.getRemainingMonths deadline now
     ---------------------
         !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit investUnitTokens
     ---------------------
-        !(commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = FundHelpers.calculateWithdrawCommissionsUsingMonths commissionsTable_Numerator1e6 deadline now withdraw investUnit_Granularity
-    ------------------
-    --     !commissionesPerDayPct =  TxRatio.unsafeRatio  (FundT.fdCommissionPerYearInBPx1e3 fundDatum_In) 300_000 -- 10_000 * 30, por que supongo que la comision es por mes -- 87_600_000 -- (10_000 * 365 * 24)
-    --     !commissionesPerDayPct' = OnChainHelpers.setAndLoosePrecision commissionesPerDayPct 6
-    -- ------------------
-    --     !commissionsAcumulatedNotIncludingThisPeriod = (TxRatio.fromInteger 1 - commissionesPerDayPct') `OnChainHelpers.powRational'Old` daysRemaining
-    --     !commissionsAcumulatedNotIncludingThisPeriod' = OnChainHelpers.setAndLoosePrecision commissionsAcumulatedNotIncludingThisPeriod 6
-    -- ------------------
-    --     !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (commissionsAcumulatedNotIncludingThisPeriod' * TxRatio.fromInteger withdraw)
-    --     !commissionsForUserFTToGetBack = withdraw - userFT'forCalculationsOfCommissionsToGetBack
-    --     !commissionsRatePerDay = TxRatio.unsafeRatio commissionsForUserFTToGetBack daysRemaining
-    --     !commissionsRatePerDay' = OnChainHelpers.setAndLoosePrecision commissionsRatePerDay 6
-    --     !withdrawPlusCommissionsGetBack = withdraw + commissionsForUserFTToGetBack
+        !(commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = FundHelpers.calculateWithdrawCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline now withdraw investUnit_Granularity
     ------------------
     PlutusContract.logInfo @P.String $ TextPrintf.printf "withdraw: %s" (P.show withdraw)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "monthsRemaining: %s" (P.show monthsRemaining)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionPerYearInBPx1e3: %s" (P.show commissionPerYearInBPx1e3)
+    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commission_PerYear_InBPx1e3: %s" (P.show commission_PerYear_InBPx1e3)
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionesPerDayPct: %s" (OffChainHelpers.displayRational 8 commissionesPerDayPct)
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionesPerDayPct': %s" (OffChainHelpers.displayRational 8 commissionesPerDayPct')
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsAcumulatedNotIncludingThisPeriod: %s" (OffChainHelpers.displayRational 8 commissionsAcumulatedNotIncludingThisPeriod)
@@ -790,13 +772,7 @@ endPointFundWithdraw T.PABFundWithdrawParams {..} = PlutusContract.handleError O
     -- PlutusContract.logInfo @P.String $ TextPrintf.printf "userFT'forCalculationsOfCommissionsToGetBack: %s" (P.show userFT'forCalculationsOfCommissionsToGetBack)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsForUserFTToGetBack: %s" (P.show commissionsForUserFTToGetBack)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "withdrawPlusCommissionsGetBack: %s" (P.show withdrawPlusCommissionsGetBack)
-    PlutusContract.logInfo @P.String $ TextPrintf.printf "commissions_FT_Rate1e6_PerMonth: %s" (P.show commissions_FT_Rate1e6_PerMonth)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay: %s" (OffChainHelpers.displayRational 8 commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay': %s" (OffChainHelpers.displayRational 8 commissionsRatePerDay')
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay numerator: %s" (P.show $ TxRatio.numerator commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay denominator: %s" (P.show $ TxRatio.denominator commissionsRatePerDay)
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay' numerator: %s" (P.show $ TxRatio.numerator commissionsRatePerDay')
-    -- PlutusContract.logInfo @P.String $ TextPrintf.printf "commissionsRatePerDay' denominator: %s" (P.show $ TxRatio.denominator commissionsRatePerDay')
+    PlutusContract.logInfo @P.String $ TextPrintf.printf "commissions_FT_Release_PerMonth_1e6: %s" (P.show commissions_FT_Release_PerMonth_1e6)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"
     ------------------
     let !valueOf_TokensForWithdraw = foldl (P.<>) (LedgerAda.lovelaceValueOf 0)
@@ -825,7 +801,7 @@ endPointFundWithdraw T.PABFundWithdrawParams {..} = PlutusContract.handleError O
     ---------------------
         !fundHoldingDatum_In = (\(_, _, dat) -> dat) uTxO_With_FundHoldingDatum
     ---------------------
-    let !fundHoldingDatum_Out = FundHoldingT.FundHoldingDatum $ FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Rate1e6_PerMonth
+    let !fundHoldingDatum_Out = FundHoldingT.FundHoldingDatum $ FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
     ---------------------
     PlutusContract.logInfo @P.String $ TextPrintf.printf "fundHoldingDatum_In: %s" (P.show fundHoldingDatum_In)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"
@@ -1159,7 +1135,7 @@ endPointFundCollect_Protocol_Commission T.PABFundCollect_Protocol_CommissionPara
         -- !msRemaining =  LedgerApiV2.getPOSIXTime  $ FundT.fdDeadline fundDatum_In - now
         -- !monthsRemainingRational = TxRatio.unsafeRatio msRemaining msPerMonth
         -- -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_Commissions_RateNumerator fundHoldingDatum_In) (FundHoldingT.hdSubtotal_Commissions_RateDenominator fundHoldingDatum_In)
-        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In) 1_000_000
+        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In) 1_000_000
         -- !commisionsReady = TxRatio.fromInteger totalCommisionsAcum - (monthsRemainingRational * rate)
         -- !sharePct = TxRatio.unsafeRatio (ProtocolT.pdShare_InBPx1e2_Protocol protocolDatum_In) 10_000
         -- !commisionsReady_For_Protocol = commisionsReady * sharePct
@@ -1314,7 +1290,7 @@ endPointFundCollect_Delegators_Commission T.PABFundCollect_Delegators_Commission
         -- !msRemaining =  LedgerApiV2.getPOSIXTime  $ FundT.fdDeadline fundDatum_In - now
         -- !monthsRemainingRational =TxRatio.unsafeRatio msRemaining msPerMonth
         -- -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_Commissions_RateNumerator fundHoldingDatum_In) (FundHoldingT.hdSubtotal_Commissions_RateDenominator fundHoldingDatum_In)
-        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In) 1_000_000
+        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In) 1_000_000
         -- !commisionsReady = TxRatio.fromInteger totalCommisionsAcum - (monthsRemainingRational * rate)
         -- !sharePct = TxRatio.unsafeRatio (ProtocolT.pdShare_InBPx1e2_Delegators protocolDatum_In) 10_000
         -- !commisionsReady_For_MAYZ = commisionsReady * sharePct
@@ -1469,7 +1445,7 @@ endPointFundCollect_Managers_Commission T.PABFundCollect_Managers_CommissionPara
         -- !msPerMonth = msPerDay * 30
         -- !msRemaining =  LedgerApiV2.getPOSIXTime  $ FundT.fdDeadline fundDatum_In - now
         -- !monthsRemainingRational =TxRatio.unsafeRatio   msRemaining  msPerMonth
-        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In) 1_000_000
+        -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In) 1_000_000
         -- -- !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_Commissions_RateNumerator fundHoldingDatum_In) (FundHoldingT.hdSubtotal_Commissions_RateDenominator fundHoldingDatum_In)
         -- !commisionsReady = TxRatio.fromInteger totalCommisionsAcum - (monthsRemainingRational * rate)
         -- !sharePct = TxRatio.unsafeRatio (ProtocolT.pdShare_InBPx1e2_Managers protocolDatum_In) 10_000

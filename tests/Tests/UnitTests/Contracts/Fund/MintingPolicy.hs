@@ -196,7 +196,7 @@ fund_Policy_Redeemer_MintID_Tests tp =
                         , Tasty.testCase "Fund with wrong Commissions in datum must fail" $ do
                             let fund_DatumType' =
                                     (fund_DatumType_MockData tp)
-                                        { FundT.fdCommissionPerYearInBPx1e3 = ProtocolT.mmdMax (ProtocolT.pdCommissionFund_PerYear_InBPx1e3 (protocol_DatumType_MockData tp)) + sum_ANY_INVALID_NUMBER
+                                        { FundT.fdCommission_PerYear_InBPx1e3 = ProtocolT.mmdMax (ProtocolT.pdCommissionFund_PerYear_InBPx1e3 (protocol_DatumType_MockData tp)) + sum_ANY_INVALID_NUMBER
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)
@@ -211,14 +211,14 @@ fund_Policy_Redeemer_MintID_Tests tp =
                         , Tasty.testCase "Fund with wrong Commissions Table values in datum must fail" $ do
                             let beginAt = FundT.fdBeginAt (fund_DatumType_MockData tp)
                                 deadline = FundT.fdDeadline (fund_DatumType_MockData tp)
-                                commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 (fund_DatumType_MockData tp) + sum_ANY_INVALID_NUMBER
+                                commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 (fund_DatumType_MockData tp) + sum_ANY_INVALID_NUMBER
                                 monthsRemainingPlusOne = FundHelpers.getRemainingMonths deadline beginAt + 1
                                 den = 120_000_000
-                                commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
+                                commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
                                 ----------------------
                                 fund_DatumType' =
                                     (fund_DatumType_MockData tp)
-                                        { FundT.fdCommissionsTable_Numerator1e6 = commissionsTable_Numerator1e6
+                                        { FundT.fdCommissions_Table_Numerator_1e6 = commissions_Table_Numerator_1e6
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)
@@ -234,14 +234,14 @@ fund_Policy_Redeemer_MintID_Tests tp =
                             let ----------------------
                                 beginAt = FundT.fdBeginAt (fund_DatumType_MockData tp)
                                 deadline = FundT.fdDeadline (fund_DatumType_MockData tp)
-                                commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 (fund_DatumType_MockData tp)
+                                commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 (fund_DatumType_MockData tp)
                                 monthsRemaining_ = FundHelpers.getRemainingMonths deadline beginAt
                                 den = 120_000_000
-                                commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemaining_]]
+                                commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemaining_]]
                                 ----------------------
                                 fund_DatumType' =
                                     (fund_DatumType_MockData tp)
-                                        { FundT.fdCommissionsTable_Numerator1e6 = sum_ANY_INVALID_NUMBER : commissionsTable_Numerator1e6
+                                        { FundT.fdCommissions_Table_Numerator_1e6 = sum_ANY_INVALID_NUMBER : commissions_Table_Numerator_1e6
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)
@@ -287,15 +287,15 @@ fund_Policy_Redeemer_MintID_Tests tp =
                             let ----------------------
                                 beginAt = FundT.fdBeginAt (fund_DatumType_MockData tp)
                                 deadline = tpTransactionDate tp - LedgerApiV2.POSIXTime sum_ANY_INVALID_NUMBER
-                                commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 (fund_DatumType_MockData tp)
+                                commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 (fund_DatumType_MockData tp)
                                 monthsRemaining_ = FundHelpers.getRemainingMonths deadline beginAt
                                 den = 120_000_000
-                                commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemaining_]]
+                                commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemaining_]]
                                 ----------------------
                                 fund_DatumType' =
                                     (fund_DatumType_MockData tp)
                                         { FundT.fdDeadline = deadline
-                                        , FundT.fdCommissionsTable_Numerator1e6 = commissionsTable_Numerator1e6
+                                        , FundT.fdCommissions_Table_Numerator_1e6 = commissions_Table_Numerator_1e6
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)
@@ -311,16 +311,16 @@ fund_Policy_Redeemer_MintID_Tests tp =
                             let ----------------------
                                 beginAt = tpTransactionDate tp + 100
                                 deadline = beginAt - 1
-                                commissionPerYearInBPx1e3 = FundT.fdCommissionPerYearInBPx1e3 (fund_DatumType_MockData tp)
+                                commission_PerYear_InBPx1e3 = FundT.fdCommission_PerYear_InBPx1e3 (fund_DatumType_MockData tp)
                                 monthsRemaining_ = FundHelpers.getRemainingMonths deadline beginAt
                                 den = 120_000_000
-                                commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemaining_]]
+                                commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemaining_]]
                                 ----------------------
                                 fund_DatumType' =
                                     (fund_DatumType_MockData tp)
                                         { FundT.fdBeginAt = beginAt
                                         , FundT.fdDeadline = deadline
-                                        , FundT.fdCommissionsTable_Numerator1e6 = commissionsTable_Numerator1e6
+                                        , FundT.fdCommissions_Table_Numerator_1e6 = commissions_Table_Numerator_1e6
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)

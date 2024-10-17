@@ -70,23 +70,23 @@ mkUpdated_Fund_Datum_With_HoldingDeleted !fundDatum_In =
 
 {-# INLINEABLE mkUpdated_FundHolding_Datum_With_Deposit #-}
 mkUpdated_FundHolding_Datum_With_Deposit :: FundHoldingT.FundHoldingDatumType -> Integer  -> Integer  -> Integer -> Integer -> FundHoldingT.FundHoldingDatumType
-mkUpdated_FundHolding_Datum_With_Deposit !fundHoldingDatum_In !mintingFT !_deliverFT !commissionsPayed !commissions_FT_Rate1e6_PerMonth =
+mkUpdated_FundHolding_Datum_With_Deposit !fundHoldingDatum_In !mintingFT !_deliverFT !commissionsPayed !commissions_FT_Release_PerMonth_1e6 =
     fundHoldingDatum_In {
         FundHoldingT.hdSubtotal_FT_Minted_Accumulated = FundHoldingT.hdSubtotal_FT_Minted_Accumulated fundHoldingDatum_In + mintingFT
         , FundHoldingT.hdSubtotal_FT_Minted = FundHoldingT.hdSubtotal_FT_Minted fundHoldingDatum_In + mintingFT
         , FundHoldingT.hdSubtotal_FT_Commissions = FundHoldingT.hdSubtotal_FT_Commissions fundHoldingDatum_In + commissionsPayed
-        , FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth = FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In + commissions_FT_Rate1e6_PerMonth
+        , FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In + commissions_FT_Release_PerMonth_1e6
     }
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkUpdated_FundHolding_Datum_With_Withdraw #-}
 mkUpdated_FundHolding_Datum_With_Withdraw :: FundHoldingT.FundHoldingDatumType ->Integer  -> Integer  -> Integer  -> FundHoldingT.FundHoldingDatumType
-mkUpdated_FundHolding_Datum_With_Withdraw !fundHoldingDatum_In !withdraw !commissionsForUserFTToGetBack !commissions_FT_Rate1e6_PerMonth =
+mkUpdated_FundHolding_Datum_With_Withdraw !fundHoldingDatum_In !withdraw !commissionsForUserFTToGetBack !commissions_FT_Release_PerMonth_1e6 =
     fundHoldingDatum_In {
         FundHoldingT.hdSubtotal_FT_Minted = FundHoldingT.hdSubtotal_FT_Minted fundHoldingDatum_In - withdraw - commissionsForUserFTToGetBack
         , FundHoldingT.hdSubtotal_FT_Commissions = FundHoldingT.hdSubtotal_FT_Commissions fundHoldingDatum_In - commissionsForUserFTToGetBack
-        , FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth = FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In - commissions_FT_Rate1e6_PerMonth
+        , FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In - commissions_FT_Release_PerMonth_1e6
     }
 
 --------------------------------------------------------------------------------2
@@ -127,9 +127,9 @@ mkUpdated_FundHolding_Datum_With_MinADAChanged !fundHoldingDatum_In !newMinADA =
 
 {-# INLINEABLE mkUpdated_FundHolding_Datum_With_CommissionsMoved #-}
 mkUpdated_FundHolding_Datum_With_CommissionsMoved :: FundHoldingT.FundHoldingDatumType -> Integer ->  Integer -> FundHoldingT.FundHoldingDatumType
-mkUpdated_FundHolding_Datum_With_CommissionsMoved !fundHoldingDatum_In !newCommissions !rateFT1x6 = fundHoldingDatum_In
+mkUpdated_FundHolding_Datum_With_CommissionsMoved !fundHoldingDatum_In !newCommissions !commissions_FT_Release_PerMonth_1e6 = fundHoldingDatum_In
     { FundHoldingT.hdSubtotal_FT_Commissions = newCommissions,
-        FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth = rateFT1x6
+        FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = commissions_FT_Release_PerMonth_1e6
     }
 
 --------------------------------------------------------------------------------2
@@ -147,28 +147,28 @@ getRemainingMonths deadline date =
 
 {-# INLINEABLE calculateDepositCommissionsUsingMonths #-}
 calculateDepositCommissionsUsingMonths :: [Integer] -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> (Integer, Integer, Integer)
-calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit = (userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth)
+calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline date deposit = (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)
   where
     -- las comisiones son por en realidad por año y en basic points BP multiplicados por 1e3 o lo que es igual 10e2 = 1_000
     -- la formula de comisiones es = (1 - comisiones por periodo en porcentaje del 0 al 1) ^ (periodos restantes + 1)
     -- el periodo aqui lo voy a calcular en meses
-    -- eso significa que al valor de commissionPerYearInBPx1e3 tengo que dividirlo por
+    -- eso significa que al valor de commission_PerYear_InBPx1e3 tengo que dividirlo por
     -- 10e2 para pasarlo a bp
     -- 100 para pasarlo a porcentaje normal del 1 al 100
     -- 100 para pasarlo a porcentaje del 0 al 1
     -- 12 para pasarlo a meses
     -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120_000_000
-    -- commissionesPerMonthPct0to1 = TxRatio.unsafeRatio commissionPerYearInBPx1e3 den
+    -- commissionesPerMonthPct0to1 = TxRatio.unsafeRatio commission_PerYear_InBPx1e3 den
     -- pero en lugar de calcular el rational y leugo volver a separarlo en num y den para llamar a la potencia
     -- voy a calcular primero el 1 - commissionesPerMonthPct0to1 de esta forma:
-    -- commissionesToUse = TxRatio.unsafeRatio (den - commissionPerYearInBPx1e3) den
+    -- commissionesToUse = TxRatio.unsafeRatio (den - commission_PerYear_InBPx1e3) den
     -- pero este Rational tampoco hace falta crearlo, puedo usar directamente esos num y den para llamar a la potencia
-    -- commissionsAcumulated = OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den (daysRemaining + 1)
+    -- commissionsAcumulated = OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den (daysRemaining + 1)
     ------------------
     !monthsRemaining = getRemainingMonths deadline date
     ------------------
     -- !den = 120_000_000
-    -- !commissionsAcumulated = OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den (monthsRemaining + 1)
+    -- !commissionsAcumulated = OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den (monthsRemaining + 1)
     -- !userFT = TxRatio.truncate (commissionsAcumulated * TxRatio.fromInteger deposit)
     ------------------
     -- Estoy usando una tabla de comisiones pre calculada
@@ -176,7 +176,7 @@ calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline da
     -- ademas esta guardada como enteros x 1e6, por lo que para obtener el valor real hay que dividir por 1e6
     -- aprovechando que es entero, primero calculo la multiplicacion por deposit, que es entero, y luego lo divido por 1e6
     ------------------
-    !commissionsAcumulated_Numerator1e6 = commissionsTable_Numerator1e6 !! (monthsRemaining + 1)
+    !commissionsAcumulated_Numerator_1e6 = commissions_Table_Numerator_1e6 !! (monthsRemaining + 1)
     ------------------
     {--
     The calculation is indeed rounding down (truncating) the result.
@@ -186,40 +186,40 @@ calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline da
     Over many transactions, this could accumulate to a non-trivial amount in favor of the protocol.
     --}
     ------------------
-    !userFT = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulated_Numerator1e6 *  deposit) 1_000_000)
+    !userFT = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulated_Numerator_1e6 *  deposit) 1_000_000)
     ------------------
     !commissionsFT = deposit - userFT
-    !commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth
         | monthsRemaining == 0 = TxRatio.fromInteger 0
         | otherwise =  TxRatio.unsafeRatio commissionsFT monthsRemaining
-    !commissions_FT_Rate1e6_PerMonth = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth_1e6 = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE calculateWithdrawCommissionsUsingMonths #-}
 calculateWithdrawCommissionsUsingMonths :: [Integer] -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> Integer ->  (Integer, Integer, Integer)
-calculateWithdrawCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date withdraw investUnit_Granularity = (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)
+calculateWithdrawCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline date withdraw investUnit_Granularity = (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)
     where
     -- las comisiones son por en realidad por año y en basic points BP multiplicados por 1e3 o lo que es igual 10e2 = 1_000
     -- la formula de comisiones es = (1 - comisiones por periodo en porcentaje del 0 al 1) ^ (periodos restantes + 1)
     -- el periodo aqui lo voy a calcular en meses
-    -- eso significa que al valor de commissionPerYearInBPx1e3 tengo que dividirlo por
+    -- eso significa que al valor de commission_PerYear_InBPx1e3 tengo que dividirlo por
     -- 10e2 para pasarlo a bp
     -- 100 para pasarlo a porcentaje normal del 1 al 100
     -- 100 para pasarlo a porcentaje del 0 al 1
     -- 12 para pasarlo a meses
     -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120_000_000
-    -- commissionesPerMonthPct0to1 = TxRatio.unsafeRatio commissionPerYearInBPx1e3 den
+    -- commissionesPerMonthPct0to1 = TxRatio.unsafeRatio commission_PerYear_InBPx1e3 den
     -- pero en lugar de calcular el rational y leugo volver a separarlo en num y den para llamar a la potencia
     -- voy a calcular primero el 1 - commissionesPerMonthPct0to1 de esta forma:
-    -- commissionesToUse = TxRatio.unsafeRatio (den - commissionPerYearInBPx1e3) den
+    -- commissionesToUse = TxRatio.unsafeRatio (den - commission_PerYear_InBPx1e3) den
     -- pero este Rational tampoco hace falta crearlo, puedo usar directamente esos num y den para llamar a la potencia
-    -- commissionsAcumulated = OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den (daysRemaining + 1)
+    -- commissionsAcumulated = OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den (daysRemaining + 1)
     ------------------
     !monthsRemaining = getRemainingMonths deadline date
     ------------------
     -- !den = 120_000_000
-    -- !commissionsAcumulatedNotIncludingThisPeriod = OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den monthsRemaining
+    -- !commissionsAcumulatedNotIncludingThisPeriod = OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemaining
     -- !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (commissionsAcumulatedNotIncludingThisPeriod * TxRatio.fromInteger withdraw)
     ------------------
     -- Estoy usando una tabla de comisiones pre calculada
@@ -227,43 +227,43 @@ calculateWithdrawCommissionsUsingMonths commissionsTable_Numerator1e6 deadline d
     -- ademas esta guardada como enteros x 1e6, por lo que para obtener el valor real hay que dividir por 1e6
     -- aprovechando que es entero, primero calculo la multiplicacion por withdraw, que es entero, y luego lo divido por 1e6
     ------------------
-    !commissionsAcumulatedNotIncludingThisPeriod_Numerator1e6 = commissionsTable_Numerator1e6 !! monthsRemaining
-    !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulatedNotIncludingThisPeriod_Numerator1e6 *  withdraw) 1_000_000)
+    !commissionsAcumulatedNotIncludingThisPeriod_Numerator_1e6 = commissions_Table_Numerator_1e6 !! monthsRemaining
+    !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulatedNotIncludingThisPeriod_Numerator_1e6 *  withdraw) 1_000_000)
     ------------------
     -- Ajustar para que sea múltiplo de la granularidad
     !userFT'forCalculationsOfCommissionsToGetBackAdjusted = (userFT'forCalculationsOfCommissionsToGetBack `divide` investUnit_Granularity) * investUnit_Granularity
     -- Recalcular commissionsForUserFTToGetBack basado en el valor ajustado
     !commissionsForUserFTToGetBack = withdraw - userFT'forCalculationsOfCommissionsToGetBackAdjusted
     !withdrawPlusCommissionsGetBack = withdraw + commissionsForUserFTToGetBack
-    !commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth
         | monthsRemaining == 0 = TxRatio.fromInteger 0
         | otherwise =  TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemaining
-    !commissions_FT_Rate1e6_PerMonth = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth_1e6 = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
 {-# INLINEABLE calculateWithdrawCommissionsAvailable #-}
 calculateWithdrawCommissionsAvailable :: [Integer] -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> Integer ->  Integer
-calculateWithdrawCommissionsAvailable commissionsTable_Numerator1e6 deadline date withdraw investUnit_Granularity = commissionsForUserFTToGetBack
+calculateWithdrawCommissionsAvailable commissions_Table_Numerator_1e6 deadline date withdraw investUnit_Granularity = commissionsForUserFTToGetBack
     where
     !monthsRemaining = getRemainingMonths deadline date
     ------------------
-    !commissionsAcumulatedNotIncludingThisPeriod_Numerator1e6 = commissionsTable_Numerator1e6 !! monthsRemaining
-    !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulatedNotIncludingThisPeriod_Numerator1e6 *  withdraw) 1_000_000)
+    !commissionsAcumulatedNotIncludingThisPeriod_Numerator_1e6 = commissions_Table_Numerator_1e6 !! monthsRemaining
+    !userFT'forCalculationsOfCommissionsToGetBack = TxRatio.truncate (TxRatio.unsafeRatio (commissionsAcumulatedNotIncludingThisPeriod_Numerator_1e6 *  withdraw) 1_000_000)
     ------------------
     -- Ajustar para que sea múltiplo de la granularidad
     !userFT'forCalculationsOfCommissionsToGetBackAdjusted = (userFT'forCalculationsOfCommissionsToGetBack `divide` investUnit_Granularity) * investUnit_Granularity
     -- Recalcular commissionsForUserFTToGetBack basado en el valor ajustado
     !commissionsForUserFTToGetBack = withdraw - userFT'forCalculationsOfCommissionsToGetBackAdjusted
 
-{-# INLINEABLE calculateWithdrawCommissionsRate  #-}
-calculateWithdrawCommissionsRate :: LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer ->  Integer
-calculateWithdrawCommissionsRate deadline date commissionsForUserFTToGetBack = commissions_FT_Rate1e6_PerMonth
+{-# INLINEABLE calculateWithdrawCommissionsRelease  #-}
+calculateWithdrawCommissionsRelease :: LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer ->  Integer
+calculateWithdrawCommissionsRelease deadline date commissionsForUserFTToGetBack = commissions_FT_Release_PerMonth_1e6
     where
     !monthsRemaining = getRemainingMonths deadline date
     ------------------
-    !commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth
         | monthsRemaining == 0 = TxRatio.fromInteger 0
         | otherwise =  TxRatio.unsafeRatio commissionsForUserFTToGetBack monthsRemaining
-    !commissions_FT_Rate1e6_PerMonth = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissionsRatePerMonth
+    !commissions_FT_Release_PerMonth_1e6 = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator commissions_FT_Release_PerMonth
 
 --------------------------------------------------------------------------------2
 
@@ -273,8 +273,8 @@ getCommissionsAvailable deadline fundHoldingDatum_In shareBPx1e2 taken date =
     let
         !monthsRemainingRational = getRemainingMonths deadline date
         !totalCommisions = FundHoldingT.hdSubtotal_FT_Commissions fundHoldingDatum_In
-        !rate = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In) 1_000_000
-        !commisionsReady = TxRatio.fromInteger totalCommisions - (TxRatio.fromInteger monthsRemainingRational * rate)
+        !release_PerMonth = TxRatio.unsafeRatio (FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In) 1_000_000
+        !commisionsReady = TxRatio.fromInteger totalCommisions - (TxRatio.fromInteger monthsRemainingRational * release_PerMonth)
         -- shareBPx1e2 = shareBP * 100
         -- 1BP to decimal 1/10_000
         -- 1BPx1e2 to decimal 1/(10_000 * 100) = 1/1_000_000

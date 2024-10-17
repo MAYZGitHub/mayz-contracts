@@ -118,8 +118,8 @@ data TestParams
           , tpBeginAt                                    :: LedgerApiV2.POSIXTime
           , tpDeadline                                   :: LedgerApiV2.POSIXTime
           , tpClosedAt                                   :: Maybe LedgerApiV2.POSIXTime
-          , tpCommissionPerYearInBPx1e3                  :: Integer
-          , tpCommissionsTable_Numerator1e6              :: [Integer]
+          , tpCommission_PerYear_InBPx1e3                  :: Integer
+          , tpCommissions_Table_Numerator_1e6              :: [Integer]
           , tpTransactionDate                            :: LedgerApiV2.POSIXTime
           , tpDepositDate                                :: LedgerApiV2.POSIXTime
           , tpWithdrawDate                               :: LedgerApiV2.POSIXTime

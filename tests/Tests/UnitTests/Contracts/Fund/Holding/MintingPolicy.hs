@@ -101,7 +101,7 @@ fundHolding_Policy_Redeemer_MintID_Tests tp =
                                         0 -- hdSubtotal_FT_Minted_Accumulated
                                         0 -- hdSubtotal_FT_Minted
                                         22 -- hdSubtotal_FT_Commissions
-                                        0 -- hdSubtotal_FT_Commissions_Rate1e6_PerMonth
+                                        0 -- hdSubtotal_FT_Commissions_Release_PerMonth_1e6
                                         0 -- hdSubtotal_FT_Commissions_Collected_Protocol
                                         0 -- hdSubtotal_FT_Commissions_Collected_Managers
                                         0 -- hdSubtotal_FT_Commissions_Collected_Delegators

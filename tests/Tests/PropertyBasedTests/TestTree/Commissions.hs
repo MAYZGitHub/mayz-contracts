@@ -70,7 +70,7 @@ prop_withdrawCommissionsRespectGranularity =
     QC.forAll (QC.choose (1, 1000000)) $ \withdrawBase ->
     QC.forAll (QC.choose (1, 60)) $ \monthsTotalReal ->
     QC.forAll (QC.choose (0, monthsTotalReal - 1)) $ \monthsCurrentReal ->
-    QC.forAll (QC.choose (10000, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (10000, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             withdraw = withdrawBase * granularity  -- Asegura que el retiro sea divisible por la granularidad
 
@@ -78,11 +78,11 @@ prop_withdrawCommissionsRespectGranularity =
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
 
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-            !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+            !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
             (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, _) =
                 FundHelpers.calculateWithdrawCommissionsUsingMonths
-                    commissionsTable_Numerator1e6
+                    commissions_Table_Numerator_1e6
                     deadline
                     date
                     withdraw
@@ -100,7 +100,7 @@ prop_withdrawCommissionsRespectGranularity =
                 , "Withdraw plus commissions: " ++ show withdrawPlusCommissionsGetBack
                 , "Months total: " ++ show monthsTotalReal
                 , "Months current: " ++ show monthsCurrentReal
-                , "Commission per year (BPx1e3): " ++ show commissionPerYearInBPx1e3
+                , "Commission per year (BPx1e3): " ++ show commission_PerYear_InBPx1e3
                 ])
             (isWithdrawValid && isCommissionsValid && isWithdrawPlusCommissionsValid)
 
@@ -111,17 +111,17 @@ prop_depositCommissionsLessThanDeposit =
     QC.forAll (QC.choose (1, 1000000)) $ \deposit ->
     QC.forAll (QC.choose (1, 60)) $ \monthsTotalReal ->
     QC.forAll (QC.choose (0, monthsTotalReal - 1)) $ \monthsCurrentReal ->
-    QC.forAll (QC.choose (0, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (0, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
 
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-            !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+            !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
             (userFT, commissionsFT, _) =
                 FundHelpers.calculateDepositCommissionsUsingMonths
-                    commissionsTable_Numerator1e6
+                    commissions_Table_Numerator_1e6
                     deadline
                     date
                     deposit
@@ -142,17 +142,17 @@ prop_withdrawPlusCommissionsGreaterThanWithdraw =
     QC.forAll (QC.choose (1, 1000000)) $ \withdraw ->
     QC.forAll (QC.choose (1, 60)) $ \monthsTotalReal ->
     QC.forAll (QC.choose (0, monthsTotalReal - 1)) $ \monthsCurrentReal ->
-    QC.forAll (QC.choose (0, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (0, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             date = LedgerApiV2.POSIXTime $ msPerMonth * monthsCurrentReal
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
 
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-            !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+            !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
             (_, withdrawPlusCommissions, _) =
                 FundHelpers.calculateWithdrawCommissionsUsingMonths
-                    commissionsTable_Numerator1e6
+                    commissions_Table_Numerator_1e6
                     deadline
                     date
                     withdraw
@@ -171,18 +171,18 @@ prop_commissionRateDecreasesOverTime :: QC.Property
 prop_commissionRateDecreasesOverTime =
     QC.forAll (QC.choose (1, 1000000)) $ \deposit ->
     QC.forAll (QC.choose (2, 60)) $ \monthsTotalReal ->
-    QC.forAll (QC.choose (10000, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (10000, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
 
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-            !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+            !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
             calculateCommissionRate month =
                 let
                     date = LedgerApiV2.POSIXTime $ msPerMonth * month
                     (_, commissionsFT, _) = FundHelpers.calculateDepositCommissionsUsingMonths
-                        commissionsTable_Numerator1e6
+                        commissions_Table_Numerator_1e6
                         deadline
                         date
                         deposit
@@ -203,24 +203,24 @@ prop_depositAndImmediateWithdrawResultsInLoss :: QC.Property
 prop_depositAndImmediateWithdrawResultsInLoss =
     QC.forAll (QC.choose (100, 1000000)) $ \amount ->
     QC.forAll (QC.choose (1, 60)) $ \monthsTotalReal ->
-    QC.forAll (QC.choose (10000, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (10000, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             date = LedgerApiV2.POSIXTime 0
             deadline = LedgerApiV2.POSIXTime $ msPerMonth * monthsTotalReal
 
             !monthsTotal = FundHelpers.getRemainingMonths deadline 0
-            !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
+            !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (monthsTotal + 1)]]
 
             (userFTAfterDeposit, _, _) =
                 FundHelpers.calculateDepositCommissionsUsingMonths
-                    commissionsTable_Numerator1e6
+                    commissions_Table_Numerator_1e6
                     deadline
                     date
                     amount
 
             (_, withdrawAmount, _) =
                 FundHelpers.calculateWithdrawCommissionsUsingMonths
-                    commissionsTable_Numerator1e6
+                    commissions_Table_Numerator_1e6
                     deadline
                     date
                     userFTAfterDeposit
@@ -281,7 +281,7 @@ prop_longerDurationHigherTotalCommissions =
     QC.forAll (QC.choose (100, 1000000)) $ \deposit ->
     QC.forAll (QC.choose (1, 30)) $ \shorterDuration ->
     QC.forAll (QC.choose (31, 60)) $ \longerDuration ->
-    QC.forAll (QC.choose (10000, 1000000)) $ \commissionPerYearInBPx1e3 ->
+    QC.forAll (QC.choose (10000, 1000000)) $ \commission_PerYear_InBPx1e3 ->
         let
             date = LedgerApiV2.POSIXTime 0
             shorterDeadline = LedgerApiV2.POSIXTime $ msPerMonth * shorterDuration
@@ -289,8 +289,8 @@ prop_longerDurationHigherTotalCommissions =
 
             !shorterMonthsTotal = FundHelpers.getRemainingMonths shorterDeadline 0
             !longerMonthsTotal = FundHelpers.getRemainingMonths longerDeadline 0
-            !commissionsTableShorter = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (shorterMonthsTotal + 1)]]
-            !commissionsTableLonger = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. (longerMonthsTotal + 1)]]
+            !commissionsTableShorter = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (shorterMonthsTotal + 1)]]
+            !commissionsTableLonger = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. (longerMonthsTotal + 1)]]
 
             (_, commissionsShorter, _) =
                 FundHelpers.calculateDepositCommissionsUsingMonths

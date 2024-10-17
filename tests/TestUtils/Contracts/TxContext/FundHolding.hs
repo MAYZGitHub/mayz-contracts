@@ -32,6 +32,8 @@ import           TestUtils.HelpersMAYZ
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
+import qualified PlutusTx.Ratio as TxRatio
+import qualified PlutusTx.Prelude as Ptx
 
 --------------------------------------------------------------------------------
 -- FundHolding Contract
@@ -124,13 +126,13 @@ fundHolding_Deposit_TxContext tp depositDate depositAmount =
         input_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding_UTxO
         input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
         --------------------
-        (userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) = calculateDepositCommissionsUsingMonths_Parametrizable tp input_Fund_Datum depositDate depositAmount
+        (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp input_Fund_Datum depositDate depositAmount
         --------------------
         investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit depositAmount
         --------------------
         output_FundHolding_Datum = FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit
                 input_FundHolding_Datum
-                depositAmount userFT commissionsFT commissions_FT_Rate1e6_PerMonth
+                depositAmount userFT commissionsFT commissions_FT_Release_PerMonth_1e6
         output_FundHolding_UTxO = input_FundHolding_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $
@@ -177,13 +179,13 @@ fundHolding_Withdraw_TxContext tp depositDate depositAmount withdrawDate withdra
         input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
         --------------------
         investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues input_InvestUnit)
-        (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
+        (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
         --------------------
         investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit withdrawPlusCommissionsGetBack
         --------------------
         output_FundHolding_Datum = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw
                 input_FundHolding_Datum
-                withdrawAmount commissionsForUserFTToGetBack commissions_FT_Rate1e6_PerMonth
+                withdrawAmount commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
         output_FundHolding_UTxO = input_FundHolding_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $
@@ -245,8 +247,8 @@ fundHolding_ReIndexing_TxContext  = investUnit_ReIndexing_TxContext
 
 --------------------------------------------------------------------------------
 
-fundHolding_BalanceAssets_TxContext :: TestParams -> [Integer] -> [Integer] -> [Integer] -> LedgerApiV2.ScriptContext
-fundHolding_BalanceAssets_TxContext tp depositsInit depositsAfter redeemerCommissionsFT =
+fundHolding_BalanceAssets_TxContext :: TestParams -> [Integer] -> [Integer] -> [Integer] -> Bool -> [Integer] -> LedgerApiV2.ScriptContext
+fundHolding_BalanceAssets_TxContext tp depositsInit depositsAlterations commissionsFTAlterationsForRedeemer useCustomRelease customReleases =
     let
         --------------------
         swTrace = False
@@ -254,8 +256,8 @@ fundHolding_BalanceAssets_TxContext tp depositsInit depositsAfter redeemerCommis
         depositsInit_1 = P.head depositsInit
         depositsInit_2 = P.head (tail depositsInit)
         --------------------
-        depositsAfter_1 = P.head depositsAfter
-        depositsAfter_2 = P.head (tail depositsAfter)
+        depositsAlter_1 = P.head depositsAlterations
+        depositsAlter_2 = P.head (tail depositsAlterations)
         --------------------
         input_Fund_UTxO = fund_UTxO_MockData tp
         input_Fund_Datum = FundT.getFund_DatumType_From_UTxO input_Fund_UTxO
@@ -269,36 +271,120 @@ fundHolding_BalanceAssets_TxContext tp depositsInit depositsAfter redeemerCommis
         base_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO base_FundHolding_UTxO
         --------------------
         input_FundHolding1_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 0 depositsInit_1 (tpDepositDate tp)
-        input_FundHolding1_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding1_UTxO
         input_FundHolding1_Value = LedgerApiV2.txOutValue input_FundHolding1_UTxO
         -----------------
         input_FundHolding2_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 1 depositsInit_2 (tpDepositDate tp)
-        input_FundHolding2_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding2_UTxO
         input_FundHolding2_Value = LedgerApiV2.txOutValue input_FundHolding2_UTxO
         -----------------
-        output_FundHolding1_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 0 depositsAfter_1 (tpDepositDate tp)
-        output_FundHolding2_UTxO = fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp input_Fund_Datum base_FundHolding_Datum input_InvestUnit 1 depositsAfter_2 (tpDepositDate tp)
-        -- output_FundHolding1_Datum = input_FundHolding1_Datum
-        -- output_FundHolding1_UTxO = input_FundHolding1_UTxO
-        --     { LedgerApiV2.txOutDatum =
-        --         LedgerApiV2.OutputDatum $
-        --             FundHoldingT.mkDatum output_FundHolding1_Datum
-        --     , LedgerApiV2.txOutValue = input_FundHolding1_Value
-        --     }
-        -- -----------------
-        -- output_FundHolding2_Datum = input_FundHolding2_Datum
-        -- output_FundHolding2_UTxO = input_FundHolding2_UTxO
-        --     { LedgerApiV2.txOutDatum =
-        --         LedgerApiV2.OutputDatum $
-        --             FundHoldingT.mkDatum output_FundHolding2_Datum
-        --     , LedgerApiV2.txOutValue = input_FundHolding2_Value
-        --     }
+        tokens_InvestUnit_ValueToAlter1 = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit depositsAlter_1
+        tokens_InvestUnit_ValueToAlter2 = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit depositsAlter_2
+        -----------------
+        output_FundHolding1_Value = input_FundHolding1_Value <> tokens_InvestUnit_ValueToAlter1
+        output_FundHolding2_Value = input_FundHolding2_Value <> tokens_InvestUnit_ValueToAlter2
+        -----------------
+        output_FundHolding1_UTxO = 
+            if null commissionsFTAlterationsForRedeemer then
+                input_FundHolding1_UTxO {
+                        LedgerApiV2.txOutValue = output_FundHolding1_Value
+                    }
+            else
+                let    
+                    ------------------
+                    datumIn1 = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding1_UTxO
+                    commissionChange1 = P.head commissionsFTAlterationsForRedeemer
+                    ------------------
+                    !oldCommissions1 = FundHoldingT.hdSubtotal_FT_Commissions datumIn1
+                    !oldRelease1 = FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn1
+                    ------------------
+                    (newCommissions1, newRelease1)
+                      | useCustomRelease = 
+                          let
+                            !newCommissions = oldCommissions1 + commissionChange1
+                            !newRelease = P.head customReleases -- Tomar el primer valor de customReleases
+                          in
+                            (newCommissions, newRelease)
+                      | oldCommissions1 == 0 =
+                          let
+                            !newCommissions = oldCommissions1 + commissionChange1
+                            !newRelease = 0
+                          in
+                            (newCommissions, newRelease)
+                      | otherwise =
+                          let
+                            !newCommissions = oldCommissions1 + commissionChange1
+                            !changeRatio1 = TxRatio.unsafeRatio commissionChange1 oldCommissions1
+                            !changeRelease1 = TxRatio.truncate (changeRatio1 Ptx.* TxRatio.fromInteger oldRelease1)
+                            !newRelease = oldRelease1 + changeRelease1
+                          in
+                            (newCommissions, newRelease)
+                in
+                    input_FundHolding1_UTxO { 
+                        LedgerApiV2.txOutDatum =
+                                LedgerApiV2.OutputDatum $ FundHoldingT.mkDatum datumIn1 
+                                {
+                                    FundHoldingT.hdSubtotal_FT_Commissions = newCommissions1
+                                    , FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = newRelease1
+                                }
+                        , LedgerApiV2.txOutValue = output_FundHolding1_Value <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionChange1
+                    }
+        -----------------
+        output_FundHolding2_UTxO = 
+            if length commissionsFTAlterationsForRedeemer < 2 then
+                input_FundHolding2_UTxO{
+                        LedgerApiV2.txOutValue = output_FundHolding2_Value
+                    }
+            else
+                let    
+                    ------------------
+                    datumIn1 = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding1_UTxO
+                    commissionChange1 = P.head commissionsFTAlterationsForRedeemer
+                    ------------------
+                    datumIn2 = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding2_UTxO
+                    commissionChange2 = P.head (P.tail commissionsFTAlterationsForRedeemer)
+                    ------------------
+                    !oldCommissions1 = FundHoldingT.hdSubtotal_FT_Commissions datumIn1
+                    !oldRelease1 = FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn1
+                    ------------------
+                    !oldCommissions2 = FundHoldingT.hdSubtotal_FT_Commissions datumIn2
+                    !oldRelease2 = FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn2
+                    ------------------
+                    (newCommissions2, newRelease2)
+                      | useCustomRelease = 
+                          let
+                            !newCommissions = oldCommissions2 + commissionChange2
+                            !newRelease = P.head (P.tail customReleases) -- Tomar el segundo valor de customReleases
+                          in
+                            (newCommissions, newRelease)
+                      | oldCommissions1 == 0 =
+                          let
+                            !newCommissions = oldCommissions2 + commissionChange2
+                            !newRelease = 0
+                          in
+                            (newCommissions, newRelease)
+                      | otherwise =
+                          let
+                            !newCommissions = oldCommissions2 + commissionChange2
+                            !changeRatio1 = TxRatio.unsafeRatio commissionChange1 oldCommissions1
+                            !changeRelease1 = TxRatio.truncate (changeRatio1 Ptx.* TxRatio.fromInteger oldRelease1)
+                            !newRelease = oldRelease2 - changeRelease1
+                          in
+                            (newCommissions, newRelease)
+                in
+                    input_FundHolding2_UTxO { 
+                        LedgerApiV2.txOutDatum =
+                                LedgerApiV2.OutputDatum $ FundHoldingT.mkDatum datumIn2 
+                                {
+                                    FundHoldingT.hdSubtotal_FT_Commissions = newCommissions2
+                                    , FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = newRelease2
+                                }
+                        , LedgerApiV2.txOutValue = output_FundHolding2_Value <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionChange2
+                    }
         -----------------
     in do
         mkContext
             |> setInputsRef [fund_UTxO_With_Added_FundHolding_MockData tp,
                         uTxOForValidatorAsReference tp (tpFundHoldingValidator tp)]
-            |> setInputsAndAddRedeemers [(input_FundHolding1_UTxO, FundHoldingT.mkBalanceAssetsRedeemer redeemerCommissionsFT), (input_FundHolding2_UTxO, FundHoldingT.mkBalanceAssetsRedeemer redeemerCommissionsFT)]
+            |> setInputsAndAddRedeemers [(input_FundHolding1_UTxO, FundHoldingT.mkBalanceAssetsRedeemer commissionsFTAlterationsForRedeemer), (input_FundHolding2_UTxO, FundHoldingT.mkBalanceAssetsRedeemer commissionsFTAlterationsForRedeemer)]
             |> setOutputs [output_FundHolding1_UTxO, output_FundHolding2_UTxO]
             |> setSignatories (tpFundAdmins tp)
             |> setValidyRange (createValidRange (tpTransactionDate tp))

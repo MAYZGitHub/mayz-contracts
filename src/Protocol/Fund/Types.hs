@@ -107,8 +107,8 @@ data FundDatumType
           , fdBeginAt                       :: LedgerApiV2.POSIXTime
           , fdDeadline                      :: LedgerApiV2.POSIXTime
           , fdClosedAt                      :: Maybe LedgerApiV2.POSIXTime
-          , fdCommissionPerYearInBPx1e3     :: Integer
-          , fdCommissionsTable_Numerator1e6 :: [Integer]
+          , fdCommission_PerYear_InBPx1e3     :: Integer
+          , fdCommissions_Table_Numerator_1e6 :: [Integer]
           , fdHoldingsCount                 :: Integer
           , fdHoldingsIndex                 :: Integer
           , fdMAYZ                          :: Integer
@@ -132,8 +132,8 @@ instance Eq FundDatumType where
         && fdBeginAt ps1 == fdBeginAt ps2
         && fdDeadline ps1 == fdDeadline ps2
         && fdClosedAt ps1 == fdClosedAt ps2
-        && fdCommissionPerYearInBPx1e3 ps1 == fdCommissionPerYearInBPx1e3 ps2
-        && fdCommissionsTable_Numerator1e6 ps1 == fdCommissionsTable_Numerator1e6 ps2
+        && fdCommission_PerYear_InBPx1e3 ps1 == fdCommission_PerYear_InBPx1e3 ps2
+        && fdCommissions_Table_Numerator_1e6 ps1 == fdCommissions_Table_Numerator_1e6 ps2
         && fdHoldingsCount ps1 == fdHoldingsCount ps2
         && fdHoldingsIndex ps1 == fdHoldingsIndex ps2
         && fdMAYZ ps1 == fdMAYZ ps2
@@ -212,8 +212,8 @@ mkFund_DatumType
     beginAt
     deadline
     closedAt
-    commissionPerYearInBPx1e3
-    commissionsTable_Numerator1e6
+    commission_PerYear_InBPx1e3
+    commissions_Table_Numerator_1e6
     holdingsCount
     holdingsIndex
     amountMAYZ
@@ -234,8 +234,8 @@ mkFund_DatumType
             , fdBeginAt = beginAt
             , fdDeadline = deadline
             , fdClosedAt = closedAt
-            , fdCommissionPerYearInBPx1e3 = commissionPerYearInBPx1e3
-            , fdCommissionsTable_Numerator1e6 = commissionsTable_Numerator1e6
+            , fdCommission_PerYear_InBPx1e3 = commission_PerYear_InBPx1e3
+            , fdCommissions_Table_Numerator_1e6 = commissions_Table_Numerator_1e6
             , fdHoldingsCount = holdingsCount
             , fdHoldingsIndex = holdingsIndex
             , fdMAYZ = amountMAYZ
@@ -276,8 +276,8 @@ mkFund_Datum
     beginAt
     deadline
     closedAt
-    commissionPerYearInBPx1e3
-    commissionsTable_Numerator1e6
+    commission_PerYear_InBPx1e3
+    commissions_Table_Numerator_1e6
     holdingsCount
     holdingsIndex
     amountMAYZ
@@ -296,8 +296,8 @@ mkFund_Datum
         beginAt
         deadline
         closedAt
-        commissionPerYearInBPx1e3
-        commissionsTable_Numerator1e6
+        commission_PerYear_InBPx1e3
+        commissions_Table_Numerator_1e6
         holdingsCount
         holdingsIndex
         amountMAYZ

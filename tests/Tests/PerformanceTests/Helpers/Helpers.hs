@@ -46,43 +46,43 @@ import qualified Protocol.Types         as T
 --------------------------------------------------------------------------------2
 
 calculateDepositCommissionsUsingMonthsWrapper :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData ->  (Integer, Integer, Integer)
-calculateDepositCommissionsUsingMonthsWrapper commissionPerYearInBPx1e3 deadline date deposit  = do
+calculateDepositCommissionsUsingMonthsWrapper commission_PerYear_InBPx1e3 deadline date deposit  = do
     let
-        !commissionPerYearInBPx1e3' =  PlutusTx.unsafeFromBuiltinData commissionPerYearInBPx1e3
+        !commission_PerYear_InBPx1e3' =  PlutusTx.unsafeFromBuiltinData commission_PerYear_InBPx1e3
         !deadline' =  PlutusTx.unsafeFromBuiltinData deadline
         !date' =  PlutusTx.unsafeFromBuiltinData date
         !deposit' =  PlutusTx.unsafeFromBuiltinData deposit
-        !res = FundHelpers.calculateDepositCommissionsUsingMonths commissionPerYearInBPx1e3' deadline' date' deposit'
+        !res = FundHelpers.calculateDepositCommissionsUsingMonths commission_PerYear_InBPx1e3' deadline' date' deposit'
     res
 
 calculateWithdrawCommissionsUsingMonthsWrapper :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData ->  (Integer, Integer, Integer)
-calculateWithdrawCommissionsUsingMonthsWrapper commissionPerYearInBPx1e3 deadline date withdraw  = do
+calculateWithdrawCommissionsUsingMonthsWrapper commission_PerYear_InBPx1e3 deadline date withdraw  = do
     let
-        !commissionPerYearInBPx1e3' =  PlutusTx.unsafeFromBuiltinData commissionPerYearInBPx1e3
+        !commission_PerYear_InBPx1e3' =  PlutusTx.unsafeFromBuiltinData commission_PerYear_InBPx1e3
         !deadline' =  PlutusTx.unsafeFromBuiltinData deadline
         !date' =  PlutusTx.unsafeFromBuiltinData date
         !withdraw' =  PlutusTx.unsafeFromBuiltinData withdraw
         !investUnit_Granularity = 1
-        !res = FundHelpers.calculateWithdrawCommissionsUsingMonths commissionPerYearInBPx1e3' deadline' date' withdraw' investUnit_Granularity
+        !res = FundHelpers.calculateWithdrawCommissionsUsingMonths commission_PerYear_InBPx1e3' deadline' date' withdraw' investUnit_Granularity
     res
 
 calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized :: Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> PlutusTxCode.CompiledCode (Integer, Integer, Integer)
-calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit =
-    Plutonomy.optimizeUPLC $ calculateDepositCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit
+calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commission_PerYear_InBPx1e3 deadline date deposit =
+    Plutonomy.optimizeUPLC $ calculateDepositCommissionsUsingMonthsBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit
 
 
 calculateDepositCommissionsUsingMonthsBuiltinDataCode ::Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> PlutusTxCode.CompiledCode (Integer, Integer, Integer)
-calculateDepositCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit =
+calculateDepositCommissionsUsingMonthsBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit =
     $$(PlutusTx.compile [|| calculateDepositCommissionsUsingMonthsWrapper ||])
-            `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData commissionPerYearInBPx1e3)
+            `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData commission_PerYear_InBPx1e3)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData $ LedgerApiV2.getPOSIXTime deadline)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData $ LedgerApiV2.getPOSIXTime date)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData deposit)
 
 calculateWithdrawCommissionsUsingMonthsBuiltinDataCode ::Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> PlutusTxCode.CompiledCode (Integer, Integer, Integer)
-calculateWithdrawCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date withdraw =
+calculateWithdrawCommissionsUsingMonthsBuiltinDataCode commission_PerYear_InBPx1e3 deadline date withdraw =
     $$(PlutusTx.compile [|| calculateWithdrawCommissionsUsingMonthsWrapper ||])
-            `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData commissionPerYearInBPx1e3)
+            `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData commission_PerYear_InBPx1e3)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData $ LedgerApiV2.getPOSIXTime deadline)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData $ LedgerApiV2.getPOSIXTime date)
             `PlutusTx.applyCode` PlutusTx.liftCode (DeployHelpers.intToBuiltinData withdraw)
@@ -114,9 +114,9 @@ powRationalWrapperBuiltinDataCode num dem pot =
 
 -- ESTO ES LO QUE QUIERO OPTIMIZAR
 testDepositWrapper :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData ->  BuiltinData -> BuiltinData -> BuiltinData ->  Bool
-testDepositWrapper commissionPerYearInBPx1e3 deadline date deposit  fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit  = do
+testDepositWrapper commission_PerYear_InBPx1e3 deadline date deposit  fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit  = do
     let
-        !commissionPerYearInBPx1e3' =  PlutusTx.unsafeFromBuiltinData commissionPerYearInBPx1e3
+        !commission_PerYear_InBPx1e3' =  PlutusTx.unsafeFromBuiltinData commission_PerYear_InBPx1e3
         !deadline' =  PlutusTx.unsafeFromBuiltinData deadline
         !date' =  PlutusTx.unsafeFromBuiltinData date
         !deposit' =  PlutusTx.unsafeFromBuiltinData deposit
@@ -124,17 +124,17 @@ testDepositWrapper commissionPerYearInBPx1e3 deadline date deposit  fundFT_AC va
         !valueOf_FundHoldingDatum_In' =  PlutusTx.unsafeFromBuiltinData valueOf_FundHoldingDatum_In
         !valueOf_FundHoldingDatum_Out' =  PlutusTx.unsafeFromBuiltinData valueOf_FundHoldingDatum_Out
         !investUnit' =  PlutusTx.unsafeFromBuiltinData investUnit
-        !res = testDeposit commissionPerYearInBPx1e3' deadline' date' deposit' fundFT_AC' valueOf_FundHoldingDatum_In' valueOf_FundHoldingDatum_Out' investUnit'
+        !res = testDeposit commission_PerYear_InBPx1e3' deadline' date' deposit' fundFT_AC' valueOf_FundHoldingDatum_In' valueOf_FundHoldingDatum_Out' investUnit'
     res
 
 testDepositBuiltinDataCodeOptimized :: Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> LedgerValue.AssetClass -> LedgerValue.Value -> LedgerValue.Value ->  T.InvestUnit -> PlutusTxCode.CompiledCode Bool
-testDepositBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
-    Plutonomy.optimizeUPLC $ testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
+testDepositBuiltinDataCodeOptimized commission_PerYear_InBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
+    Plutonomy.optimizeUPLC $ testDepositBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
 
 testDepositBuiltinDataCode :: Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> LedgerValue.AssetClass -> LedgerValue.Value -> LedgerValue.Value ->  T.InvestUnit -> PlutusTxCode.CompiledCode Bool
-testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
+testDepositBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
            $$(PlutusTx.compile [|| testDepositWrapper ||])
-                    `PlutusTx.applyCode` PlutusTx.liftCode (LedgerApiV2.toBuiltinData commissionPerYearInBPx1e3)
+                    `PlutusTx.applyCode` PlutusTx.liftCode (LedgerApiV2.toBuiltinData commission_PerYear_InBPx1e3)
                     `PlutusTx.applyCode` PlutusTx.liftCode (LedgerApiV2.toBuiltinData deadline)
                     `PlutusTx.applyCode` PlutusTx.liftCode (LedgerApiV2.toBuiltinData date)
                     `PlutusTx.applyCode` PlutusTx.liftCode (LedgerApiV2.toBuiltinData deposit)
@@ -146,11 +146,11 @@ testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundF
 ------------------
 
 testDeposit :: [Integer] -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer ->  LedgerValue.AssetClass -> LedgerValue.Value -> LedgerValue.Value -> T.InvestUnit ->   Bool
-testDeposit commissionsTable_Numerator1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
+testDeposit commissions_Table_Numerator_1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit =
     traceIfFalse "not isCorrect_Output_FundHolding_Value_With_Tokens_And_FT" (isCorrect_Output_FundHolding_Value valueFor_FundHoldingDatum_Control_With_Tokens_And_FT valueOf_FundHoldingDatum_Out)
     where
     ------------------
-        !(_, commissionsFT, _) = FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
+        !(_, commissionsFT, _) = FundHelpers.calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline date deposit
     ------------------
         !valueOf_TokensForDeposit_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In (T.iuValues investUnit) deposit True
     ------------------

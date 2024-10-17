@@ -116,7 +116,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParams_Default =
             [ TxParam "beginDate" (tpBeginAt tp)
             , TxParam "deadlineDate" (tpDeadline tp)
-            , TxParam "fundCommission_PerYear_InBPx1e3" (tpCommissionPerYearInBPx1e3 tp)
+            , TxParam "fundCommission_PerYear_InBPx1e3" (tpCommission_PerYear_InBPx1e3 tp)
             , TxParam "depositDate" (tpDepositDate tp)
             , TxParam "investUnitTokensQty" (5 :: Integer)
             , TxParam "investUnitTokens" investUnit_Initial
@@ -330,7 +330,7 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParams_Default =
             [ TxParam "beginDate" (tpBeginAt tp)
             , TxParam "deadlineDate" (tpDeadline tp)
-            , TxParam "fundCommission_PerYear_InBPx1e3" (tpCommissionPerYearInBPx1e3 tp)
+            , TxParam "fundCommission_PerYear_InBPx1e3" (tpCommission_PerYear_InBPx1e3 tp)
             , TxParam "depositDate" (tpDepositDate tp)
             , TxParam "withdrawDate" (tpWithdrawDate tp)
             , TxParam "investUnitTokensQty" (5 :: Integer)

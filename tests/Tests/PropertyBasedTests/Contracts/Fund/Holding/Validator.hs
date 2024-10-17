@@ -319,7 +319,7 @@ prop_withdraw_burnExpectedFT tp selectedRedeemer ctxParametrizable (IntegerPlusZ
             input_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding_UTxO
             -- input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
             --------------------
-            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
+            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
             --------------------
             ctx = ctxParametrizable [
                             TxParam "depositDate" depositDate,
@@ -333,9 +333,9 @@ prop_withdraw_burnExpectedFT tp selectedRedeemer ctxParametrizable (IntegerPlusZ
         --------------------
         results <- testContextWrapper tp ctx'
         --------------------
-        if commissions_FT_Rate1e6_PerMonth >= FundHoldingT.hdSubtotal_FT_Commissions_Rate1e6_PerMonth input_FundHolding_Datum then
+        if commissions_FT_Release_PerMonth_1e6 >= FundHoldingT.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 input_FundHolding_Datum then
                 assertResultsContainAnyOf (Just selectedRedeemer, results)
-                ["not isEnough_Commissions_RatePerMonth"]
+                ["not isEnough_Commissions_Release_PerMonth"]
         else
             if commissionsForUserFTToGetBack >= FundHoldingT.hdSubtotal_FT_Commissions input_FundHolding_Datum then
                 assertResultsContainAnyOf (Just selectedRedeemer, results)
@@ -405,13 +405,13 @@ prop_withdraw_takeExpectedValue tp selectedRedeemer ctxParametrizable =
             input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
             --------------------
             !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues input_InvestUnit)
-            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
+            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
             --------------------
             investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit withdrawPlusCommissionsGetBack
             --------------------
             output_FundHolding_Datum = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw
                     input_FundHolding_Datum
-                    withdrawAmount commissionsForUserFTToGetBack commissions_FT_Rate1e6_PerMonth
+                    withdrawAmount commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
             output_FundHolding_UTxO' = input_FundHolding_UTxO
                 { LedgerApiV2.txOutDatum =
                     LedgerApiV2.OutputDatum $

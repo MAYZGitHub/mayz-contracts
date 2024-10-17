@@ -115,15 +115,10 @@ For a detailed explanation of the re-indexing methodology, please refer to the s
 Balancing is necessary after reidx to redistribute tokens across all Fund Holding UTXOs.
 
 Key Points:
-- Must operate on multiple UTXOs simultaneously
-- Does not modify datum values
-- Can move any tokens freely between UTXOs, except commission FTs
-- Maintains minimum ADA as specified in each datum
-
-Balancing Approach:
-1. Does not aim for perfect balancing where all UTXOs have correct datums and values
-2. Allows free movement of underlying tokens between UTXOs, maintaining total token consistency
-3. Does not modify datum values
+- Must operate on two UTXOs at a time.
+- Modifies the hdSubtotal_FT_Commissions and hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fields in the Fund Holding datum to reflect proportional changes.
+- Can move tokens between UTXOs, but the first input must always have non-zero deposits to calculate the changeRatio to be used.
+- Maintains minimum ADA as specified in each datum.
 
 ## Datum Fields and Potential Discrepancies
 
@@ -132,9 +127,9 @@ The Fund Holding datum contains several important fields:
 1. hdSubtotal_FT_Minted
 2. hdSubtotal_FT_Minted_Accumulated
 3. hdSubtotal_FT_Commissions
-4. hdSubtotal_Commissions_RatePerMonth_Numerator1e6
+4. hdSubtotal_FT_Commissions_Release_PerMonth_1e6
 
-After balancing, fields 1 and 2 may become out of sync with the actual token amounts in the UTXO. However, fields 3 and 4 must remain accurate and in sync for correct commission calculations.
+After balancing, fields 1 (hdSubtotal_FT_Minted) and 2 (hdSubtotal_FT_Minted_Accumulated) may become out of sync with the actual token amounts in the UTXO. Fields 3 (hdSubtotal_FT_Commissions) and 4 (hdSubtotal_FT_Commissions_Release_PerMonth_1e6) will be updated to reflect the proportional changes made during balancing, ensuring the correct synchronization of commissions and release values.
 
 ## Withdrawals and Commissions
 
@@ -173,10 +168,12 @@ Due to these challenges, the MAYZ Protocol has adopted a pragmatic balancing app
 
 1. The chosen methodology does not aim for perfect balancing where all UTXOs have correct datums and values. Such an approach would be infeasible due to the reasons mentioned above.
 
-2. Instead, the current balancing process allows for free movement of underlying tokens between UTXOs, as long as the total of tokens remains constant between inputs and outputs.
-
-3. Importantly, this balancing process does not modify any datum values.
-
+2. The current balancing process operates on two UTXOs at a time, allowing free movement of underlying tokens between them, provided the total token amount remains consistent across inputs and outputs. Additionally, it enables the transfer of commission FTs, with proportional updates to both the commission and release per month values.
+   
+3. The first UTXO must have non-zero deposits, as the changeRatio is calculated based on its values. 
+   
+4. The total of tokens must remain constant between inputs and outputs.
+   
 It's crucial to note that while individual datum values may become out of sync with their UTXO's actual token holdings, these values serve important purposes:
 
 1. Statistical tracking: The datum values provide historical information about the fund's operations.
@@ -191,10 +188,10 @@ This approach strikes a balance between operational feasibility and maintaining 
 The calculation of available commissions is critical:
 
 ```
-commisionsReady = totalComisions - (monthsRemaining * rate)
+commisionsReady = totalComisions - (monthsRemaining * releasePerMonth)
 ```
 
-If the commission FTs (totalComisions) and the rate become out of sync, it could lead to:
+If the commission FTs (totalComisions) and the releasePerMonth become out of sync, it could lead to:
 - Incorrect commission payments
 - Possibility of withdrawing more commissions than actually available
 
@@ -202,75 +199,75 @@ Example:
 5 months remaining:
 
 - Initial state:
-UTXO1: 100 commission FTs, rate 10 FTs/month
+UTXO1: 100 commission FTs, releasePerMonth 10 FTs/month
 
 ```
-commisionsReady = 100 - (5 * 10) = 50
+commisionsReady1 = 100 - (5 * 10) = 50
 ```
 
-UTXO2: 50 commission FTs, rate 5 FTs/month
+UTXO2: 50 commission FTs, releasePerMonth 5 FTs/month
 
 ```
-commisionsReady = 50 - (5 * 5) = 25
+commisionsReady2 = 50 - (5 * 5) = 25
 ```
 
 Total commissions ready: 50 + 25 = 75 FTs
 
-- If a withdrawal in UTXO2 of 50 FT occurs that reduces the rate to 0:
+- If a withdrawal in UTXO2 of 50 FT occurs that reduces the releasePerMonth to 0:
   
 ```
-commisionsReady = 0 - (0 * 5) = 0
+commisionsReady2 = 0 - (5 * 0) = 0
 ```
 
 Total commissions ready: 50 + 0 = 50 FTs
 
 
-- Now with incorrect balancing (move 90 FT and not update the rate):
+- Now with incorrect balancing (move 90 FT and not update the releasePerMonth):
   
-UTXO1: 10 commission FTs, rate 10 FTs/month
+UTXO1: 100 - 90 = 10 commission FTs, releasePerMonth 10 FTs/month
 
 ```
-commisionsReady = 10 - (5 * 10) = -40
+commisionsReady1 = 10 - (5 * 10) = -40
 ```
 
 These 10 commissions cannot be collected due to negative commisionsReady.
 
-UTXO2: 140 commission FTs, rate 5 FTs/month
+UTXO2: 50 + 90 = 140 commission FTs, releasePerMonth 5 FTs/month
 
 ```
-commisionsReady = 140 - (5 * 5) = 115
+commisionsReady2 = 140 - (5 * 5) = 115
 ```
 
-- If a withdrawal in UTXO2 of 50 FT occurs that reduces the rate to 0:
+- If a withdrawal in UTXO2 of 50 FT occurs that reduces the releasePerMonth to 0:
   
 ```
-commisionsReady = 90 - (0 * 5) = 90
+commisionsReady2 = 90 - (5 * 0) = 90
 ```
 
 90 FTs become available, which is significantly more than the original 50 FTs without the incorrect balancing.
 
 This discrepancy demonstrates the importance of keeping commission FTs and rates in sync across UTXOs.
 
-- Now with correct balancing (move 90 FT and update the rate):
+- Now with correct balancing (move 90 FT and update the releasePerMonth):
   
-UTXO1: 10 commission FTs, rate (10 - 9) 1 FTs/month
+UTXO1: 100 - 90 = 10 commission FTs, releasePerMonth = 10 - 9 = 1 FTs/month
 
 ```
-commisionsReady = 10 - (1 * 5) = 5
+commisionsReady1 = 10 - (5 * 1) = 5   0
 ```
 
-UTXO2: 140 commission FTs, rate (5 + 9) 14 FTs/month
+UTXO2: 140 commission FTs, releasePerMonth (5 + 9) 14 FTs/month
 
 ```
-commisionsReady = 140 - (14 * 5) = 70
+commisionsReady2 = 140 - (5 * 14) = 70
 ```
 
 Total commissions ready: 5 + 70 = 75 FTs
 
-- If a withdrawal in UTXO1 of 50 FT occurs that reduces the rate to 9:
+- If a withdrawal in UTXO2 of 50 FT occurs that reduces the releasePerMonth to 9:
   
 ```
-commisionsReady = 90 - (9 * 5) = 45
+commisionsReady2 = 90 - (5 * 9) = 45
 ```
 
 Total commissions ready: 5 + 45 = 50 FTs

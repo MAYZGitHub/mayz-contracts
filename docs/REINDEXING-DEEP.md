@@ -96,6 +96,8 @@ This ensures that, after the multiplication and division operations within the I
 
 ## Calculation of Fundamental Scaling Factor (K)
 
+[TODO: creo que el concepto se llama modular multiplicative inverse]
+
 The Fundamental Scaling Factor (K) is a crucial constant used throughout the re-indexing process. It's calculated using the formula:
 
 ```

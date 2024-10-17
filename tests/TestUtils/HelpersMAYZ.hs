@@ -128,11 +128,11 @@ generateTestParams deployAllParams = do
         deadlineDate = ProtocolT.mmdDef fundLifeTime
         closedAtDate = Nothing  :: Maybe LedgerApiV2.POSIXTime
         ------------
-        commissionPerYearInBPx1e3 = ProtocolT.mmdDef minMaxDef_CommissionFund_PerYear_InBPx1e3
+        commission_PerYear_InBPx1e3 = ProtocolT.mmdDef minMaxDef_CommissionFund_PerYear_InBPx1e3
         monthsRemainingPlusOne = FundHelpers.getRemainingMonths deadlineDate beginDate + 1
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         den = 120_000_000
-        commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
+        commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
         ------------
     let
         transactionDate = LedgerApiV2.POSIXTime ((2 * 30 * 24 * 60 * 60 * 1000) :: Integer)
@@ -448,8 +448,8 @@ generateTestParams deployAllParams = do
             , tpBeginAt = beginDate
             , tpDeadline = deadlineDate
             , tpClosedAt = closedAtDate
-            , tpCommissionPerYearInBPx1e3 = commissionPerYearInBPx1e3
-            , tpCommissionsTable_Numerator1e6 = commissionsTable_Numerator1e6
+            , tpCommission_PerYear_InBPx1e3 = commission_PerYear_InBPx1e3
+            , tpCommissions_Table_Numerator_1e6 = commissions_Table_Numerator_1e6
             , tpTransactionDate = transactionDate
             , tpDepositDate = depositDate
             , tpWithdrawDate = withdrawDate
@@ -611,7 +611,7 @@ findMintingPolicyRedeemerName tp scriptHash (LedgerApiV2.Redeemer redeemer)
 calculateDepositCommissionsUsingMonths_ :: TestParams -> LedgerApiV2.POSIXTime -> Integer -> (Integer, Integer, Integer)
 calculateDepositCommissionsUsingMonths_ tp =
     FundHelpers.calculateDepositCommissionsUsingMonths
-        (tpCommissionsTable_Numerator1e6 tp)
+        (tpCommissions_Table_Numerator_1e6 tp)
         (tpDeadline tp)
 
 calculateDepositCommissionsUsingMonths_Parametrizable :: TestParams -> FundT.FundDatumType -> LedgerApiV2.POSIXTime -> Integer -> (Integer, Integer, Integer)
@@ -628,34 +628,34 @@ calculateDepositCommissionsUsingMonths_Parametrizable _ fundDatum date deposit =
         (deposit, 0, 0)  -- Return full deposit to user, no commissions
     where
         deadline = FundT.fdDeadline fundDatum
-        commissionsTable = FundT.fdCommissionsTable_Numerator1e6 fundDatum
+        commissionsTable = FundT.fdCommissions_Table_Numerator_1e6 fundDatum
         remainingMonths = FundHelpers.getRemainingMonths deadline date
 
 
 calculateWithdrawCommissionsUsingMonths_ :: TestParams -> LedgerApiV2.POSIXTime -> Integer -> Integer -> (Integer, Integer, Integer)
 calculateWithdrawCommissionsUsingMonths_ tp =
     FundHelpers.calculateWithdrawCommissionsUsingMonths
-        (tpCommissionsTable_Numerator1e6 tp)
+        (tpCommissions_Table_Numerator_1e6 tp)
         (tpDeadline tp)
 
 calculateWithdrawCommissionsUsingMonths_Parametrizable :: TestParams -> FundT.FundDatumType -> LedgerApiV2.POSIXTime -> Integer -> Integer -> (Integer, Integer, Integer)
 calculateWithdrawCommissionsUsingMonths_Parametrizable _ fundDatum date withdraw investUnit_Granularity =
     if Ptx.length commissionsTable Ptx.> (remainingMonths + 1) then
         -- DebugTrace.trace ("calculateDepositCommissionsUsingMonths_Parametrizable: " P.++ P.show  (remainingMonths,commissionsTable)) $
-            let (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = FundHelpers.calculateWithdrawCommissionsUsingMonths
+            let (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = FundHelpers.calculateWithdrawCommissionsUsingMonths
                     commissionsTable
                     deadline
                     date
                     withdraw investUnit_Granularity
             in
-                debugTraceIf_ swTrace ("valid calculateDepositCommissions: " P.++ P.show  (date, deadline, remainingMonths, Ptx.length commissionsTable, commissionsTable, (withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)))
-                    (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth)
+                debugTraceIf_ swTrace ("valid calculateDepositCommissions: " P.++ P.show  (date, deadline, remainingMonths, Ptx.length commissionsTable, commissionsTable, (withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)))
+                    (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6)
     else
         debugTraceIf_ swTrace ("invalid calculateDepositCommissions: " P.++ P.show  (date, deadline, remainingMonths, Ptx.length commissionsTable, commissionsTable, withdraw))
             (0, withdraw, 0)  -- Return full withdraw to user, no commissions
     where
         deadline = FundT.fdDeadline fundDatum
-        commissionsTable = FundT.fdCommissionsTable_Numerator1e6 fundDatum
+        commissionsTable = FundT.fdCommissions_Table_Numerator_1e6 fundDatum
         remainingMonths = FundHelpers.getRemainingMonths deadline date
 
 

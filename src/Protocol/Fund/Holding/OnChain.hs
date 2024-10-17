@@ -42,6 +42,7 @@ import qualified Protocol.Fund.Types         as FundT
 import qualified Protocol.InvestUnit.Types   as InvestUnitT
 import qualified Protocol.Protocol.Types     as ProtocolT
 import qualified Protocol.Types              as T
+import qualified PlutusTx.Ratio as TxRatio
 
 ----------------------------------------------------------------------------2
 -- Modulo
@@ -116,7 +117,7 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
                             T.hdSubtotal_FT_Minted_Accumulated = 0,
                             T.hdSubtotal_FT_Minted = 0,
                             T.hdSubtotal_FT_Commissions = 0,
-                            T.hdSubtotal_FT_Commissions_Rate1e6_PerMonth = 0,
+                            T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 = 0,
                             T.hdSubtotal_FT_Commissions_Collected_Protocol = 0,
                             T.hdSubtotal_FT_Commissions_Collected_Managers = 0,
                             T.hdSubtotal_FT_Commissions_Collected_Delegators = 0,
@@ -442,13 +443,15 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                             ---------------------
                                             -- Que sea Fund Admin
                                             -- Ya esta controlado que haya mas de un input, por lo tanto hay al menos misma cantidad de outputs
-                                            -- La cantidad de FT modificadas, somas y restas en el array alterCommissionsFT, tiene que ser 0
+                                            -- por cuesitones de complejidad, se limita a dos entradas y dos salidas
+                                            -- La cantidad de FT modificadas, sumas y restas en el array alterCommissionsFT, tiene que ser 0
                                             -- Que se modifique datum correctamente: si se alteraron FT Commissions, que se hayan movido proporcionalmente a los rates
                                             -- Que la suma total de los values de salida sea igual a la suma total de los values de entrada
                                             -- Que cada value de salida tiene lo que dice el datum de minADA, la cantidad de FT y el funHoldingID correspondiente
                                             ---------------------------------
                                             validateFundAdminAction fundDatum_In
                                             && traceIfFalse "not cantInputs == cantOutputs" (cantInputs == cantOutputs)
+                                            && traceIfFalse "not cantOutputs == 2" (cantOutputs == 2)
                                             && traceIfFalse "not len alterCommissionsFT == cantOutputs" (length alterCommissionsFT == cantOutputs)
                                             && traceIfFalse "not isCorrect_Outputs_Commissions_SameTotal" isCorrect_Outputs_Commissions_SameTotal
                                             && traceIfFalse "not isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate" isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate
@@ -492,38 +495,48 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                 !isCorrect_Outputs_Commissions_SameTotal = sum alterCommissionsFT == 0
                                                 ------------------
                                                 isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate :: Bool
-                                                !isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate =
+                                                isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate =
                                                     let
-                                                        {-
-                                                            Validate Fund Holding Datum updates:
-                                                            1. Create control datum using input datum, new commission (commissionFT), and new rate from output datum
-                                                            2. Verify proportional change in commissions and rates:
-                                                               - If old commission was 0, accept any new rate
-                                                               - Otherwise, ensure (newCommissions * oldRate) == (oldCommissions * newRate)
-                                                            3. Check if control datum matches output datum
-                                                        -}
-                                                        validateDatum :: T.FundHoldingDatumType -> T.FundHoldingDatumType -> Integer -> Bool
-                                                        validateDatum !datumIn !datumOut !alter_Commission_FT =
-                                                            let
-                                                                ------------------
-                                                                !oldCommissions = T.hdSubtotal_FT_Commissions datumIn
-                                                                !newCommissions = oldCommissions + alter_Commission_FT  -- Use the parameter value directly
-                                                                !oldRate = T.hdSubtotal_FT_Commissions_Rate1e6_PerMonth datumIn
-                                                                !newRate = T.hdSubtotal_FT_Commissions_Rate1e6_PerMonth datumOut  -- Use the rate from datumOut
-                                                                ------------------
-                                                                !datumControl = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn newCommissions newRate
-                                                                ------------------
-                                                                isProportionalChange = (oldCommissions == 0) || ((newCommissions * oldRate) == (oldCommissions * newRate))
-                                                            in
-                                                                OnChainHelpers.isUnsafeEqDatums datumControl datumOut && isProportionalChange
-                                                        ------------------
-                                                        validateAll :: [T.FundHoldingDatumType] -> [T.FundHoldingDatumType] -> [Integer] -> Bool
-                                                        validateAll [] [] []                    = True
-                                                        validateAll (din:dis) (dout:dos) (c:cs) = validateDatum din dout c && validateAll dis dos cs
-                                                        validateAll _ _ _                       = False
-                                                        ------------------
+                                                        --------------------
+                                                        -- Solo dos elementos en fundHoldingDatums_In, fundHoldingDatums_Out y alterCommissionsFT
+                                                        !datumIn1 = head fundHoldingDatums_In
+                                                        !datumIn2 = (head . tail) fundHoldingDatums_In
+                                                        !datumOut1 = head fundHoldingDatums_Out
+                                                        !datumOut2 = (head . tail) fundHoldingDatums_Out
+                                                        !alterCommissions1 = head alterCommissionsFT
+                                                        --------------------
+                                                        -- Obtener nuevas comisiones para el primer datum de salida
+                                                        -- Sumamos comisiones anteriores con el primer elemento de alterCommissionsFT
+                                                        !oldCommissions1 = T.hdSubtotal_FT_Commissions datumIn1
+                                                        !newCommissions1 = oldCommissions1 + alterCommissions1
+                                                        -- Obtener nuevas comisiones para el segundo datum de salida
+                                                        -- Restamos el primer elemento de alterCommissionsFT a las comisiones anteriores del segundo datum de entrada
+                                                        !oldCommissions2 = T.hdSubtotal_FT_Commissions datumIn2
+                                                        !newCommissions2 = oldCommissions2 - alterCommissions1
+                                                        --------------------
+                                                        -- Calcular el ratio de cambio basado en comisiones
+                                                        !changeRatio1 = if oldCommissions1 > 0 then
+                                                                TxRatio.unsafeRatio alterCommissions1 oldCommissions1 
+                                                            else
+                                                                traceError "Expected oldCommissions firts input to be greater than 0"
+                                                        -- Calcular el cambio en el distribution
+                                                        !oldRelease1 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn1
+                                                        !oldRelease2 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn2
+                                                        -- Cambiar Release usando el changeRatio1
+                                                        !changeRelease1 = TxRatio.truncate (changeRatio1 * TxRatio.fromInteger oldRelease1)
+                                                        -- El nuevo Release para el primer datum de salida es el Release anterior + cambio
+                                                        !newRelease1 = oldRelease1 + changeRelease1
+                                                        -- El nuevo Release para el segundo datum de salida es el Release anterior - cambio
+                                                        !newRelease2 = oldRelease2 - changeRelease1
+                                                        --------------------
+                                                        -- Crear los datums de control para validar la salida
+                                                        !datumControl1 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn1 newCommissions1 newRelease1
+                                                        !datumControl2 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn2 newCommissions2 newRelease2
                                                     in
-                                                        validateAll fundHoldingDatums_In fundHoldingDatums_Out alterCommissionsFT
+                                                        -- Verificamos que los datums de salida coincidan con los controlados
+                                                        OnChainHelpers.isUnsafeEqDatums datumControl1 datumOut1 &&
+                                                        OnChainHelpers.isUnsafeEqDatums datumControl2 datumOut2 &&
+                                                        traceIfFalse "not isCorrect newCommissions >=0 and newRelease >=0" (newCommissions1 >= 0 && newCommissions2 >= 0 && newRelease1 >= 0 && newRelease2 >= 0)
                                                 ------------------
                                                 isCorrect_Output_FundHolding_Values_SameTotal :: Bool
                                                 !isCorrect_Output_FundHolding_Values_SameTotal =
@@ -609,10 +622,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                         where
                                                             ------------------
                                                             !deadline = FundT.fdDeadline fundDatum_In
-                                                            !commissionsTable_Numerator1e6 = FundT.fdCommissionsTable_Numerator1e6 fundDatum_In
+                                                            !commissions_Table_Numerator_1e6 = FundT.fdCommissions_Table_Numerator_1e6 fundDatum_In
                                                             ---------------------
-                                                            !(userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) =
-                                                                FundHelpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
+                                                            !(userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) =
+                                                                FundHelpers.calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline date deposit
                                                             ------------------
                                                             !valueOf_TokensForDeposit_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In investUnitTokens deposit True
                                                             ------------------
@@ -620,7 +633,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ------------------
                                                             !valueFor_FundHoldingDatum_Control_With_Tokens_And_FT = valueOf_TokensForDeposit_Plus_FundHolding_Value <> valueFor_FT_Commissions
                                                             ------------------
-                                                            !fundHoldingDatum_Control_With_Deposit = FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Rate1e6_PerMonth
+                                                            !fundHoldingDatum_Control_With_Deposit = FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Release_PerMonth_1e6
                                                             ------------------
                                                             isMintingFT :: Bool
                                                             !isMintingFT = OnChainHelpers.isOnlyToken_Minting_With_AC_AndAmt fundFT_AC deposit info
@@ -629,14 +642,14 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ------------------
                                                             -- it runs along with Fund Policy (PolicyRedeemerBurnFT)
                                                             ------------------
-                                                            -- there are no temporal restritions for withdraw
+                                                            -- there are no temporal restritions for withdraw hdSubtotal_FT_Commissions_Release_PerMonth_1e6
                                                             ------------------
                                                             traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
                                                             && traceIfFalse "not Correct Withdraw Amount" (FundHelpers.isCorrectAmount withdraw T.maxDepositAndWithdrawInFunds investUnit_Granularity)
                                                             && traceIfFalse "not Correct Comissions" (FundHelpers.isCorrectCommissionsAmount commissionsForUserFT commissionsForUserFT_calculated investUnit_Granularity)
                                                             && traceIfFalse "not isEnough_FT_ForComission" isEnough_FT_ForComission
-                                                            && traceIfFalse "not isEnough_Commissions_RatePerMonth" isEnough_Commissions_RatePerMonth
+                                                            && traceIfFalse "not isEnough_Commissions_Release_PerMonth" isEnough_Commissions_Release_PerMonth
                                                             && traceIfFalse "not isBurningFT" isBurningFT
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Datum_With_Withdraw" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Out fundHoldingDatum_Control_With_Withdraw)
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Value_Without_Tokens_And_FT_for_Commissions" (isCorrect_Output_FundHolding_Value valueOf_FundHoldingDatum_Out valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions)
@@ -646,21 +659,22 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             !commissionsForUserFT = withdrawPlusComissions - withdraw
                                                             ---------------------
                                                             !deadline = FundT.fdDeadline fundDatum_In
-                                                            !commissionsTable_Numerator1e6 = FundT.fdCommissionsTable_Numerator1e6 fundDatum_In
+                                                            !commissions_Table_Numerator_1e6 = FundT.fdCommissions_Table_Numerator_1e6 fundDatum_In
                                                             ---------------------
-                                                            !commissionsForUserFT_calculated = FundHelpers.calculateWithdrawCommissionsAvailable commissionsTable_Numerator1e6 deadline date withdraw investUnit_Granularity
-                                                            !commissions_FT_Rate1e6_PerMonth_calculated = FundHelpers.calculateWithdrawCommissionsRate deadline date commissionsForUserFT
+                                                            !commissionsForUserFT_calculated = FundHelpers.calculateWithdrawCommissionsAvailable commissions_Table_Numerator_1e6 deadline date withdraw investUnit_Granularity
+                                                            !commissions_FT_Release_PerMonth_1e6_calculated = FundHelpers.calculateWithdrawCommissionsRelease deadline date commissionsForUserFT
                                                             ------------------
                                                             !valueOf_TokensForWithdraw_Plus_FundHolding_Value = FundHelpers.createValue_WithTokensFrom_InvestUnit_Plus_FundHolding_Value valueOf_FundHoldingDatum_In investUnitTokens (negate withdrawPlusComissions) False
                                                             !valueFor_FT_CommissionsToGetBack = LedgerValue.assetClassValue fundFT_AC commissionsForUserFT
                                                             !valueFor_FundHoldingDatum_ControlWithout_Tokens_And_FT_for_Commissions = valueOf_TokensForWithdraw_Plus_FundHolding_Value <> negate valueFor_FT_CommissionsToGetBack
                                                             ------------------
-                                                            !fundHoldingDatum_Control_With_Withdraw  = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFT commissions_FT_Rate1e6_PerMonth_calculated
+                                                            !fundHoldingDatum_Control_With_Withdraw  = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFT commissions_FT_Release_PerMonth_1e6_calculated
                                                             ------------------
                                                             isEnough_FT_ForComission :: Bool
                                                             !isEnough_FT_ForComission = T.hdSubtotal_FT_Commissions fundHoldingDatum_In >= commissionsForUserFT
-                                                            isEnough_Commissions_RatePerMonth :: Bool
-                                                            !isEnough_Commissions_RatePerMonth = T.hdSubtotal_FT_Commissions_Rate1e6_PerMonth fundHoldingDatum_In >= commissions_FT_Rate1e6_PerMonth_calculated
+                                                            ------------------
+                                                            isEnough_Commissions_Release_PerMonth :: Bool
+                                                            !isEnough_Commissions_Release_PerMonth = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 fundHoldingDatum_In >= commissions_FT_Release_PerMonth_1e6_calculated
                                                             ------------------
                                                             isBurningFT :: Bool
                                                             !isBurningFT = OnChainHelpers.isOnlyToken_Burning_With_AC_AndAmt fundFT_AC (negate withdrawPlusComissions) info

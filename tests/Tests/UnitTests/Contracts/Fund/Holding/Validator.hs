@@ -591,13 +591,13 @@ fundHolding_Validator_Redeemer_BalanceAssets_Tests tp =
         txName = show FundHolding_BalanceAssets_Tx
         selectedRedeemer = RedeemerLogValidator (Just FundHolding_BalanceAssets_TestRedeemer)
         redeemerName = getRedeemerNameFromLog selectedRedeemer
-        ------------------------
-        commissionsFT = [0, 0]
     in
+        ------------------------
+
         ------------------------
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
             let
-                ctx = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] commissionsFT
+                ctx = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [0, 0] False []
             in
                 [ Tasty.testCase "Balancing assets correctly must succeed" $ do
                     let
@@ -605,27 +605,109 @@ fundHolding_Validator_Redeemer_BalanceAssets_Tests tp =
                     results <- testContextWrapper tp ctx'
                     (Nothing, results)
                         `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing assets incorrect total must fail" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -99] [0, 0] False []
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not isCorrect_Output_FundHolding_Values_SameTotal"]
+                , Tasty.testCase "Balancing assets from fst input with zero deposits to other correctly must fail" $ do
+                    -- para el calculo y control del movimiento de comisiones, se necesita un deposito previo en la primer input
+                    -- es una restriccion de simplificacion y siempre se puede armar la misma tx usando la primer input como segunda y viceversa
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [0, deposit_MockData] [100, -100] [0, 0] False []
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["Expected oldCommissions firts input to be greater than 0"]
+                , Tasty.testCase "Balancing assets from fst input with depositos to other with zero correctly must succeed" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-100, 100] [0, 0] False []
+                    results <- testContextWrapper tp ctx'
+                    (Nothing, results)
+                        `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing commissions FT correctly must succeed" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [0, 0] [1000000, -1000000] False []
+                    results <- testContextWrapper tp ctx'
+                    (Nothing, results)
+                        `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing deposits and commissions FT correctly release must succeed" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [1000000, -1000000] False []
+                    results <- testContextWrapper tp ctx'
+                    (Nothing, results)
+                        `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing deposits and commissions FT using correct custom release per month must succeed" $ do
+                    let
+                        -- con deposit_MockData se crea un datum con
+                        -- comission FT = 1991200
+                        -- rate = 221244444444
+                        -- con un cambio de [1000000, -1000000]
+                        -- deberia generarse un cambio [332355555554, 110133333334]
+                        -- eso lo saco del caso de testeo anterior, usando testContextWrapperTrace y leyendo el contexto.
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [1000000, -1000000] True [332355555554, 110133333334]
+                    results <- testContextWrapper tp ctx'
+                    (Nothing, results)
+                        `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing ALL deposits and ALL commissions FT correctly release must succeed" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData, deposit_MockData] [-1991200, 1991200] False []
+                    results <- testContextWrapper tp ctx'
+                    (Nothing, results)
+                        `assertResultsContainAnyOf` []
+                -- TODO: deberia fallar pero no lo hace por que mi test context no verifica que ningun valor en value sea menor a cero. 
+                -- deberia agregar ese control en el test context
+                -- , Tasty.testCase "Balancing a LITLE MORE deposits and ALL commissions FT correctly release must fail" $ do
+                --     let
+                --         ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData - 100, deposit_MockData + 100] [-1991200, 1991200] False []
+                --     results <- testContextWrapperTrace tp ctx'
+                --     (Nothing, results)
+                --         `assertResultsContainAnyOf` []
+                , Tasty.testCase "Balancing a ALL deposits and LITLE MORE commissions FT correctly release must fail" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData, deposit_MockData] [-1991200 - 1, 1991200 + 1] False []
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not isCorrect newCommissions >=0 and newRelease >=0"]
+                , Tasty.testCase "Balancing deposits and commissions FT using incorrect custom release 1 per month must fail" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [1000000, -1000000] True [332355555553, 110133333334]
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate"]
+                , Tasty.testCase "Balancing deposits and commissions FT using incorrect custom release 2 per month must fail" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [1000000, -1000000] True [332355555554, 110133333333]
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate"]
+                , Tasty.testCase "Balancing deposits and commissions FT using incorrect custom release 3 per month must fail" $ do
+                    let
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [100, -100] [1000001, -1000001] True [332355555554, 110133333334]
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate"]
                 , Tasty.testCase "Incorrect redeemer with more items in commissions list must fail" $ do
                     let
-                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [0, 0, 0]
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [0, 0, 0] False []
                     results <- testContextWrapper tp ctx'
                     (Just selectedRedeemer, results)
                         `assertResultsContainAnyOf` ["not len alterCommissionsFT == cantOutputs"]
                 , Tasty.testCase "Incorrect redeemer with less items in commissions list invalid must fail" $ do
                     let
-                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [0]
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [0] False []
                     results <- testContextWrapper tp ctx'
                     (Just selectedRedeemer, results)
                         `assertResultsContainAnyOf` ["not len alterCommissionsFT == cantOutputs"]
                 , Tasty.testCase "Incorrect redeemer with sum total of commision not zero (plus zero) must fail" $ do
                     let
-                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [1, 0]
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [1, 0] False []
                     results <- testContextWrapper tp ctx'
                     (Just selectedRedeemer, results)
                         `assertResultsContainAnyOf` ["not isCorrect_Outputs_Commissions_SameTotal"]
                 , Tasty.testCase "Incorrect redeemer with sum total of commision not zero (less zero) must fail" $ do
                     let
-                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [-1, 0]
+                        ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, deposit_MockData] [deposit_MockData, deposit_MockData] [-1, 0] False []
                     results <- testContextWrapper tp ctx'
                     (Just selectedRedeemer, results)
                         `assertResultsContainAnyOf` ["not isCorrect_Outputs_Commissions_SameTotal"]

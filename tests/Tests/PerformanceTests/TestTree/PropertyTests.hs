@@ -68,24 +68,24 @@ data TestParamsCalculateDepositCommissionsUsingMonths
 
 instance QC.Arbitrary TestParamsCalculateDepositCommissionsUsingMonths where
     arbitrary = do
-        commissionPerYearInBPx1e3 <- QC.choose (1, 10000000)
+        commission_PerYear_InBPx1e3 <- QC.choose (1, 10000000)
         deadline' <- QC.choose (1691965154000, 1755123554000)
         date' <- QC.choose (1691965154000, 1755123554000)
         deposit <- QC.choose (1000000, 10000000000)
-        return (TestParamsCalculateDepositCommissionsUsingMonths commissionPerYearInBPx1e3 (LedgerApiV2.POSIXTime deadline') (LedgerApiV2.POSIXTime date') deposit)
+        return (TestParamsCalculateDepositCommissionsUsingMonths commission_PerYear_InBPx1e3 (LedgerApiV2.POSIXTime deadline') (LedgerApiV2.POSIXTime date') deposit)
 
 propCalculateDepositCommissionsUsingMonths_less_than :: Bool -> Integer -> TestParamsCalculateDepositCommissionsUsingMonths -> QC.Property
-propCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax (TestParamsCalculateDepositCommissionsUsingMonths commissionPerYearInBPx1e3 deadline date deposit) =
+propCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax (TestParamsCalculateDepositCommissionsUsingMonths commission_PerYear_InBPx1e3 deadline date deposit) =
     (deadline > date) QC.==>
-        runCheckCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax commissionPerYearInBPx1e3 deadline date deposit
+        runCheckCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax commission_PerYear_InBPx1e3 deadline date deposit
 
 runCheckCalculateDepositCommissionsUsingMonths_less_than :: Bool -> Integer -> Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> QC.Property
-runCheckCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax commissionPerYearInBPx1e3 deadline date deposit =
+runCheckCalculateDepositCommissionsUsingMonths_less_than useOptimized memMax commission_PerYear_InBPx1e3 deadline date deposit =
     let
         evalCostResult =
             if useOptimized
-                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit)
-                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit)
+                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCodeOptimized commission_PerYear_InBPx1e3 deadline date deposit)
+                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.calculateDepositCommissionsUsingMonthsBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit)
         (LedgerApiV2.ExBudget _ (LedgerApiV2.ExMemory mem), _) = evalCostResult
         memInt = read @Integer (show mem)
     in
@@ -132,11 +132,11 @@ instance QC.Arbitrary TestParamsDeposit where
     arbitrary = do
         tokensQty <- QC.choose (5, 10)
         tokens <- ControlMonad.replicateM tokensQty generateRandomToken
-        commissionPerYearInBPx1e3 <- QC.choose (1, 10000000)
+        commission_PerYear_InBPx1e3 <- QC.choose (1, 10000000)
         deadline' <- QC.choose (1691965154000, 1755123554000)
         date' <- QC.choose (1691965154000, 1755123554000)
         deposit <- QC.choose (1000000, 10000000000)
-        return (TestParamsDeposit tokens commissionPerYearInBPx1e3 (LedgerApiV2.POSIXTime deadline') (LedgerApiV2.POSIXTime date') deposit)
+        return (TestParamsDeposit tokens commission_PerYear_InBPx1e3 (LedgerApiV2.POSIXTime deadline') (LedgerApiV2.POSIXTime date') deposit)
 
 generateRandomToken :: QC.Gen InvestUnitT.InvestUnitToken
 generateRandomToken = do
@@ -145,51 +145,51 @@ generateRandomToken = do
     return (LedgerValue.CurrencySymbol $ OffChainHelpers.stringToBuiltinByteString randomHex, LedgerValue.TokenName $ OffChainHelpers.stringToBuiltinByteString randomTokenName, 1)
 
 propDeposit_less_than :: TestParams -> Bool -> Integer -> TestParamsDeposit -> QC.Property
-propDeposit_less_than tp useOptimized memMax (TestParamsDeposit tokens commissionPerYearInBPx1e3 deadline date deposit) =
+propDeposit_less_than tp useOptimized memMax (TestParamsDeposit tokens commission_PerYear_InBPx1e3 deadline date deposit) =
     (deadline > date) QC.==>
-        runCheckDeposit_less_than tp useOptimized memMax tokens commissionPerYearInBPx1e3 deadline date deposit
+        runCheckDeposit_less_than tp useOptimized memMax tokens commission_PerYear_InBPx1e3 deadline date deposit
 
 runCheckDeposit_less_than :: TestParams -> Bool -> Integer -> [InvestUnitT.InvestUnitToken] -> Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> QC.Property
-runCheckDeposit_less_than tp useOptimized memMax tokens commissionPerYearInBPx1e3 deadline date deposit =
+runCheckDeposit_less_than tp useOptimized memMax tokens commission_PerYear_InBPx1e3 deadline date deposit =
     let
-        (fundFT_AC, valueOf_FundHoldingDatum_In, valueOf_FundHoldingDatum_Out, investUnit) = generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit
+        (fundFT_AC, valueOf_FundHoldingDatum_In, valueOf_FundHoldingDatum_Out, investUnit) = generateDepositParams tp tokens commission_PerYear_InBPx1e3 deadline date deposit
         evalCostResult =
             if useOptimized
-                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCodeOptimized commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
-                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCode commissionPerYearInBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
+                then OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCodeOptimized commission_PerYear_InBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
+                else OffChainEval.evaluateCompileCodeWithCekGetCost (Helpers.testDepositBuiltinDataCode commission_PerYear_InBPx1e3 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit)
         (LedgerApiV2.ExBudget _ (LedgerApiV2.ExMemory mem), _) = evalCostResult
         memInt = read @Integer (show mem)
     in
         TastyQC.counterexample (show evalCostResult) (memInt < memMax)
 
 propDeposit_isValid :: TestParams -> Bool -> TestParamsDeposit -> QC.Property
-propDeposit_isValid tp useOptimized (TestParamsDeposit tokens commissionPerYearInBPx1e3 deadline date deposit) =
+propDeposit_isValid tp useOptimized (TestParamsDeposit tokens commission_PerYear_InBPx1e3 deadline date deposit) =
     (deadline > date) QC.==>
-        runCheckDeposit_isValid tp useOptimized tokens commissionPerYearInBPx1e3 deadline date deposit
+        runCheckDeposit_isValid tp useOptimized tokens commission_PerYear_InBPx1e3 deadline date deposit
 
 runCheckDeposit_isValid :: TestParams -> Bool -> [InvestUnitT.InvestUnitToken] -> Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> QC.Property
-runCheckDeposit_isValid tp _ tokens commissionPerYearInBPx1e3 deadline date deposit =
+runCheckDeposit_isValid tp _ tokens commission_PerYear_InBPx1e3 deadline date deposit =
     let
-        (fundFT_AC, valueOf_FundHoldingDatum_In, valueOf_FundHoldingDatum_Out, investUnit) = generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit
+        (fundFT_AC, valueOf_FundHoldingDatum_In, valueOf_FundHoldingDatum_Out, investUnit) = generateDepositParams tp tokens commission_PerYear_InBPx1e3 deadline date deposit
 
         !monthsRemainingPlusOne = Helpers.getRemainingMonths deadline (tpBeginAt tp) + 1
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         !den = 120_000_000
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
 
-        isValidDeposit = Helpers.testDeposit commissionsTable_Numerator1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
+        isValidDeposit = Helpers.testDeposit commissions_Table_Numerator_1e6 deadline date deposit fundFT_AC valueOf_FundHoldingDatum_In valueOf_FundHoldingDatum_Out investUnit
     in
         TastyQC.counterexample (show isValidDeposit) isValidDeposit
 
 generateDepositParams :: TestParams -> [InvestUnitT.InvestUnitToken] -> Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Integer -> (LedgerValue.AssetClass, LedgerValue.Value, LedgerValue.Value, InvestUnitT.InvestUnit)
-generateDepositParams tp tokens commissionPerYearInBPx1e3 deadline date deposit =
+generateDepositParams tp tokens commission_PerYear_InBPx1e3 deadline date deposit =
     let
         !monthsRemainingPlusOne = Helpers.getRemainingMonths deadline (tpBeginAt tp) + 1
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         !den = 120_000_000
-        !commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
+        !commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
 
-        !(_, commissionsFT, _) = Helpers.calculateDepositCommissionsUsingMonths commissionsTable_Numerator1e6 deadline date deposit
+        !(_, commissionsFT, _) = Helpers.calculateDepositCommissionsUsingMonths commissions_Table_Numerator_1e6 deadline date deposit
 
         fundFT_AC :: LedgerValue.AssetClass
         fundFT_AC = LedgerValue.AssetClass (tpFundPolicy_CS tp, tpFundFT_TN tp)

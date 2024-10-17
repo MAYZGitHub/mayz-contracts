@@ -204,21 +204,21 @@ fund_DatumType_MockData tp =
         (tpBeginAt tp) -- fdBeginAt
         (tpDeadline tp) -- fdDeadline
         (tpClosedAt tp) -- fdClosedAt
-        (tpCommissionPerYearInBPx1e3 tp) -- fdCommissionsTable_Numerator1e6
-        (tpCommissionsTable_Numerator1e6 tp) -- fdCommissionsTable_Numerator1e6
+        (tpCommission_PerYear_InBPx1e3 tp) -- fdCommissions_Table_Numerator_1e6
+        (tpCommissions_Table_Numerator_1e6 tp) -- fdCommissions_Table_Numerator_1e6
         0 -- fdHoldingsCount
         0 -- fdHoldingsIndex
         (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
         minAdaFundDatum -- fdMinADA
 
 fund_DatumType_MockData_Parametrizable :: TestParams -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Maybe LedgerApiV2.POSIXTime -> Integer -> FundT.FundDatumType
-fund_DatumType_MockData_Parametrizable tp beginDate deadlineDate closedAt commissionPerYearInBPx1e3 =
+fund_DatumType_MockData_Parametrizable tp beginDate deadlineDate closedAt commission_PerYear_InBPx1e3 =
     let
         ------------
         monthsRemainingPlusOne = FundHelpers.getRemainingMonths deadlineDate beginDate + 1
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         den = 120_000_000
-        commissionsTable_Numerator1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commissionPerYearInBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
+        commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
         ------------
     in
         FundT.mkFund_DatumType
@@ -234,8 +234,8 @@ fund_DatumType_MockData_Parametrizable tp beginDate deadlineDate closedAt commis
             beginDate
             deadlineDate
             closedAt
-            commissionPerYearInBPx1e3
-            commissionsTable_Numerator1e6
+            commission_PerYear_InBPx1e3
+            commissions_Table_Numerator_1e6
             0 -- fdHoldingsCount
             0 -- fdHoldingsIndex
             (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
@@ -257,8 +257,8 @@ fund_DatumType_MockData_Parametrizable2 tp num_FundHolding_UTxOs =
         (tpBeginAt tp) -- fdBeginAt
         (tpDeadline tp) -- fdDeadline
         (tpClosedAt tp) -- fdClosedAt
-        (tpCommissionPerYearInBPx1e3 tp) -- fdCommissionsTable_Numerator1e6
-        (tpCommissionsTable_Numerator1e6 tp) -- fdCommissionsTable_Numerator1e6
+        (tpCommission_PerYear_InBPx1e3 tp) -- fdCommissions_Table_Numerator_1e6
+        (tpCommissions_Table_Numerator_1e6 tp) -- fdCommissions_Table_Numerator_1e6
         num_FundHolding_UTxOs -- fdHoldingsCount
         0 -- fdHoldingsIndex
         (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
@@ -365,7 +365,7 @@ fundHolding_DatumType_With_NoDeposits_MockData _ =
         0 -- hdSubtotal_FT_Minted_Accumulated
         0 -- hdSubtotal_FT_Minted
         0 -- hdSubtotal_FT_Commissions
-        0 -- hdSubtotal_FT_Commissions_Rate1e6_PerMonth
+        0 -- hdSubtotal_FT_Commissions_Release_PerMonth_1e6
         0 -- hdSubtotal_FT_Commissions_Collected_Protocol
         0 -- hdSubtotal_FT_Commissions_Collected_Managers
         0 -- hdSubtotal_FT_Commissions_Collected_Delegators
@@ -419,10 +419,10 @@ fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp fundDatum fundHoldingD
     -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (deposit,depositDate)) $
         let
             --------------------
-            (userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth) = calculateDepositCommissionsUsingMonths_Parametrizable tp fundDatum depositDate deposit
+            (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp fundDatum depositDate deposit
             --------------------
             fundHoldingDatum_Control_With_Deposit =
-                    (FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Rate1e6_PerMonth)
+                    (FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Release_PerMonth_1e6)
                         {
                             FundHoldingT.hdFundHolding_Index = index
                         }
@@ -433,7 +433,7 @@ fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp fundDatum fundHoldingD
             -- remainingMonths = FundHelpers.getRemainingMonths deadline depositDate
             --------------------
         in
-            -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (depositDate, deadline, remainingMonths, deposit, userFT, commissionsFT, commissions_FT_Rate1e6_PerMonth)) $
+            -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (depositDate, deadline, remainingMonths, deposit, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)) $
             LedgerApiV2.TxOut
                 (OffChainHelpers.addressValidator $ tpFundHoldingValidator_Hash tp)
                 ( LedgerAda.lovelaceValueOf minAdaFundHoldingDatum
@@ -451,9 +451,9 @@ fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp fundDatum fundHolding_
             --------------------
             fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
             --------------------
-            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp fundDatum withdrawDate withdraw investUnit_Granularity
+            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp fundDatum withdrawDate withdraw investUnit_Granularity
             --------------------
-            fundHoldingDatum_Control_With_Withdraw = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Rate1e6_PerMonth
+            fundHoldingDatum_Control_With_Withdraw = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
             --------------------
             tokens_InvestUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 investUnit withdrawPlusCommissionsGetBack
             --------------------
@@ -470,7 +470,7 @@ fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp fundDatum fundHolding_
                 , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHoldingDatum_Control_With_Withdraw)
             }
         in
-            -- DebugTrace.trace ("fundHolding_UTxO_With_Withdraw_MockData_Parametrizable: " P.++ P.show  (withdrawDate, deadline, remainingMonths, withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Rate1e6_PerMonth))
+            -- DebugTrace.trace ("fundHolding_UTxO_With_Withdraw_MockData_Parametrizable: " P.++ P.show  (withdrawDate, deadline, remainingMonths, withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6))
             fundHolding_UTxO_With_Withdraw
 
 
