@@ -5,6 +5,8 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/ubuntu_haskell/Dockerfile
+      args:
+        BUILDARCH: "x86_64"  # use "arm64" for M1 Macs
     volumes:
       - ..:/home/plutus/workspace
     env_file:
