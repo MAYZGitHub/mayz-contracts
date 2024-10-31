@@ -50,6 +50,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=var.cache.apt \
     libsystemd-dev \
     libtinfo-dev \
     libexpat1-dev \
+    libbz2-dev \
     libtool \
     make \
     pkg-config \
