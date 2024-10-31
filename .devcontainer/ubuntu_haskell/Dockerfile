@@ -9,8 +9,6 @@ ARG USER_GID=1000
 ###
 ARG HOME=/home/${USER}
 ARG WORK=${HOME}/workspace
-ARG TOOLS=${HOME}/tools
-ARG SCRIPTS=${TOOLS}/cardano-tools-scripts/scripts
 ###
 # ARG BUILDARCH=x86_64
 ARG BUILDARCH=arm64
@@ -23,7 +21,6 @@ ARG HLS_VERSION=1.7.0.0
 ###
 ARG TEMPDir=/tmp
 ###
-
 
 ########################################################################################################################################################################
 
@@ -122,17 +119,11 @@ ARG USER_UID
 ARG USER_GID
 ARG HOME
 ARG WORK
-ARG TOOLS
-ARG SCRIPTS
-ARG PLUTUS_APPS_ROOT
 ENV USER=${USER}
 ENV USER_UID=${USER_UID}
 ENV USER_GID=${USER_GID}
 ENV HOME=${HOME}
 ENV WORK=${WORK}
-ENV TOOLS=${TOOLS}
-ENV SCRIPTS=${SCRIPTS}
-ENV PLUTUS_APPS_ROOT=${PLUTUS_APPS_ROOT}
 RUN groupadd -g ${USER_GID} ${USER} && \ 
     useradd -u ${USER_UID} -g ${USER_GID}  -ms /bin/bash ${USER} && \ 
     echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -221,28 +212,8 @@ COPY --chown=${USER}:${USER} --from=system_deps_download_stylish_haskell ${TEMPD
 
 ####################################################################################
 
-FROM system_deps_with_ghcup_and_cabal as system_deps_download_toolkit
-ARG TOOLKIT_VERSION_VERSION_GIT="tags/v1.1"
-RUN git clone  https://github.com/manupadillaph/cardano-tools-scripts.git && \
-    cd cardano-tools-scripts  && \
-    git checkout ${TOOLKIT_VERSION_VERSION_GIT} 
-
-####################################################################################
-
 FROM system_deps_with_ghcup_and_cabal as system_deps_with_tools
 ARG TEMPDir
-COPY --chown=${USER}:${USER} --from=system_deps_download_toolkit ${TEMPDir}/cardano-tools-scripts ${TOOLS}/cardano-tools-scripts
-
-RUN echo "source ${SCRIPTS}/env/tools-env-init.sh" >> ${HOME}/.bashrc && \
-    echo "export NIXX=${SCRIPTS}/env/direnv-switch.sh" >> ${HOME}/.bashrc && \
-    echo "export NIX=${SCRIPTS}/env/activate-shell-nix.sh" >> ${HOME}/.bashrc
-
-USER root
-RUN chown ${USER}:${USER} -hR "${TOOLS}" && \
-    find "${TOOLS}" -type d -exec chmod 755 {} \; && \
-    find "${TOOLS}" -type f -exec chmod u+w  {} \; && \
-    find "${TOOLS}" -name "*.sh" -type f -exec chmod +x {} \;
-
 USER ${USER}
 RUN sudo rm -rf ${TEMPDir}/*
 WORKDIR ${WORK}
