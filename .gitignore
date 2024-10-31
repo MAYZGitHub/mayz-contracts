@@ -40,3 +40,6 @@ export
 folder_structure.txt
 
 ~$*.xlsx
+
+.vscode/hsl.log_
+.vscode/phoityne.log
