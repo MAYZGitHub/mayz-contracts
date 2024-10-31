@@ -56,6 +56,8 @@ The MAYZ Protocol is built on a modular architecture, leveraging Cardano's exten
 - **Multi-UTXO Management**: Optimizes fund operations and user concurrency.
 - **Delegation System**: Manages MAYZ token delegations and commission distributions.
 
+For detailed information, refer to the [Smart Contracts](./docs/ARCHITECTURE.md) documentation.
+
 ## Smart Contracts
 Our protocol utilizes advanced smart contracts for secure and efficient operations:
 - **Protocol Contract**: Manages global protocol parameters and upgrades.
@@ -117,6 +119,35 @@ mayz-protocol-contracts/
 To set up the development environment:
 1. Clone this repository
 2. Run `cabal build` to compile the contracts
+
+## Using the Dev Container
+For a consistent and ready-to-use development environment, follow these steps to set up the Dev Container:
+
+1. **Open the Dev Container in VS Code**
+   - Open the project in Visual Studio Code and use the **Dev Containers** extension to open the workspace in a Dev Container.
+   - VS Code will automatically build the container as specified in `.devcontainer/docker-compose.yml` and `Dockerfile`.
+
+2. **Configure for macOS Users**
+   - If you're using a Mac, make sure to set the `BUILDARCH` argument to `"arm64"` in `.devcontainer/docker-compose.yml` to ensure compatibility with macOS architecture.
+   - Example:
+     ```
+     services:
+       plutus:
+         build:
+           context: ..
+           dockerfile: .devcontainer/ubuntu_haskell/Dockerfile
+           args:
+             BUILDARCH: "arm64"
+     ```
+
+3. **Build the Contracts**
+   - Once the container is running, update dependencies and build the project:
+     ```
+     cabal update
+     cabal build all
+     ```
+
+   - **Note for macOS Users**: macOS handles Docker containers differently than Linux, and resource constraints can cause builds to fail or slow down. Running `cabal build all -j1` limits the build to a single worker, which can help prevent memory issues, especially on systems with limited resources or in macOS environments. 
 
 ## Testing
 
