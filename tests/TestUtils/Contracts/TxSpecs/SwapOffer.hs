@@ -943,19 +943,19 @@ swapOffer_SwapFTxADA_TxSpecs tp txParams =
                         in
                             -- Create the oracle data with the adjusted time
                             mkOracleData tp token_FT_Price1xe6 oracleTimeTooEarly
-                    Just ("Oracle Time Too Late", _) ->
-                        let
-                            -- Create the valid range based on the transaction date
-                            validRange = createValidRange (tpTransactionDate tp)
-                            -- Extract the upper limit from the valid range
-                            upperLimit = case Ledger.ivTo validRange of
-                                Ledger.UpperBound (Ledger.Finite a) _ -> a
-                                _                                     -> traceError "Invalid interval upper bound"
-                            -- Set the oracle time to be just after the upper limit
-                            oracleTimeTooLate = upperLimit + sum_ONE_INVALID_DATE
-                        in
-                            -- Create the oracle data with the adjusted time
-                            mkOracleData tp token_FT_Price1xe6 oracleTimeTooLate
+                    -- Just ("Oracle Time Too Late", _) ->
+                    --     let
+                    --         -- Create the valid range based on the transaction date
+                    --         validRange = createValidRange (tpTransactionDate tp)
+                    --         -- Extract the upper limit from the valid range
+                    --         upperLimit = case Ledger.ivTo validRange of
+                    --             Ledger.UpperBound (Ledger.Finite a) _ -> a
+                    --             _                                     -> traceError "Invalid interval upper bound"
+                    --         -- Set the oracle time to be just after the upper limit
+                    --         oracleTimeTooLate = upperLimit + sum_ONE_INVALID_DATE
+                    --     in
+                    --         -- Create the oracle data with the adjusted time
+                    --         mkOracleData tp token_FT_Price1xe6 oracleTimeTooLate
                     Just ("FT Price ADA not found", _) ->
                         let
                             tokenFTPrice1xe6' =
@@ -1039,7 +1039,7 @@ swapOffer_SwapFTxADA_TxSpecs tp txParams =
                 , ("isOrderRestrictedForSellingFT", False)
                 , ("not isCorrect_Oracle_Signature", False)
                 , ("Oracle Time Too Early", False)
-                , ("Oracle Time Too Late", False)
+                -- , ("Oracle Time Too Late", False)
                 , ("FT Price ADA not found", False)
                 , ("not isAmount_ADA_Available", True)
                 ]
@@ -1239,19 +1239,19 @@ swapOffer_SwapADAxFT_TxSpecs tp !txParams =
                         in
                             -- Create the oracle data with the adjusted time
                             mkOracleData tp token_FT_Price1xe6 oracleTimeTooEarly
-                    Just ("Oracle Time Too Late", _) ->
-                        let
-                            -- Create the valid range based on the transaction date
-                            validRange = createValidRange (tpTransactionDate tp)
-                            -- Extract the upper limit from the valid range
-                            upperLimit = case Ledger.ivTo validRange of
-                                Ledger.UpperBound (Ledger.Finite a) _ -> a
-                                _                                     -> traceError "Invalid interval upper bound"
-                            -- Set the oracle time to be just after the upper limit
-                            oracleTimeTooLate = upperLimit + sum_ONE_INVALID_DATE
-                        in
-                            -- Create the oracle data with the adjusted time
-                            mkOracleData tp token_FT_Price1xe6 oracleTimeTooLate
+                    -- Just ("Oracle Time Too Late", _) ->
+                    --     let
+                    --         -- Create the valid range based on the transaction date
+                    --         validRange = createValidRange (tpTransactionDate tp)
+                    --         -- Extract the upper limit from the valid range
+                    --         upperLimit = case Ledger.ivTo validRange of
+                    --             Ledger.UpperBound (Ledger.Finite a) _ -> a
+                    --             _                                     -> traceError "Invalid interval upper bound"
+                    --         -- Set the oracle time to be just after the upper limit
+                    --         oracleTimeTooLate = upperLimit + sum_ONE_INVALID_DATE
+                    --     in
+                    --         -- Create the oracle data with the adjusted time
+                    --         mkOracleData tp token_FT_Price1xe6 oracleTimeTooLate
                     Just ("FT Price ADA not found", True) ->
                         let
                             tokenFTPrice1xe6' =
@@ -1333,7 +1333,7 @@ swapOffer_SwapADAxFT_TxSpecs tp !txParams =
                 , ("isOrderRestrictedForSellingFT", False)
                 , ("not isCorrect_Oracle_Signature", False)
                 , ("Oracle Time Too Early", False)
-                , ("Oracle Time Too Late", False)
+                -- , ("Oracle Time Too Late", False)
                 , ("FT Price ADA not found", False)
                 , ("not isAmount_FT_Available", True)
                 ]
