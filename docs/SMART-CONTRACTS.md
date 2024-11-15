@@ -120,7 +120,6 @@
     - [Fund Lifecycle](#fund-lifecycle)
       - [Fund Management](#fund-management)
         - [Fund\_Create\_Tx](#fund_create_tx)
-  - [Fund\_Create\_Tx](#fund_create_tx-1)
         - [Fund\_DatumUpdate\_Tx](#fund_datumupdate_tx)
         - [Fund\_Finish\_Tx](#fund_finish_tx)
         - [Fund\_Delete\_Tx](#fund_delete_tx)
@@ -1782,7 +1781,6 @@ Validations:
 #### Fund Management
 
 ##### Fund_Create_Tx
-## Fund_Create_Tx
 Purpose: Create new investment fund with initial parameters
 Signers: [Fund Creator with Required MAYZ]
 Inputs:
