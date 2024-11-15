@@ -13,6 +13,7 @@
   - [Key Concepts](#key-concepts)
   - [Repository Structure](#repository-structure)
   - [Development Environment](#development-environment)
+  - [Using the Dev Container](#using-the-dev-container)
   - [Testing](#testing)
   - [Deployment](#deployment)
   - [Security Considerations](#security-considerations)
@@ -126,6 +127,35 @@ To set up the development environment:
 2. Run `cabal build` to compile the contracts
 
 > For detailed technical setup requirements and development environment configuration, see our [Technical Documentation](./docs/TECHNICAL.md#development-environment).
+
+## Using the Dev Container
+For a consistent and ready-to-use development environment, follow these steps to set up the Dev Container:
+
+1. **Open the Dev Container in VS Code**
+   - Open the project in Visual Studio Code and use the **Dev Containers** extension to open the workspace in a Dev Container.
+   - VS Code will automatically build the container as specified in `.devcontainer/docker-compose.yml` and `Dockerfile`.
+
+2. **Configure for macOS Users**
+   - If you're using a Mac, make sure to set the `BUILDARCH` argument to `"arm64"` in `.devcontainer/docker-compose.yml` to ensure compatibility with macOS architecture.
+   - Example:
+     ```
+     services:
+       plutus:
+         build:
+           context: ..
+           dockerfile: .devcontainer/ubuntu_haskell/Dockerfile
+           args:
+             BUILDARCH: "arm64"
+     ```
+
+3. **Build the Contracts**
+   - Once the container is running, update dependencies and build the project:
+     ```
+     cabal update
+     cabal build all
+     ```
+
+   - **Note for macOS Users**: macOS handles Docker containers differently than Linux, and resource constraints can cause builds to fail or slow down. Running `cabal build all -j1` limits the build to a single worker, which can help prevent memory issues, especially on systems with limited resources or in macOS environments. 
 
 ## Testing
 

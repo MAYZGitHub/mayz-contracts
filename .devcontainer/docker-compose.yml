@@ -2,7 +2,11 @@ version: '3.4'
 name: "mayz-contracts"
 services:
   plutus:
-    image: manupadilla/${COMPOSE_PROJECT_NAME}_dev_image:latest
+    build:
+      context: ..
+      dockerfile: .devcontainer/ubuntu_haskell/Dockerfile
+      args:
+        BUILDARCH: "x86_64"  # use "arm64" for M1 Macs
     volumes:
       - ..:/home/plutus/workspace
     env_file:
