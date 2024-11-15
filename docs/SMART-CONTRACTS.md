@@ -3,6 +3,12 @@
 ## Table of Contents
 - [MAYZ Protocol Smart Contracts - Technical Specification](#mayz-protocol-smart-contracts---technical-specification)
   - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Validators](#validators)
+  - [Minting Policies](#minting-policies)
+  - [Interactions Between Contracts](#interactions-between-contracts)
+  - [Version Management and Dependencies](#version-management-and-dependencies)
+  - [Security Considerations](#security-considerations)
   - [Common Types and Helper Structures](#common-types-and-helper-structures)
     - [Basic Types](#basic-types)
     - [Core Asset Identifiers](#core-asset-identifiers)
@@ -186,6 +192,68 @@
     - [Code Examples Needed](#code-examples-needed)
     - [Important Notes](#important-notes)
     - [Priority Order](#priority-order)
+
+## Introduction
+
+This document provides a comprehensive overview of the smart contracts that power the MAYZ Protocol. Each contract plays a crucial role in the ecosystem, enabling the creation and management of decentralized investment funds, facilitating token swaps, and ensuring the overall security and efficiency of the protocol.
+
+For more detailed information on each contract's implementation, please refer to the source code and accompanying comments in the `src/Protocol/` directory.
+
+## Validators
+
+Our protocol utilizes advanced smart contracts for secure and efficient operations:
+- **Protocol Contract**: Manages global protocol parameters and upgrades.
+- **Fund Contract**: Manages the creation, operation, and liquidation of funds.
+- **Fund Holding Contract**: Handles individual fund holdings and optimizes concurrency.
+- **Invest Unit Contract**: Manages representation and valuation of fund compositions.
+- **SwapOffer Contract**: Facilitates ADA and Fund Token exchanges.
+- **Delegation Contract**: Manages MAYZ token delegations to funds.
+- **Script Contract**: Oversees deployed scripts on-chain.
+
+## Minting Policies
+
+The MAYZ Protocol employs several minting policies to manage various tokens within the ecosystem:
+- **Protocol ID Policy**: Mints the unique Protocol ID token
+- **Fund ID Policy**: Mints Fund ID and Invest Unit ID tokens for each fund
+- **Fund Holding ID Policy**: Mints Fund Holding ID tokens for each fund holding
+- **Fund Token (FT) Policy**: Manages the minting and burning of fund-specific tokens
+- **Swap Offer ID Policy**: Mints Swap Offer ID tokens
+- **Delegation ID Policy**: Mints Delegation ID tokens
+- **Script ID Policy**: Mints Script ID tokens for deployed scripts
+
+Each policy ensures the uniqueness and integrity of its respective tokens within the protocol.
+
+## Interactions Between Contracts
+The MAYZ Protocol's smart contracts interact in complex ways to provide a seamless and secure user experience:
+- The Protocol Contract sets global parameters used by all other contracts.
+- Fund Contracts create and manage funds, interacting with Fund Holding and Invest Unit contracts.
+- Fund Holding Contracts manage individual holdings, coordinating with the Fund Contract for deposits, withdrawals, and re-indexing.
+- The Invest Unit Contract works closely with Fund and Fund Holding contracts during re-indexing operations.
+- The Swap Offer contract interacts with Fund contracts to facilitate token exchanges.
+- The Delegation Contract interacts with Fund contracts for commission distributions.
+- The Script Contract manages the lifecycle of all deployed scripts, including the other contracts.
+
+These interactions are carefully designed to maintain the integrity and security of the entire protocol.
+
+## Version Management and Dependencies 
+The MAYZ Protocol implements a hierarchical version management system that reflects the dependencies between contracts. Changes in core contracts trigger cascading updates in dependent contracts to maintain compatibility and consistency:
+
+- Protocol Contract changes affect all contracts
+- Fund Block changes affect Fund, Fund Holding, and Invest Unit contracts, plus dependent Swap/Delegation contracts
+- Swap and Delegation contracts can be updated independently
+
+Each contract follows semantic versioning principles while respecting these dependencies. For in-depth details about our versioning strategy, dependency management, and update procedures, see our [Dependencies and Versioning](./VERSIONING.md) documentation.
+
+## Security Considerations
+The MAYZ Protocol implements several security measures across its smart contracts:
+- **Access Control**: Admin functions are protected by signature checks or admin tokens.
+- **Oracle Integration**: Price data for token swaps and re-indexing is provided by a secure, multi-source oracle system.
+- **Commission Calculations**: High-precision arithmetic is used to prevent rounding errors in commission calculations.
+- **Re-indexing Safeguards**: The re-indexing process includes checks to ensure the total fund value remains constant.
+- **Multi-UTXO Design**: Fund holdings are spread across multiple UTXOs to enhance concurrency and resist certain types of attacks.
+- **Emergency Mechanisms**: The Protocol Contract includes provisions for handling emergency situations.
+
+Regular security audits and open-source development practices contribute to the ongoing security efforts of the protocol.
 
 ## Common Types and Helper Structures
 
