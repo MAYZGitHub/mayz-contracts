@@ -1,55 +1,62 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 --------------------------------------------------------------------------------3
 {- HLINT ignore "Use camelCase"          -}
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------3
 
-module Protocol.InvestUnit.Types where
+module Protocol.Fund.InvestUnit.Types where
 
 --------------------------------------------------------------------------------2
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson             as DataAeson (FromJSON, ToJSON)
-import qualified Data.OpenApi.Schema    as DataOpenApiSchema (ToSchema)
-import qualified GHC.Generics           as GHCGenerics (Generic)
+import qualified Data.Aeson as DataAeson (FromJSON, ToJSON)
+import qualified Data.OpenApi.Schema as DataOpenApiSchema (ToSchema)
+import qualified GHC.Generics as GHCGenerics (Generic)
 import qualified Ledger
-import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified PlutusTx
-import           PlutusTx.Prelude
-import qualified Prelude                as P
+import PlutusTx.Prelude
 import qualified Schema
+import qualified Prelude as P
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
 import qualified Generic.OnChainHelpers as OnChainHelpers
-import qualified Generic.Types          as T
-import qualified Protocol.Types         as T
+import qualified Generic.Types as T
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Types as FundT
+import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Protocol.Types as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the fundVersion on Protocol.Fund.Types
+
+ownVersion :: Integer
+ownVersion = T.mkVersionWithDependency [ProtocolT.protocolVersion] FundT.fundVersion
+
 --------------------------------------------------------------------------------2
 -- Params
 --------------------------------------------------------------------------------2
 
-data ValidatorParams
-    = ValidatorParams
-          { vpProtocolPolicyID_CS          :: LedgerApiV2.CurrencySymbol
-          , vpTokenEmergencyAdminPolicy_CS :: LedgerApiV2.CurrencySymbol
-          }
+data ValidatorParams = ValidatorParams
+    { vpProtocolPolicyID_CS :: LedgerApiV2.CurrencySymbol
+    , vpTokenEmergencyAdminPolicy_CS :: LedgerApiV2.CurrencySymbol
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
 instance Eq ValidatorParams where
@@ -68,21 +75,28 @@ PlutusTx.makeIsDataIndexed
 -- Datums
 --------------------------------------------------------------------------------2
 
-data InvestUnitDatumType
-    = InvestUnitDatumType
-          { iudFundPolicy_CS :: T.CS
-          , iudInvestUnit    :: T.InvestUnit
-          , iudMinADA        :: Integer
-          }
+data InvestUnitDatumType = InvestUnitDatumType
+    { -- Version Control
+      iuVersion :: Integer -- Contract version
+    , -- Fund Reference
+      iudFundPolicy_CS :: T.CS -- Associated fund policy ID
+    , -- Token Composition
+      iudInvestUnit :: T.InvestUnit -- Current token basket
+      -- InvestUnit represents fund composition
+      -- All amounts stored as Integer * 100 for 2 decimal places
+      -- Must maintain divisibility properties
+    , -- Minimum ADA
+      iudMinADA :: Integer -- Minimum ADA used in UTXO
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
 instance Eq InvestUnitDatumType where
     {-# INLINEABLE (==) #-}
     ps1 == ps2 =
-        iudFundPolicy_CS ps1 == iudFundPolicy_CS ps2
+        iuVersion ps1 == iuVersion ps2
+            && iudFundPolicy_CS ps1 == iudFundPolicy_CS ps2
             && iudInvestUnit ps1 == iudInvestUnit ps2
             && iudMinADA ps1 == iudMinADA ps2
-
 
 PlutusTx.makeIsDataIndexed
     ''InvestUnitDatumType
@@ -111,19 +125,19 @@ getInvestUnit_DatumType (InvestUnitDatum sdType) = sdType
 {-# INLINEABLE getInvestUnit_DatumType_From_UTxO #-}
 getInvestUnit_DatumType_From_UTxO :: LedgerApiV2.TxOut -> InvestUnitDatumType
 getInvestUnit_DatumType_From_UTxO utxo = case OnChainHelpers.getInlineDatum_From_TxOut @ValidatorDatum utxo of
-                    Nothing     -> P.error "No InvestUnit Datum found"
-                    Just datum' -> getInvestUnit_DatumType datum'
+    Nothing -> P.error "No InvestUnit Datum found"
+    Just datum' -> getInvestUnit_DatumType datum'
 
 instance T.ShowDatum ValidatorDatum where
     showCborAsDatumType cbor = case LedgerApiV2.fromBuiltinData @ValidatorDatum cbor of
         Nothing -> Nothing
-        Just d  -> Just $ P.show d
+        Just d -> Just $ P.show d
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkInvestUnit_DatumType #-}
 mkInvestUnit_DatumType :: T.CS -> T.InvestUnit -> Integer -> InvestUnitDatumType
-mkInvestUnit_DatumType = InvestUnitDatumType
+mkInvestUnit_DatumType = InvestUnitDatumType ownVersion
 
 {-# INLINEABLE mkInvestUnit_Datum #-}
 mkInvestUnit_Datum :: T.CS -> T.InvestUnit -> Integer -> ValidatorDatum
@@ -132,7 +146,6 @@ mkInvestUnit_Datum fundPolicy_CS investUnit minADA =
 
 mkDatum :: InvestUnitDatumType -> LedgerApiV2.Datum
 mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . InvestUnitDatum
-
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
@@ -147,21 +160,20 @@ instance Eq ValidatorRedeemerUpdateMinADAType where
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateMinADAType [('ValidatorRedeemerUpdateMinADAType, 0)]
 
 --------------------------------------------------------------------------------2
-data ValidatorRedeemerReIndexingType
-    = ValidatorRedeemerReIndexingType
-          { riuriTokensToAdd      :: T.InvestUnit
-          , riuriTokensToRemove   :: T.InvestUnit
-          , riuriOracleReIdx_Data :: T.OracleReIdx_Data
-          , riuriOracleSignature  :: Ledger.Signature
-          }
+data ValidatorRedeemerReIndexingType = ValidatorRedeemerReIndexingType
+    { riuriTokensToAdd :: T.InvestUnit
+    , riuriTokensToRemove :: T.InvestUnit
+    , riuriOracleReIdx_Data :: T.OracleReIdx_Data
+    , riuriOracleSignature :: Ledger.Signature
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerReIndexingType where
     {-# INLINEABLE (==) #-}
     r1 == r2 =
         riuriTokensToAdd r1 == riuriTokensToAdd r2
-        && riuriTokensToRemove r1 == riuriTokensToRemove r2
-        && riuriOracleReIdx_Data r1 == riuriOracleReIdx_Data r2
+            && riuriTokensToRemove r1 == riuriTokensToRemove r2
+            && riuriOracleReIdx_Data r1 == riuriOracleReIdx_Data r2
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemerReIndexingType
@@ -173,8 +185,8 @@ PlutusTx.makeIsDataIndexed
 data ValidatorRedeemerEmergencyType = ValidatorRedeemerEmergencyType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerEmergencyType where
-    {-# INLINABLE (==) #-}
-    r1 == r2 =  r1 ==  r2
+    {-# INLINEABLE (==) #-}
+    r1 == r2 = r1 == r2
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemerEmergencyType
@@ -184,7 +196,7 @@ PlutusTx.makeIsDataIndexed
 data ValidatorRedeemerDeleteType = ValidatorRedeemerDeleteType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerDeleteType where
-    {-# INLINABLE (==) #-}
+    {-# INLINEABLE (==) #-}
     r1 == r2 = r1 == r2
 
 PlutusTx.makeIsDataIndexed
@@ -203,27 +215,27 @@ data ValidatorRedeemer
 instance Eq ValidatorRedeemer where
     {-# INLINEABLE (==) #-}
     ValidatorRedeemerUpdateMinADA rmf1 == ValidatorRedeemerUpdateMinADA rmf2 = rmf1 == rmf2
-    ValidatorRedeemerReIndexing rmf1 == ValidatorRedeemerReIndexing rmf2     = rmf1 == rmf2
-    ValidatorRedeemerEmergency rmf1 == ValidatorRedeemerEmergency rmf2       = rmf1 == rmf2
-    ValidatorRedeemerDelete rmf1 == ValidatorRedeemerDelete rmf2             = rmf1 == rmf2
-    _ == _                                                                   = False
+    ValidatorRedeemerReIndexing rmf1 == ValidatorRedeemerReIndexing rmf2 = rmf1 == rmf2
+    ValidatorRedeemerEmergency rmf1 == ValidatorRedeemerEmergency rmf2 = rmf1 == rmf2
+    ValidatorRedeemerDelete rmf1 == ValidatorRedeemerDelete rmf2 = rmf1 == rmf2
+    _ == _ = False
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemer
-    [ ('ValidatorRedeemerReIndexing, 0),
-        ('ValidatorRedeemerUpdateMinADA, 1),
-        ('ValidatorRedeemerEmergency, 2),
-        ('ValidatorRedeemerDelete, 3)
+    [ ('ValidatorRedeemerReIndexing, 0)
+    , ('ValidatorRedeemerUpdateMinADA, 1)
+    , ('ValidatorRedeemerEmergency, 2)
+    , ('ValidatorRedeemerDelete, 3)
     ]
 
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
-getValidatorRedeemerName (Just (ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType {}))  = Just "ReIndexing"
+getValidatorRedeemerName (Just (ValidatorRedeemerReIndexing ValidatorRedeemerReIndexingType {})) = Just "ReIndexing"
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))       = Just "Emergency"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType {}))          = Just "Delete"
-getValidatorRedeemerName _                                                                        = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType)) = Just "Emergency"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType {})) = Just "Delete"
+getValidatorRedeemerName _ = Nothing
 
 --------------------------------------------------------------------------------2
 

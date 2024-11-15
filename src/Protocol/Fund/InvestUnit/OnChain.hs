@@ -13,7 +13,7 @@
 {- HLINT ignore "Reduce duplication"          -}
 --------------------------------------------------------------------------------3
 
-module Protocol.InvestUnit.OnChain where
+module Protocol.Fund.InvestUnit.OnChain where
 
 --------------------------------------------------------------------------------2
 -- Import Externos
@@ -36,7 +36,7 @@ import qualified Generic.OnChainHelpers      as OnChainHelpers
 import qualified Protocol.Constants          as T
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
 import qualified Protocol.Fund.Types         as FundT
-import qualified Protocol.InvestUnit.Types   as T
+import qualified Protocol.Fund.InvestUnit.Types   as T
 import qualified Protocol.OnChainHelpers     as OnChainHelpers
 import qualified Protocol.Protocol.Types     as ProtocolT
 import qualified Protocol.Types              as T
@@ -45,10 +45,16 @@ import qualified Protocol.Types              as T
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the fundVersion on Protocol.Fund.Types
+
+--------------------------------------------------------------------------------2
+
 {-# INLINEABLE mkValidator #-}
 mkValidator :: T.ValidatorParams -> BuiltinData -> BuiltinData -> BuiltinData -> ()
 mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_CS) !datumRaw !redRaw !ctxRaw =
     let
+        ------------------
+        !useThisToMakeScriptUnique = protocolPolicyID_CS /= LedgerApiV2.adaSymbol
         ------------------
         !redeemer = LedgerApiV2.unsafeFromBuiltinData @T.ValidatorRedeemer redRaw
         !ctx = LedgerApiV2.unsafeFromBuiltinData @LedgerContextsV2.ScriptContext ctxRaw
@@ -74,14 +80,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         else error ()
             False ->
                 if traceIfFalse "" useThisToMakeScriptUnique
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "Expected exactly one InvestUnit input" (length inputs_Own_TxOuts == 1)
                     && validateAdminAction && validateRedeemerAdmin
                     then ()
                     else error ()
                 where
-                        ------------------
-                        !useThisToMakeScriptUnique = protocolPolicyID_CS /= LedgerApiV2.adaSymbol
                         ------------------
                         !datum = LedgerApiV2.unsafeFromBuiltinData @T.ValidatorDatum datumRaw
                         ------------------
@@ -164,7 +168,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         ------------------
                                         traceIfFalse "not isCorrect_Redeemer_FundHolding" isCorrect_Redeemer_FundHolding
                                         && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey riuriOracleSignature)
-                                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.oridTime riuriOracleReIdx_Data))
+                                        && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.oridTime riuriOracleReIdx_Data) (ProtocolT.pdOracleData_Valid_Time protocolDatum_In))
                                         && traceIfFalse "not isCorrect_Exchange_WithSamePriceADA" isCorrect_Exchange_WithSamePriceADA
                                         && traceIfFalse "not isCorrect_Output_InvestUnit_Datum_WithTokensExchanged" isCorrect_Output_InvestUnit_Datum_WithTokensExchanged
                                         && traceIfFalse "not isCorrect_Output_InvestUnit_Value_NotChanged" isCorrect_Output_InvestUnit_Value_NotChanged

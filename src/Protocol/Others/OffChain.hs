@@ -42,7 +42,7 @@ import qualified Generic.OffChainEval                as OffChainEval
 import qualified Generic.OffChainHelpers             as OffChainHelpers
 import qualified Generic.OnChainHelpers              as OnChainHelpers
 import qualified Protocol.Constants                  as T
-import qualified Protocol.InvestUnit.Types           as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types           as InvestUnitT
 import qualified Protocol.OffChainHelpers            as OffChainHelpers
 import qualified Protocol.Others.PolicyFT            as OnChain
 import qualified Protocol.Others.PolicyNFT           as OnChain
@@ -154,7 +154,7 @@ endPointMintFT T.PABMintFTParams {..} = PlutusContract.handleError OffChainHelpe
         !mintFree_CS = OffChainHelpers.getCurSymbolOfPolicy policy_MintFT
     ---------------------
         !intervalOffset1 = 1000
-        !intervalOffset2 = T.validTimeRange - 1000
+        !intervalOffset2 = T.validTxTimeRange - 1000
         !validityRange = LedgerValidityInterval.interval (now - intervalOffset1) (now + intervalOffset2)
     ---------------------
         !mintFree_TNS =
@@ -217,7 +217,7 @@ endPointMintNFT T.PABMintNFTParams {..} = PlutusContract.handleError OffChainHel
         !mintNFT_CS = OffChainHelpers.getCurSymbolOfPolicy policy_MintNFT
     ---------------------
         !intervalOffset1 = 1000
-        !intervalOffset2 = T.validTimeRange - 1000
+        !intervalOffset2 = T.validTxTimeRange - 1000
         !validityRange = LedgerValidityInterval.interval (now - intervalOffset1) (now + intervalOffset2)
     ---------------------
         !mintNFT_TNS =
@@ -328,7 +328,7 @@ endPointMintFundTokens T.PABMintFundTokensParams {..} = PlutusContract.handleErr
 
     ---------------------
         !intervalOffset1 = 1000
-        !intervalOffset2 = T.validTimeRange - 1000
+        !intervalOffset2 = T.validTxTimeRange - 1000
         !validityRange = LedgerValidityInterval.interval (now - intervalOffset1) (now + intervalOffset2)
     ---------------------
         !lookupsTx =

@@ -231,7 +231,7 @@ getRandomPrice iu1 iu2 = do
 -- instance QC.Arbitrary ProtocolT.ProtocolDatumType where
 --     arbitrary =
 --         ProtocolT.ProtocolDatumType
---             <$> (return 2 :: QC.Gen Integer) -- pdProtocolFactoryVersion
+--             <$> (return 2 :: QC.Gen Integer) -- pdProtocolVersion
 --             <*> QC.arbitrary -- pdScriptPolicyID_CS
 --             <*> QC.arbitrary -- pdScriptValidator_Hash
 --             <*> QC.arbitrary -- pdOraclePaymentPubKey
@@ -274,7 +274,7 @@ genValidProtocolDatumType tp = do
 -- instance QC.Arbitrary FundT.FundDatumType where
 --     arbitrary = do
 --         FundT.FundDatumType
---             <$> (return 2 :: QC.Gen Integer) -- fdFundFactoryVersion
+--             <$> (return 2 :: QC.Gen Integer) -- fdFundVersion
 --             <*> QC.arbitrary -- fdFundPolicy_CS
 --             <*> QC.arbitrary -- fdFundFT_TN
 --             <*> QC.arbitrary -- fdFundValidator_Hash

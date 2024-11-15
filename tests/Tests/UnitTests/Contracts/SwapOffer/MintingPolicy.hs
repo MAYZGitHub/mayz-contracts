@@ -145,7 +145,7 @@ swapOffer_Policy_Redeemer_MintID_Tests tp =
                             let
                                 wrongDatum = SwapOfferT.mkDatum $
                                                 (swapOffer_DatumType_MockData tp)
-                                                    { SwapOfferT.sodMAYZ =  ProtocolT.pdRequiredMAYZForSwapOffer (protocol_DatumType_MockData tp )+ sum_ANY_INVALID_NUMBER}
+                                                    { SwapOfferT.sodRequiredMAYZ =  ProtocolT.pdRequiredMAYZForSwapOffer (protocol_DatumType_MockData tp )+ sum_ANY_INVALID_NUMBER}
                                 wrongUTxO =
                                     (swapOffer_UTxO_MockData tp)
                                         { LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum wrongDatum

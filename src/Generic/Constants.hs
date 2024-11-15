@@ -26,10 +26,12 @@ import qualified Plutus.V2.Ledger.Api         as LedgerApiV2
 
 -- FOR CONFIGURATION:
 
-validTimeRange :: LedgerApiV2.POSIXTime
-validTimeRange = 900_000 -- 15 * 60 * 1000 = 15 minutos
+validTxTimeRange :: LedgerApiV2.POSIXTime
+validTxTimeRange = 900_000 -- 15 * 60 * 1000 = 15 minutos
 
 --------------------------------------------------------------------------------2
+
+-- Lo usa la parte off-chain
 -- TODO: Usar plutus-1.1.0
 networkId :: Ledger.NetworkId
 networkId = CardanoNodeEmulatorParams.testnet

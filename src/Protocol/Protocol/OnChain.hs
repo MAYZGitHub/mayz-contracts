@@ -1,12 +1,13 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+
 --------------------------------------------------------------------------------2
 -- {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:dump-compilation-trace #-}
 -- {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:dump-uplc #-}
@@ -22,34 +23,38 @@ module Protocol.Protocol.OnChain where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Ledger.Ada                as LedgerAda
-import qualified Ledger.Value              as LedgerValue
+import qualified Ledger.Ada as LedgerAda
+import qualified Ledger.Value as LedgerValue
 import qualified Plutonomy
-import qualified Plutus.V2.Ledger.Api      as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified Plutus.V2.Ledger.Contexts as LedgerContextsV2
 import qualified PlutusTx
-import           PlutusTx.Prelude
+import PlutusTx.Prelude
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Constants         as T
-import qualified Generic.OnChainHelpers    as OnChainHelpers
-import qualified Protocol.Constants        as T
+import qualified Generic.Constants as T
+import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Constants as T
 import qualified Protocol.Protocol.Helpers as ProtocolHelpers
-import qualified Protocol.Protocol.Types   as T
-import qualified Protocol.Types            as T
+import qualified Protocol.Protocol.Types as T
+import qualified Protocol.Types as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
+--------------------------------------------------------------------------------2
+
+-- Any change in the logic, datum or redeemer must change the version of the protocolVersion on Protocol.Protocol.Types
+    
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkPolicyID #-}
 mkPolicyID :: T.PolicyParams -> BuiltinData -> BuiltinData -> ()
 mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
     if traceIfFalse "" useThisToMakeScriptUnique
-        && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+        && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
         && validateRedeemer
         then ()
         else error ()
@@ -109,9 +114,11 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
         !share_InBPx1e2_Protocol = T.pdShare_InBPx1e2_Protocol protocolDatum_Out
         !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
         !share_InBPx1e2_Managers = T.pdShare_InBPx1e2_Managers protocolDatum_Out
+        !oracleData_Valid_Time = T.pdOracleData_Valid_Time protocolDatum_Out
+        !maxDepositAndWithdraw = T.pdMaxDepositAndWithdraw protocolDatum_Out
         ---------------------
         !protocolDatum_Out_Control =
-            T.mkProtocolDatumType
+            T.mkProtocol_DatumType
                 (T.pdScriptPolicyID_CS protocolDatum_Out)
                 (T.pdScriptValidator_Hash protocolDatum_Out)
                 (T.pdOraclePaymentPubKey protocolDatum_Out)
@@ -119,6 +126,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 (T.pdTokenAdminPolicy_CS protocolDatum_Out)
                 fundCategories
                 fundLifeTime
+                (T.pdTokenMAYZ_AC protocolDatum_Out)
                 requiredMAYZForSwapOffer
                 requiredMAYZForBuyOrder
                 commissionFund_PerYear_InBPx1e3
@@ -128,6 +136,8 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 share_InBPx1e2_Delegators
                 share_InBPx1e2_Managers
                 (T.pdDelegatorsAdmins protocolDatum_Out)
+                oracleData_Valid_Time
+                maxDepositAndWithdraw
                 minADA_For_ProtocolDatum
         ---------------------
         isCorrect_Output_Protocol_Datum :: Bool
@@ -152,6 +162,8 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
                 && traceIfFalse "not Max commissionBuyOrder_InBPx1e3 <= 100%" (T.mmdMax commissionBuyOrder_InBPx1e3 <= 10_000_000)
                 && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers == 1_000_000) -- 1_000_000 BPx1e2 = 100%
+                && traceIfFalse "not (racleData_Valid_Time > 0" (oracleData_Valid_Time > 0)
+                && traceIfFalse "not (maxDepositAndWithdraw > 0" (maxDepositAndWithdraw > 0)
         ------------------
         isSequentialAndUnique :: [Integer] -> Bool
         isSequentialAndUnique xs = xs == OnChainHelpers.enumFromTo 0 (length xs - 1)
@@ -174,7 +186,6 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 && traceIfFalse "not isCorrect_Output_Protocol_Datum" isCorrect_Output_Protocol_Datum
                 && traceIfFalse "not isCorrect_Output_Protocol_Value" isCorrect_Output_Protocol_Value
 
-
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkValidator #-}
@@ -191,7 +202,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
         !isEmergencyRedeemer =
             case redeemer of
                 (T.ValidatorRedeemerEmergency _) -> True
-                _                                -> False
+                _ -> False
     in
         ------------------
         case isEmergencyRedeemer of
@@ -206,7 +217,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         else error ()
             False ->
                 if traceIfFalse "" useThisToMakeScriptUnique
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "Expected exactly one Protocol input" (length inputs_Own_TxOuts == 1)
                     && (
                          -- Si no, se valida que el que firma sea admin o que este el token admin y luego se valida el redeemer
@@ -225,10 +236,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                     ------------------
                     !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
                     !protocol_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
-                     ------------------
-                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
-                        let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
-                        in  OnChainHelpers.isScriptAddress address && address == protocol_Validator_Address]
+                    ------------------
+                    !inputs_Own_TxOuts =
+                        [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info, let
+                                                                                                                        address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+                                                                                                                    in
+                                                                                                                        OnChainHelpers.isScriptAddress address && address == protocol_Validator_Address
+                        ]
                     ------------------
                     !outputs_txOuts =
                         [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress txOut)
@@ -267,9 +281,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             ------------------
                             isAdminTokenPresent :: Bool
                             isAdminTokenPresent = case LedgerApiV2.txInfoOutputs info of
-                                []         -> False
+                                [] -> False
                                 -- search admin token in output 0
-                                (output:_) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
+                                (output : _) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
                                 where
                                     !tokenAdminPolicy_CS = T.getAdminToken_CS protocolDatum_In
                                     !tokenAdmin_AC = LedgerValue.AssetClass (tokenAdminPolicy_CS, T.protocolTokenAdmin_TN)
@@ -350,7 +364,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 -- Que el ProtocolDatum se actualiza correctamente
                                 -- Que el ProtocolDatum value cambie con el min ADA nuevo
                                 ------------------
-                                    traceIfFalse "not min ADA > 0" (newMinADA > 0)
+                                traceIfFalse "not min ADA > 0" (newMinADA > 0)
                                     && traceIfFalse "not isCorrect_Output_Protocol_Datum_With_MinADAChanged" isCorrect_Output_Protocol_Datum_With_MinADAChanged
                                     && traceIfFalse "not isCorrect_Output_Protocol_Value_With_MinADAChanged" isCorrect_Output_Protocol_Value_With_MinADAChanged
                                 where

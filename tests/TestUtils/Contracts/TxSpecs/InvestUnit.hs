@@ -18,8 +18,8 @@ import qualified Plutus.V2.Ledger.Api                 as LedgerApiV2
 import qualified Generic.OnChainHelpers               as OnChainHelpers
 import qualified Protocol.Fund.Holding.Types          as FundHoldingT
 import qualified Protocol.Fund.Types                  as FundT
-import qualified Protocol.InvestUnit.OnChain          as InvestUnit
-import qualified Protocol.InvestUnit.Types            as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.OnChain          as InvestUnit
+import qualified Protocol.Fund.InvestUnit.Types            as InvestUnitT
 import qualified Protocol.Types                       as T
 import           TestUtils.Automatic.ContextGenerator
 import           TestUtils.Automatic.HelpersMAYZ

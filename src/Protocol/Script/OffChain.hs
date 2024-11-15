@@ -292,7 +292,7 @@ doAddScriptTxWitParams
                 scriptsValidatorsToAddLeftForNext = P.drop (P.fromIntegral quantityLeft) scriptsValidatorsToAddLeft
                 ---------------------
             let !intervalOffset1 = 1000
-                !intervalOffset2 = T.validTimeRange - 1000
+                !intervalOffset2 = T.validTxTimeRange - 1000
                 !validityRange = LedgerValidityInterval.interval (now - intervalOffset1) (now + intervalOffset2)
                 ---------------------
             let prepareTx :: (AttachScriptToTx d) => (d, LedgerApiV2.ScriptHash) ->
@@ -465,7 +465,7 @@ doDeleteScriptTxWithParams
                 scriptsValidatorsToDeleteLeftForNext = P.drop (P.fromIntegral quantityLeft) scriptsValidatorsToDeleteLeft
             ---------------------
             let !intervalOffset1 = 1000
-                !intervalOffset2 = T.validTimeRange - 1000
+                !intervalOffset2 = T.validTxTimeRange - 1000
                 !validityRange = LedgerValidityInterval.interval (now - intervalOffset1) (now + intervalOffset2)
             ---------------------
             let prepareTx :: (d, LedgerApiV2.ScriptHash) ->

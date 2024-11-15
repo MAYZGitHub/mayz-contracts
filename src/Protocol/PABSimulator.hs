@@ -29,8 +29,7 @@ import qualified System.FilePath.Posix                 as SystemFilePathPosix
 import qualified Generic.CLIHelpers                    as CLIHelpers
 import qualified Generic.OffChainHelpers               as OffChainHelpers
 import qualified Generic.PABHelpers                    as PABHelpers
-import qualified Protocol.Constants                    as T
-import qualified Protocol.Deploy                       as Deploy
+import qualified Protocol.DeployPAB                       as DeployPAB
 import qualified Protocol.Fund.PABSimulator            as FundPABSimulator
 import qualified Protocol.Fund.PABSimulatorCommissions as FundPABSimulatorCommissions
 import qualified Protocol.Fund.PABSimulatorUser        as FundPABSimulatorUser
@@ -39,6 +38,7 @@ import qualified Protocol.PABContracts                 as PABContracts
 import qualified Protocol.PABHelpers                   as PABHelpers
 import qualified Protocol.PABTypes                     as T
 import qualified Protocol.Protocol.PABSimulator        as ProtocolPABSimulator
+import qualified Protocol.Protocol.Types as ProtocolT
 
 --------------------------------------------------------------------------------2
 -- Modulo
@@ -202,8 +202,8 @@ pabCreateProtocolParams (walletNro', walletCount) protocolPABParams' pabShutdown
             blockchain <- PABSimulator.blockchain
             let uTxOutRefAt = fst <$> PABHelpers.getUTxOsListInPABSimulator blockchain (PABHelpers.walletPaymentPubKeyHashAddress walletNro)
                 protocolPolicyID_TxOutRef = head uTxOutRefAt
-            protocolPABParams <- MonadIOClass.liftIO $ Deploy.deploy_ProtocolPAB_With_RequestingParams protocolPolicyID_TxOutRef
-            -- MonadIOClass.liftIO $ Deploy.deploy_FundFactory_With_RequestingParams (T.pppProtocolPolicyID_CS protocolPABParams)
+            protocolPABParams <- MonadIOClass.liftIO $ DeployPAB.deploy_ProtocolPAB_With_RequestingParams protocolPolicyID_TxOutRef
+            -- MonadIOClass.liftIO $ DeployPAB.deploy_FundFactory_With_RequestingParams (T.pppProtocolPolicyID_CS protocolPABParams)
             PABHelpers.waitKeyPress
             pabMainLoop (Just walletNro, walletCount) (Just protocolPABParams) pabShutdown
         _ -> do
@@ -219,7 +219,7 @@ pabLoadProtocolParams (walletNro', walletCount) protocolPABParams' pabShutdown =
     MonadIOClass.liftIO $ CLIHelpers.printSubTitle "Load Protocol"
     -- MonadIOClass.liftIO $ P.putStrLn "Path (default=export/protocol):"
     -- !path <- MonadIOClass.liftIO $ CLIHelpers.getStrWithDefault "export/protocol"
-    let !path = "export/protocol-v" ++ P.show T.protocolFactoryVersion
+    let !path = "export/protocol-v" ++ P.show ProtocolT.protocolVersion
     !existPath <- MonadIOClass.liftIO $ SystemDirectory.doesPathExist path
     if existPath
         then do

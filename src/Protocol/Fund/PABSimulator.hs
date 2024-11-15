@@ -37,7 +37,7 @@ import qualified Generic.OffChainHelpers      as OffChainHelpers
 import qualified Generic.OnChainHelpers       as OnChainHelpers
 import qualified Generic.PABHelpers           as PABHelpers
 import qualified Protocol.Constants           as T
-import qualified Protocol.Deploy              as Deploy
+import qualified Protocol.DeployPAB               as DeployPAB
 import qualified Protocol.Fund.Holding.Types  as FundHoldingT
 import qualified Protocol.Fund.Types          as FundT
 import qualified Protocol.PABContracts        as PABContracts
@@ -201,7 +201,7 @@ pabCreateFundParams isAdminMenu (walletNro, walletCount) protocolPABParams _ pab
     MonadIOClass.liftIO $ P.putStrLn $ "fundPolicy_TxOutRef: " ++ P.show fundPolicy_TxOutRef
     MonadIOClass.liftIO $ P.putStrLn "--------------------------------"
     ---------------------
-    fundPABParams <- MonadIOClass.liftIO $ Deploy.deploy_FundPAB_With_RequestingParams (T.pppProtocolPolicyID_CS protocolPABParams) fundPolicy_TxOutRef
+    fundPABParams <- MonadIOClass.liftIO $ DeployPAB.deploy_FundPAB_With_RequestingParams (T.pppProtocolPolicyID_CS protocolPABParams) fundPolicy_TxOutRef
     ---------------------
     newProtocolPABParams <-
         if fundPABParams `P.elem` T.ffppFundPABParams (head $ T.pppFundFactoryPABParams protocolPABParams)
@@ -239,7 +239,7 @@ pabLoadFundParams isAdminMenu (walletNro, walletCount) protocolPABParams fundPAB
     MonadIOClass.liftIO $ CLIHelpers.printSubTitle "Load Fund"
     -- MonadIOClass.liftIO $ P.putStrLn "Path (default=export/funds):"
     -- !path <- MonadIOClass.liftIO $ CLIHelpers.getStrWithDefault "export/funds"
-    let !path = "export/funds-v" ++ P.show T.fundFactoryVersion
+    let !path = "export/funds-v" ++ P.show FundT.fundVersion
     !existPath <- MonadIOClass.liftIO $ SystemDirectory.doesPathExist path
     if existPath
         then do

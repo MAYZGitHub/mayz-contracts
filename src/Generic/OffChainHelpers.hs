@@ -847,12 +847,12 @@ getValueFromDecoratedTxOut decoratedTxOut =
 
 --------------------------------------------------------------------------------2
 
-isNFTInDecoratedTxOut :: LedgerTx.DecoratedTxOut -> Ledger.AssetClass -> Bool
+isNFTInDecoratedTxOut :: LedgerTx.DecoratedTxOut -> LedgerValue.AssetClass -> Bool
 isNFTInDecoratedTxOut ciTxOut = OnChainHelpers.isNFT_With_AC_InValue (getValueFromDecoratedTxOut ciTxOut)
 
 --------------------------------------------------------------------------------2
 
-isTokenInDecoratedTxOut :: LedgerTx.DecoratedTxOut -> Ledger.AssetClass -> Bool
+isTokenInDecoratedTxOut :: LedgerTx.DecoratedTxOut -> LedgerValue.AssetClass -> Bool
 isTokenInDecoratedTxOut ciTxOut = OnChainHelpers.isToken_With_AC_InValue (getValueFromDecoratedTxOut ciTxOut)
 
 --------------------------------------------------------------------------------2

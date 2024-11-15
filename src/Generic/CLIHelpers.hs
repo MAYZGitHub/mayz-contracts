@@ -29,7 +29,6 @@ import qualified Data.Time.Clock           as DataTimeClock (secondsToNominalDif
 import qualified Data.Time.Clock.POSIX     as DataTimeClockPOSIX (posixSecondsToUTCTime)
 import qualified Data.Time.Clock.POSIX     as DataTimePOSIX
 import qualified Data.Time.Format          as DataTimeFormat (defaultTimeLocale, formatTime)
-import qualified Ledger
 import qualified Plutus.V2.Ledger.Api      as LedgerApiV2
 import qualified PlutusTx.Builtins.Class   as TxBuiltinsClass
 import           PlutusTx.Prelude          hiding (unless)
@@ -38,6 +37,7 @@ import qualified System.Directory          as SystemDirectory
 import qualified System.FilePath.Posix     as SystemFilePathPosix
 import qualified Text.Hex                  as TextHex
 import qualified Text.Read                 as TextRead (readMaybe)
+import qualified Ledger.Value as LedgerValue
 
 --------------------------------------------------------------------------------2
 -- Import Internos
@@ -59,7 +59,7 @@ formatTime posixTime =
 
 --------------------------------------------------------------------------------2
 
-getAmountWithMax :: P.String -> Ledger.AssetClass -> Integer -> Integer -> P.IO Integer
+getAmountWithMax :: P.String -> LedgerValue.AssetClass -> Integer -> Integer -> P.IO Integer
 getAmountWithMax unit_UI unit_AC minAmount maxAmount = do
     let unit_Str = unit_UI
     -- TODO: mostrar el hex bien
@@ -92,7 +92,7 @@ getAmountWithMax unit_UI unit_AC minAmount maxAmount = do
 
 --------------------------------------------------------------------------------2
 
-getAmount :: P.String -> Ledger.AssetClass -> Integer -> P.IO Integer
+getAmount :: P.String -> LedgerValue.AssetClass -> Integer -> P.IO Integer
 getAmount unit_UI unit_AC minAmount = do
     let unit_Str = unit_UI
     -- TODO: mostrar el hex bien

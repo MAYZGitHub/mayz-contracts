@@ -17,7 +17,7 @@ import qualified Plutus.V2.Ledger.Api                 as LedgerApiV2
 import qualified Protocol.Constants                   as T
 import qualified Protocol.Fund.Holding.Types          as FundHoldingT
 import qualified Protocol.Fund.Types                  as FundT
-import qualified Protocol.InvestUnit.Types            as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types            as InvestUnitT
 import qualified Protocol.Protocol.Types              as ProtocolT
 import qualified Protocol.SwapOffer.Types             as SwapOfferT
 import           TestUtils.Automatic.ContextGenerator

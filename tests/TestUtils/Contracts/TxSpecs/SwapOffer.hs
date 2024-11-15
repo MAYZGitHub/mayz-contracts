@@ -937,7 +937,7 @@ swapOffer_SwapFTxADA_TxSpecs tp txParams =
                                 Ledger.LowerBound (Ledger.Finite a) True -> a
                                 _                                        -> traceError "Invalid interval lower bound"
                             -- Adjust the lower limit by subtracting the valid time
-                            newLowerLimitValue = lowerLimit - T.oracleData_Valid_Time
+                            newLowerLimitValue = lowerLimit - T.oracleData_Valid_Time_aux
                             -- Set the oracle time to be just before the new lower limit
                             oracleTimeTooEarly = newLowerLimitValue - sum_ONE_INVALID_DATE
                         in
@@ -1233,7 +1233,7 @@ swapOffer_SwapADAxFT_TxSpecs tp !txParams =
                                 Ledger.LowerBound (Ledger.Finite a) True -> a
                                 _                                        -> traceError "Invalid interval lower bound"
                             -- Adjust the lower limit by subtracting the valid time
-                            newLowerLimitValue = lowerLimit - T.oracleData_Valid_Time
+                            newLowerLimitValue = lowerLimit - T.oracleData_Valid_Time_aux
                             -- Set the oracle time to be just before the new lower limit
                             oracleTimeTooEarly = newLowerLimitValue - sum_ONE_INVALID_DATE
                         in

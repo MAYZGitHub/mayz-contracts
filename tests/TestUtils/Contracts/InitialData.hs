@@ -7,34 +7,34 @@
 Module      : TestUtils.Contracts.InitialData
 Description : Mock Data
 -}
-
 module TestUtils.Contracts.InitialData where
 
 -- Non-IOG imports
 
 -- IOG imports
 import qualified Ledger
-import qualified Ledger.Ada                  as LedgerAda
-import qualified Ledger.Crypto               as LedgerCrypto
-import qualified Plutus.V2.Ledger.Api        as LedgerApiV2
-import           PlutusTx.Prelude
+import qualified Ledger.Ada as LedgerAda
+import qualified Ledger.Crypto as LedgerCrypto
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import PlutusTx.Prelude
+import qualified Ledger.Value as LedgerValue
 
 -- Project imports
-import qualified Generic.OffChainHelpers     as OffChainHelpers
-import qualified Generic.OnChainHelpers      as OnChainHelpers
-import qualified Protocol.Constants          as T
-import qualified Protocol.Fund.Helpers       as FundHelpers
-import qualified Protocol.Fund.Helpers       as FundT
+import qualified Generic.OffChainHelpers as OffChainHelpers
+import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Helpers as FundHelpers
+import qualified Protocol.Fund.Helpers as FundT
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Fund.Types         as FundT
-import qualified Protocol.InvestUnit.Types   as InvestUnitT
-import qualified Protocol.OffChainHelpers    as OffChainHelpers
-import qualified Protocol.OnChainHelpers     as OnChainHelpers
-import qualified Protocol.Protocol.Types     as ProtocolT
-import qualified Protocol.SwapOffer.Types    as SwapOfferT
-import qualified Protocol.Types              as T
-import           TestUtils.HelpersMAYZ
-import           TestUtils.TypesMAYZ
+import qualified Protocol.Fund.Types as FundT
+import qualified Protocol.Fund.InvestUnit.Types as InvestUnitT
+import qualified Protocol.OffChainHelpers as OffChainHelpers
+import qualified Protocol.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Protocol.SwapOffer.Types as SwapOfferT
+import qualified Protocol.Types as T
+import TestUtils.HelpersMAYZ
+import TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 -- Constants
@@ -66,7 +66,6 @@ toAlter_minAda = 16_222_000
 
 toAlter_Value_Adding_SomeADA :: LedgerApiV2.Value
 toAlter_Value_Adding_SomeADA = LedgerAda.lovelaceValueOf 10_000_000
-
 
 --------------------------------------------------------------------------------
 
@@ -125,7 +124,7 @@ mkOracleData :: TestParams -> Integer -> LedgerApiV2.POSIXTime -> T.Oracle_Data
 mkOracleData tp token_FT_Price1xe6 = T.Oracle_Data (tokenFTPrice1xe6 tp token_FT_Price1xe6)
 
 mkOracleDataSignature :: TestParams -> T.Oracle_Data -> Ledger.Signature
-mkOracleDataSignature  tp oracleData = LedgerCrypto.sign' (OnChainHelpers.oracleDataToBBS oracleData) (tpOraclePrivateKey tp)
+mkOracleDataSignature tp oracleData = LedgerCrypto.sign' (OnChainHelpers.oracleDataToBBS oracleData) (tpOraclePrivateKey tp)
 
 --------------------------------------------------------------------------------
 
@@ -145,14 +144,15 @@ protocol_Datum_MockData tp = ProtocolT.mkDatum $ protocol_DatumType_MockData tp
 
 protocol_DatumType_MockData :: TestParams -> ProtocolT.ProtocolDatumType
 protocol_DatumType_MockData tp =
-    ProtocolT.mkProtocolDatumType
+    ProtocolT.mkProtocol_DatumType
         (tpScriptPolicyID_CS tp) -- pdScriptPolicyID_CS
         (tpScriptValidator_Hash tp) -- pdScriptValidator_Hash
         (tpOraclePaymentPubKey tp) -- pdOraclePaymentPubKey
         (tpProtocolAdmins tp) -- pdAdmins
         (tpTokenAdminPolicy_CS tp) -- pdTokenAdminPolicy_CS
         [tpFundCategory tp] -- fundCategories
-        (tpFundLifeTime tp)
+        (tpFundLifeTime tp) -- pdFundLifeTime
+        (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- pdTokenMAYZ_AC
         (tpRequiredMAYZForSwapOffer tp) -- pdRequiredMAYZForSwapOffers
         (tpRequiredMAYZForBuyOrder tp) -- pdRequiredMAYZForBuyOrders
         (tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) -- pdCommissionFund_PerYear_InBPx1e3
@@ -162,6 +162,8 @@ protocol_DatumType_MockData tp =
         (tpShare_InBPx1e2_Delegators tp) -- pdShare_InBPx1e2_Delegators
         (tpShare_InBPx1e2_Managers tp) -- pdShare_InBPx1e2_Managers
         (tpDelegatorsAdmins tp) -- pdDelegatorsAdmins
+        T.oracleData_Valid_Time_aux -- pdOracleData_Valid_Time
+        T.maxDepositAndWithdraw_aux -- pdMaxDepositAndWithdraw
         minAdaProtocolDatum -- pdMinADA
 
 protocol_UTxO_MockData :: TestParams -> LedgerApiV2.TxOut
@@ -208,7 +210,9 @@ fund_DatumType_MockData tp =
         (tpCommissions_Table_Numerator_1e6 tp) -- fdCommissions_Table_Numerator_1e6
         0 -- fdHoldingsCount
         0 -- fdHoldingsIndex
-        (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
+        T.maxDepositAndWithdraw_aux -- fdMaxDepositAndWithdraw
+        (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- fdTokenMAYZ_AC
+        (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp) -- fdRequiredMAYZ
         minAdaFundDatum -- fdMinADA
 
 fund_DatumType_MockData_Parametrizable :: TestParams -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Maybe LedgerApiV2.POSIXTime -> Integer -> FundT.FundDatumType
@@ -219,8 +223,9 @@ fund_DatumType_MockData_Parametrizable tp beginDate deadlineDate closedAt commis
         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
         den = 120_000_000
         commissions_Table_Numerator_1e6 = [OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den month | month <- [0 .. monthsRemainingPlusOne]]
-        ------------
     in
+        ------------
+
         FundT.mkFund_DatumType
             (tpFundPolicy_CS tp) -- fdFundPolicy_CS
             (tpFundFT_TN tp) -- fdFundFT_TN
@@ -238,9 +243,10 @@ fund_DatumType_MockData_Parametrizable tp beginDate deadlineDate closedAt commis
             commissions_Table_Numerator_1e6
             0 -- fdHoldingsCount
             0 -- fdHoldingsIndex
-            (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
+            T.maxDepositAndWithdraw_aux -- fdMaxDepositAndWithdraw
+            (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- fdTokenMAYZ_AC
+            (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp) -- fdRequiredMAYZ
             minAdaFundDatum -- fdMinADA
-
 
 fund_DatumType_MockData_Parametrizable2 :: TestParams -> Integer -> FundT.FundDatumType
 fund_DatumType_MockData_Parametrizable2 tp num_FundHolding_UTxOs =
@@ -261,7 +267,9 @@ fund_DatumType_MockData_Parametrizable2 tp num_FundHolding_UTxOs =
         (tpCommissions_Table_Numerator_1e6 tp) -- fdCommissions_Table_Numerator_1e6
         num_FundHolding_UTxOs -- fdHoldingsCount
         0 -- fdHoldingsIndex
-        (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp)
+        T.maxDepositAndWithdraw_aux -- fdMaxDepositAndWithdraw
+        (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- fdTokenMAYZ_AC
+        (ProtocolT.fcRequiredMAYZ $ tpFundCategory tp) -- fdRequiredMAYZ
         minAdaFundDatum -- fdMinADA
 
 fund_Datum_MockData :: TestParams -> LedgerApiV2.Datum
@@ -295,7 +303,6 @@ fund_UTxO_MockData_Parametrizable2 tp num_FundHolding_UTxOs =
             (LedgerApiV2.OutputDatum datum)
             Nothing
 
-
 fund_DatumType_With_Added_FundHolding_MockData :: TestParams -> FundT.FundDatumType
 fund_DatumType_With_Added_FundHolding_MockData tp =
     (fund_DatumType_MockData tp)
@@ -324,11 +331,10 @@ fund_UTxO_With_Added_FundHolding_MockData_Parametrizable tp beginDate deadlineDa
             { LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum datum
             }
 
-
 fund_DatumType_With_Deleted_FundHolding_MockData :: TestParams -> FundT.FundDatumType
 fund_DatumType_With_Deleted_FundHolding_MockData tp =
     (fund_DatumType_With_Added_FundHolding_MockData tp)
-        { FundT.fdHoldingsCount = FundT.fdHoldingsCount (fund_DatumType_With_Added_FundHolding_MockData tp) -1
+        { FundT.fdHoldingsCount = FundT.fdHoldingsCount (fund_DatumType_With_Added_FundHolding_MockData tp) - 1
         }
 
 fund_Datum_With_Deleted_FundHolding_MockData :: TestParams -> LedgerApiV2.Datum
@@ -343,7 +349,6 @@ fund_UTxO_With_Deleted_FundHolding_MockData tp =
             { LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum datum
             }
 
-
 -- | UTxO that is spent in order to mint the Fund ID.
 fund_spend_UTxO_And_TxOutRef_MockData :: TestParams -> (LedgerApiV2.TxOut, LedgerApiV2.TxOutRef)
 fund_spend_UTxO_And_TxOutRef_MockData tp =
@@ -354,7 +359,6 @@ fund_spend_UTxO_And_TxOutRef_MockData tp =
         Nothing
     , tpFundPolicy_TxOutRef tp
     )
-
 
 --------------------------------------------------------------------------------
 
@@ -417,62 +421,62 @@ fundHolding_UTxO_With_Deposits_MockData tp =
 fundHolding_UTxO_With_Deposits_MockData_Parametrizable :: TestParams -> FundT.FundDatumType -> FundHoldingT.FundHoldingDatumType -> T.InvestUnit -> Integer -> Integer -> LedgerApiV2.POSIXTime -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp fundDatum fundHoldingDatum_In investUnit index deposit depositDate =
     -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (deposit,depositDate)) $
-        let
-            --------------------
-            (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp fundDatum depositDate deposit
-            --------------------
-            fundHoldingDatum_Control_With_Deposit =
-                    (FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Release_PerMonth_1e6)
-                        {
-                            FundHoldingT.hdFundHolding_Index = index
-                        }
-            --------------------
-            tokens_InvestUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 investUnit deposit
-            --------------------
-            -- deadline = FundT.fdDeadline fundDatum
-            -- remainingMonths = FundHelpers.getRemainingMonths deadline depositDate
-            --------------------
-        in
-            -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (depositDate, deadline, remainingMonths, deposit, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)) $
-            LedgerApiV2.TxOut
-                (OffChainHelpers.addressValidator $ tpFundHoldingValidator_Hash tp)
-                ( LedgerAda.lovelaceValueOf minAdaFundHoldingDatum
-                    <> tokens_InvestUnit_Value
-                    <> LedgerApiV2.singleton (tpFundHoldingPolicyID_CS tp) (mkFundHoldingID_TN index) 1
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionsFT
-                )
-                (LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHoldingDatum_Control_With_Deposit))
-                Nothing
+    let
+        --------------------
+        (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp fundDatum depositDate deposit
+        --------------------
+        fundHoldingDatum_Control_With_Deposit =
+            (FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit fundHoldingDatum_In deposit userFT commissionsFT commissions_FT_Release_PerMonth_1e6)
+                { FundHoldingT.hdFundHolding_Index = index
+                }
+        --------------------
+        tokens_InvestUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 investUnit deposit
+    in
+        --------------------
+        -- deadline = FundT.fdDeadline fundDatum
+        -- remainingMonths = FundHelpers.getRemainingMonths deadline depositDate
+        --------------------
+
+        -- DebugTrace.trace ("fundHolding_UTxO_With_Deposits_MockData_Parametrizable: " P.++ P.show  (depositDate, deadline, remainingMonths, deposit, userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6)) $
+        LedgerApiV2.TxOut
+            (OffChainHelpers.addressValidator $ tpFundHoldingValidator_Hash tp)
+            ( LedgerAda.lovelaceValueOf minAdaFundHoldingDatum
+                <> tokens_InvestUnit_Value
+                <> LedgerApiV2.singleton (tpFundHoldingPolicyID_CS tp) (mkFundHoldingID_TN index) 1
+                <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionsFT
+            )
+            (LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHoldingDatum_Control_With_Deposit))
+            Nothing
 
 fundHolding_UTxO_With_Withdraw_MockData_Parametrizable :: TestParams -> FundT.FundDatumType -> LedgerApiV2.TxOut -> T.InvestUnit -> Integer -> LedgerApiV2.POSIXTime -> Integer -> LedgerApiV2.TxOut
-fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp fundDatum fundHolding_UTxO_With_Deposit investUnit withdraw withdrawDate investUnit_Granularity=
+fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp fundDatum fundHolding_UTxO_With_Deposit investUnit withdraw withdrawDate investUnit_Granularity =
     -- DebugTrace.trace ("fundHolding_UTxO_With_Withdraw_MockData_Parametrizable: " P.++ P.show  (withdraw,withdrawDate, fundHolding_UTxO_With_Deposit)) $
-        let
-            --------------------
-            fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
-            --------------------
-            (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp fundDatum withdrawDate withdraw investUnit_Granularity
-            --------------------
-            fundHoldingDatum_Control_With_Withdraw = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
-            --------------------
-            tokens_InvestUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 investUnit withdrawPlusCommissionsGetBack
-            --------------------
-            -- deadline = FundT.fdDeadline fundDatum
-            -- remainingMonths = FundHelpers.getRemainingMonths deadline withdrawDate
-            --------------------
-            !valueFor_FT_CommissionsToGetBack = LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionsForUserFTToGetBack
-            --------------------
-            fundHolding_UTxO_With_Withdraw = fundHolding_UTxO_With_Deposit {
-                LedgerApiV2.txOutValue =
+    let
+        --------------------
+        fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
+        --------------------
+        (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp fundDatum withdrawDate withdraw investUnit_Granularity
+        --------------------
+        fundHoldingDatum_Control_With_Withdraw = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw fundHoldingDatum_In withdraw commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
+        --------------------
+        tokens_InvestUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 investUnit withdrawPlusCommissionsGetBack
+        --------------------
+        -- deadline = FundT.fdDeadline fundDatum
+        -- remainingMonths = FundHelpers.getRemainingMonths deadline withdrawDate
+        --------------------
+        !valueFor_FT_CommissionsToGetBack = LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) commissionsForUserFTToGetBack
+        --------------------
+        fundHolding_UTxO_With_Withdraw =
+            fundHolding_UTxO_With_Deposit
+                { LedgerApiV2.txOutValue =
                     LedgerApiV2.txOutValue fundHolding_UTxO_With_Deposit
                         <> negate tokens_InvestUnit_Value
                         <> negate valueFor_FT_CommissionsToGetBack
                 , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHoldingDatum_Control_With_Withdraw)
-            }
-        in
-            -- DebugTrace.trace ("fundHolding_UTxO_With_Withdraw_MockData_Parametrizable: " P.++ P.show  (withdrawDate, deadline, remainingMonths, withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6))
-            fundHolding_UTxO_With_Withdraw
-
+                }
+    in
+        -- DebugTrace.trace ("fundHolding_UTxO_With_Withdraw_MockData_Parametrizable: " P.++ P.show  (withdrawDate, deadline, remainingMonths, withdraw, commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6))
+        fundHolding_UTxO_With_Withdraw
 
 --------------------------------------------------------------------------------
 
@@ -511,30 +515,29 @@ fundHolding_UTxO_With_Collected_Protocol tp withdraw_Commissions_MockData' =
         (fundHolding_UTxO_With_Deposits_MockData tp)
             { LedgerApiV2.txOutValue =
                 LedgerApiV2.txOutValue (fundHolding_UTxO_With_Deposits_MockData tp)
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData' )
+                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData')
             , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ FundHoldingT.mkDatum newDatumType
             }
 
-
 fundHolding_UTxO_With_Collected_Protocol_Parametrizable :: TestParams -> LedgerApiV2.TxOut -> Integer -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Collected_Protocol_Parametrizable tp fundHolding_UTxO_With_Deposit withdraw =
-        let
-            --------------------
-            fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
-            --------------------
-            fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Protocol_Commission fundHoldingDatum_In  withdraw
-            --------------------
-            fundHolding_UTxO_Out = fundHolding_UTxO_With_Deposit {
-                LedgerApiV2.txOutValue =
+    let
+        --------------------
+        fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
+        --------------------
+        fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Protocol_Commission fundHoldingDatum_In withdraw
+        --------------------
+        fundHolding_UTxO_Out =
+            fundHolding_UTxO_With_Deposit
+                { LedgerApiV2.txOutValue =
                     LedgerApiV2.txOutValue fundHolding_UTxO_With_Deposit
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
-
+                        <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
                 , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHolding_Datum_Out)
-            }
-        in
-            fundHolding_UTxO_Out
+                }
+    in
+        fundHolding_UTxO_Out
 
-fundHolding_UTxO_With_Collected_Managers :: TestParams ->  Integer -> LedgerApiV2.TxOut
+fundHolding_UTxO_With_Collected_Managers :: TestParams -> Integer -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Collected_Managers tp withdraw_Commissions_MockData' =
     let
         newDatumType = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Managers_Commission (fundHolding_DatumType_With_Deposits_MockData tp) withdraw_Commissions_MockData'
@@ -542,30 +545,29 @@ fundHolding_UTxO_With_Collected_Managers tp withdraw_Commissions_MockData' =
         (fundHolding_UTxO_With_Deposits_MockData tp)
             { LedgerApiV2.txOutValue =
                 LedgerApiV2.txOutValue (fundHolding_UTxO_With_Deposits_MockData tp)
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData' )
+                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData')
             , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ FundHoldingT.mkDatum newDatumType
             }
 
-
 fundHolding_UTxO_With_Collected_Managers_Parametrizable :: TestParams -> LedgerApiV2.TxOut -> Integer -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Collected_Managers_Parametrizable tp fundHolding_UTxO_With_Deposit withdraw =
-        let
-            --------------------
-            fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
-            --------------------
-            fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Managers_Commission fundHoldingDatum_In  withdraw
-            --------------------
-            fundHolding_UTxO_Out = fundHolding_UTxO_With_Deposit {
-                LedgerApiV2.txOutValue =
+    let
+        --------------------
+        fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
+        --------------------
+        fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Managers_Commission fundHoldingDatum_In withdraw
+        --------------------
+        fundHolding_UTxO_Out =
+            fundHolding_UTxO_With_Deposit
+                { LedgerApiV2.txOutValue =
                     LedgerApiV2.txOutValue fundHolding_UTxO_With_Deposit
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
-
+                        <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
                 , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHolding_Datum_Out)
-            }
-        in
-            fundHolding_UTxO_Out
+                }
+    in
+        fundHolding_UTxO_Out
 
-fundHolding_UTxO_With_Collected_Delegators :: TestParams ->  Integer -> LedgerApiV2.TxOut
+fundHolding_UTxO_With_Collected_Delegators :: TestParams -> Integer -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Collected_Delegators tp withdraw_Commissions_MockData' =
     let
         newDatumType = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Delegators_Commission (fundHolding_DatumType_With_Deposits_MockData tp) withdraw_Commissions_MockData'
@@ -573,31 +575,27 @@ fundHolding_UTxO_With_Collected_Delegators tp withdraw_Commissions_MockData' =
         (fundHolding_UTxO_With_Deposits_MockData tp)
             { LedgerApiV2.txOutValue =
                 LedgerApiV2.txOutValue (fundHolding_UTxO_With_Deposits_MockData tp)
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData' )
+                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw_Commissions_MockData')
             , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ FundHoldingT.mkDatum newDatumType
             }
 
-
 fundHolding_UTxO_With_Collected_Delegators_Parametrizable :: TestParams -> LedgerApiV2.TxOut -> Integer -> LedgerApiV2.TxOut
 fundHolding_UTxO_With_Collected_Delegators_Parametrizable tp fundHolding_UTxO_With_Deposit withdraw =
-        let
-            --------------------
-            fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
-            --------------------
-            fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Delegators_Commission fundHoldingDatum_In  withdraw
-            --------------------
-            fundHolding_UTxO_Out = fundHolding_UTxO_With_Deposit {
-                LedgerApiV2.txOutValue =
+    let
+        --------------------
+        fundHoldingDatum_In = FundHoldingT.getFundHolding_DatumType_From_UTxO fundHolding_UTxO_With_Deposit
+        --------------------
+        fundHolding_Datum_Out = FundHelpers.mkUpdated_FundHolding_Datum_With_Collect_Delegators_Commission fundHoldingDatum_In withdraw
+        --------------------
+        fundHolding_UTxO_Out =
+            fundHolding_UTxO_With_Deposit
+                { LedgerApiV2.txOutValue =
                     LedgerApiV2.txOutValue fundHolding_UTxO_With_Deposit
-                    <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
-
+                        <> LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) (-withdraw)
                 , LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (FundHoldingT.mkDatum fundHolding_Datum_Out)
-            }
-        in
-            fundHolding_UTxO_Out
-
-
-
+                }
+    in
+        fundHolding_UTxO_Out
 
 --------------------------------------------------------------------------------
 
@@ -653,7 +651,7 @@ investUnit_UTxO_After_ReIdx_MockData tp =
         { LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum (investUnit_Datum_After_ReIdx_MockData tp)
         }
 
-fundHolding_UTxO_After_Reidx_MockData :: TestParams -> T.InvestUnit -> T.InvestUnit ->LedgerApiV2.TxOut
+fundHolding_UTxO_After_Reidx_MockData :: TestParams -> T.InvestUnit -> T.InvestUnit -> LedgerApiV2.TxOut
 fundHolding_UTxO_After_Reidx_MockData tp investUnit_Initial' investUnit_AfterReIdx' =
     let
         !total_Deposits_IU = FundHoldingT.hdSubtotal_FT_Minted (fundHolding_DatumType_With_Deposits_MockData tp)
@@ -683,6 +681,7 @@ swapOffer_DatumType_MockData tp =
         T.swapOffer_AllowSell
         T.swapOffer_AllowSell
         T.swapOffer_Status_Open -- order_Status
+         (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- tokenMAYZ_AC
         (ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp)
         minAdaSwapOfferDatum -- minADA
 
@@ -712,7 +711,6 @@ swapOffer_UTxO_MockData tp =
             (LedgerApiV2.OutputDatum $ swapOffer_Datum_MockData tp)
             Nothing
 
-
 swapOffer_DatumType_MockData_Parametrizable :: TestParams -> Integer -> Integer -> SwapOfferT.SwapOffer_DatumType
 swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Available =
     SwapOfferT.mkSwapOffer_DatumType
@@ -728,6 +726,7 @@ swapOffer_DatumType_MockData_Parametrizable tp amount_FT_Available amount_ADA_Av
         T.swapOffer_AllowSell
         T.swapOffer_AllowSell
         T.swapOffer_Status_Open -- order_Status
+         (LedgerValue.AssetClass (tpTokenMAYZ_CS tp, tpTokenMAYZ_TN tp))  -- tokenMAYZ_AC
         (ProtocolT.pdRequiredMAYZForSwapOffer $ protocol_DatumType_MockData tp)
         minAdaSwapOfferDatum -- minADA
 

@@ -39,7 +39,7 @@ import qualified Protocol.Constants          as T
 import qualified Protocol.Fund.Helpers       as FundHelpers
 import qualified Protocol.Fund.Holding.Types as T
 import qualified Protocol.Fund.Types         as FundT
-import qualified Protocol.InvestUnit.Types   as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types   as InvestUnitT
 import qualified Protocol.Protocol.Types     as ProtocolT
 import qualified Protocol.Types              as T
 import qualified PlutusTx.Ratio as TxRatio
@@ -48,11 +48,15 @@ import qualified PlutusTx.Ratio as TxRatio
 -- Modulo
 ----------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the fundVersion on Protocol.Fund.Types
+      
+--------------------------------------------------------------------------------2
+
 {-# INLINEABLE mkPolicyID #-}
 mkPolicyID :: T.PolicyParams -> BuiltinData -> BuiltinData -> ()
-mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
+mkPolicyID (T.PolicyParams !fundPolicy_CS) !redRaw !ctxRaw =
     if  traceIfFalse "" useThisToMakeScriptUnique
-        && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+        && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
         && case redeemer of
             (T.PolicyRedeemerMintID _) ->
                     ------------------
@@ -113,6 +117,7 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
                     !valueFor_FundHoldingDatum_Out_Control = valueFor_Mint_FundHoldingID <> value_MinADA_For_FundHoldingDatum_Out
                     ------------------
                     !fundHoldingDatum_Out_Control = T.FundHoldingDatumType  {
+                            T.hdVersion = T.ownVersion,
                             T.hdFundHolding_Index = fundHolding_Index,
                             T.hdSubtotal_FT_Minted_Accumulated = 0,
                             T.hdSubtotal_FT_Minted = 0,
@@ -218,13 +223,12 @@ mkPolicyID (T.PolicyParams !ppFundPolicy_CS) !redRaw !ctxRaw =
     else error ()
         where
             ------------------
-            !useThisToMakeScriptUnique = True
+            !useThisToMakeScriptUnique = fundPolicy_CS /= LedgerApiV2.adaSymbol
             ------------------
             !redeemer = LedgerApiV2.unsafeFromBuiltinData @T.PolicyRedeemer redRaw
             !ctx = LedgerApiV2.unsafeFromBuiltinData @LedgerContextsV2.ScriptContext ctxRaw
             !info = LedgerContextsV2.scriptContextTxInfo ctx
             ------------------
-            !fundPolicy_CS = ppFundPolicy_CS
             !fundID_AC = LedgerValue.AssetClass (fundPolicy_CS, T.fundID_TN)
             ------------------
             !fundHoldingPolicyID_CS = LedgerContextsV2.ownCurrencySymbol ctx
@@ -284,7 +288,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                         else error ()
             False ->
                 if traceIfFalse "" useThisToMakeScriptUnique
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "Expected at least one FundHolding input" (not (null inputs_Own_TxOuts))
                     && validateRedeemer getRedeemerType
                     then ()
@@ -615,7 +619,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ------------------
                                                             traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
-                                                            && traceIfFalse "not Correct Deposit Amount" (FundHelpers.isCorrectAmount deposit T.maxDepositAndWithdrawInFunds investUnit_Granularity)
+                                                            && traceIfFalse "not Correct Deposit Amount" (FundHelpers.isCorrectAmount deposit (FundT.fdMaxDepositAndWithdraw fundDatum_In) investUnit_Granularity)
                                                             && traceIfFalse "not isMintingFT" isMintingFT
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Datum_With_Deposit" (isCorrect_Output_FundHolding_Datum fundHoldingDatum_Out fundHoldingDatum_Control_With_Deposit)
                                                             && traceIfFalse "not isCorrect_Output_FundHolding_Value_With_Tokens_And_FT" (isCorrect_Output_FundHolding_Value valueOf_FundHoldingDatum_Out valueFor_FundHoldingDatum_Control_With_Tokens_And_FT)
@@ -646,7 +650,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                             ------------------
                                                             traceIfFalse "Expected exactly one FundHolding input" (length inputs_Own_TxOuts == 1)
                                                             && traceIfFalse "not isDateInRange" (OnChainHelpers.isDateInRange date info)
-                                                            && traceIfFalse "not Correct Withdraw Amount" (FundHelpers.isCorrectAmount withdraw T.maxDepositAndWithdrawInFunds investUnit_Granularity)
+                                                            && traceIfFalse "not Correct Withdraw Amount" (FundHelpers.isCorrectAmount withdraw (FundT.fdMaxDepositAndWithdraw fundDatum_In) investUnit_Granularity)
                                                             && traceIfFalse "not Correct Comissions" (FundHelpers.isCorrectCommissionsAmount commissionsForUserFT commissionsForUserFT_calculated investUnit_Granularity)
                                                             && traceIfFalse "not isEnough_FT_ForComission" isEnough_FT_ForComission
                                                             && traceIfFalse "not isEnough_Commissions_Release_PerMonth" isEnough_Commissions_Release_PerMonth

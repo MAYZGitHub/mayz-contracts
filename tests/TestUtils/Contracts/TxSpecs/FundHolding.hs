@@ -19,7 +19,7 @@ import qualified Generic.OnChainHelpers                 as OnChainHelpers
 import qualified Protocol.Fund.Helpers                  as FundHelpers
 import qualified Protocol.Fund.Holding.Types            as FundHoldingT
 import qualified Protocol.Fund.Types                    as FundT
-import qualified Protocol.InvestUnit.Types              as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types              as InvestUnitT
 import qualified Protocol.OnChainHelpers                as OnChainHelpers
 import qualified Protocol.Protocol.Types                as ProtocolT
 import qualified Protocol.Types                         as T
@@ -290,12 +290,12 @@ fundHolding_Deposit_TxSpecs tp txParams =
             let
                 depositDate' =
                     case DataList.find P.snd extras of
-                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTimeRange
-                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTimeRange
+                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTxTimeRange
+                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                         _                                         -> depositDate
                 closedAt =
                     case DataList.find P.snd extras of
-                        Just ("Invalid Deposit with Fund Closed", _) -> Just $ depositDate' - T.validTimeRange
+                        Just ("Invalid Deposit with Fund Closed", _) -> Just $ depositDate' - T.validTxTimeRange
                         _                                            -> Nothing
             in
                 fund_UTxO_With_Added_FundHolding_MockData_Parametrizable tp beginDate deadlineDate closedAt fundCommission_PerYear_InBPx1e3
@@ -327,8 +327,8 @@ fundHolding_Deposit_TxSpecs tp txParams =
             let
                 depositDate' =
                     case DataList.find P.snd extras of
-                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTimeRange
-                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTimeRange
+                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTxTimeRange
+                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                         _                                         -> depositDate
             in
                 consume_TxOut_Gen
@@ -344,8 +344,8 @@ fundHolding_Deposit_TxSpecs tp txParams =
             let
                 depositDate' =
                     case DataList.find P.snd extras of
-                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTimeRange
-                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTimeRange
+                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTxTimeRange
+                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                         _                                         -> depositDate
             in
                 txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp (input_Fund_Datum extras) input_FundHolding_Datum investUnitTokens 0 depositAmount depositDate') FundHolding_TestEntity op
@@ -360,8 +360,8 @@ fundHolding_Deposit_TxSpecs tp txParams =
             let
                 depositDate' =
                     case DataList.find P.snd extras of
-                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTimeRange
-                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTimeRange
+                        Just ("Valid DepositDate on BeginAt", _)  -> beginDate + T.validTxTimeRange
+                        Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                         _                                         -> depositDate
             in
                 validityRange_gen tp depositDate' op
@@ -426,15 +426,15 @@ fundHolding_Withdraw_TxSpecs tp txParams =
         -----------------
         getWithdrawDate extras =
             case DataList.find P.snd extras of
-                Just ("Valid WithdrawDate on BeginAt", _)  -> beginDate + T.validTimeRange
-                Just ("Valid WithdrawDate on Deadline", _) -> deadlineDate - T.validTimeRange
+                Just ("Valid WithdrawDate on BeginAt", _)  -> beginDate + T.validTxTimeRange
+                Just ("Valid WithdrawDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                 _                                          -> withdrawDate_
         -----------------
         input_Fund_UTxO extras =
             let
                 closedAt =
                     case DataList.find P.snd extras of
-                        Just ("Valid Withdraw with Fund Closed", _) -> Just $ getWithdrawDate extras - T.validTimeRange
+                        Just ("Valid Withdraw with Fund Closed", _) -> Just $ getWithdrawDate extras - T.validTxTimeRange
                         _                                           -> Nothing
             in
                 fund_UTxO_With_Added_FundHolding_MockData_Parametrizable tp beginDate deadlineDate closedAt fundCommission_PerYear_InBPx1e3

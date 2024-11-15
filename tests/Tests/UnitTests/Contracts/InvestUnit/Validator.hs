@@ -31,7 +31,7 @@ import qualified Plutus.V2.Ledger.Api                     as LedgerApiV2
 import           PlutusTx.Prelude                         (divide)
 import qualified Protocol.Constants                       as T
 import qualified Protocol.Fund.Holding.Types              as FundHoldingT
-import qualified Protocol.InvestUnit.Types                as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types                as InvestUnitT
 import qualified Protocol.OnChainHelpers                  as OnChainHelpers
 import qualified Protocol.Types                           as T
 import qualified Test.Tasty.HUnit                         as Tasty
@@ -311,17 +311,17 @@ investUnit_Validator_Redeemer_ReIndexing_Tests tp =
                         , Tasty.testCase
                             "Using an incorrect Oracle time range must fail" $ do
                             let
-                                -- the ranne of the tx is check, and is between the validTimeRange for tx
-                                -- validTimeRange = 900_000 -- 15 * 60 * 1000 = 15 minutos
+                                -- the ranne of the tx is check, and is between the validTxTimeRange for tx
+                                -- validTxTimeRange = 900_000 -- 15 * 60 * 1000 = 15 minutos
                                 -- then from the lower bound of the tx range, the oracleData_Valid_Time is subtracted
                                 -- oracleData_Valid_Time = 300_000 -- 5 * 60 * 1000 = 5 minutos
                                 -- and the valid range goes from that value to the upper bound of the tx range
                                 -- in this tx, the tx range is created with
                                 -- LedgerInterval.interval
-                                -- from: (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) + 1)
-                                -- to: (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) -1)
+                                -- from: (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) + 1)
+                                -- to: (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) -1)
                                 -- so for creating a invalid range we use the lower bound, we subtract the oracleData_Valid_Time and we substract 1 more
-                                validLowerBound =  (tpReIdxDate tp  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) + 1) - T.oracleData_Valid_Time
+                                validLowerBound =  (tpReIdxDate tp  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) + 1) - T.oracleData_Valid_Time_aux
                                 invalidLowerBound = validLowerBound - 1
                                 wrongOracleData = T.OracleReIdx_Data tokensReIdxPrice invalidLowerBound
                                 wrongPriceData = OnChainHelpers.oracleReIdxDataToBBS wrongOracleData

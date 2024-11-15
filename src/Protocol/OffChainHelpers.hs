@@ -55,7 +55,7 @@ import qualified Text.Printf                      as TextPrintf (printf)
 import qualified Generic.OnChainHelpers           as OnChainHelpers
 import qualified Protocol.Fund.Holding.Types      as FundHoldingT
 import qualified Protocol.Fund.Types              as FundT
-import qualified Protocol.InvestUnit.Types        as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types        as InvestUnitT
 import qualified Protocol.PABTypes                as T
 import qualified Protocol.Protocol.Types          as ProtocolT
 import qualified Protocol.Script.Types            as ScriptT
@@ -608,3 +608,4 @@ mkValue_From_InvestUnit_And_Amount2 (T.InvestUnit investUnitTokens) deposit =
             accValue <> LedgerApiV2.singleton cs tn scaledAmount
 
  ------------------------------------------------------------
+

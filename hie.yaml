@@ -7,6 +7,9 @@ cradle:
     - path: "./app"
       component: "mayz-protocol-contracts:exe:cli"
 
+    - path: "./app"
+      component: "mayz-protocol-contracts:exe:deploy"
+
     - path: "./tests/Tests/UnitTests"
       component: "mayz-protocol-contracts:test:UnitTests"
 

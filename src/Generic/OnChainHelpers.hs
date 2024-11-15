@@ -395,7 +395,7 @@ isDateInRange !dateAt !info =
 
 --------------------------------------------------------------------------------
 
-{- Check that the tx range interval of validity. Must be lees than T.validTimeRange Pool Param. -}
+{- Check that the tx range interval of validity. Must be lees than T.validTxTimeRange Pool Param. -}
 {-# INLINABLE isValidRange #-}
 isValidRange :: LedgerContextsV2.TxInfo -> LedgerApiV2.POSIXTime -> Bool
 isValidRange !info = isCorrectIntervalSize (LedgerApiV2.txInfoValidRange info)

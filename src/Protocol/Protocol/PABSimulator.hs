@@ -111,7 +111,7 @@ pabProtocolPrepare (walletNro, walletCount) protocolPABParams pabReturnToMainMen
     -- necesito tener la private key luego
     -- (oracleWalletNro,_) <- PABHelpers.selectWallet "Protocol Oracle" walletNro walletCount False
     -- let oracleWallet = Ledger.unPaymentPubKeyHash $ PABHelpers.walletPaymentPubKeyHash oracleWalletNro
-    let oracleWallet_PaymentPubKey = OffChainHelpers.seedToPaymentPubKey T.oracleWallet_Seed
+    let oracleWallet_PaymentPubKey = OffChainHelpers.seedToPaymentPubKey T.oracleWallet_Seed_aux
     ---------------------
     adminProtocolWalletsNros <- PABHelpers.selectWallets "Protocol Admin" (OffChainHelpers.removeDuplicates [1,2,walletNro]) walletCount []
     let adminProtocolWallets =

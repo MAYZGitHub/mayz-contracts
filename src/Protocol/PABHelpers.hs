@@ -37,7 +37,7 @@ import qualified Generic.Types                  as T
 import qualified Protocol.Constants             as T
 import qualified Protocol.Fund.Holding.Types    as FundHoldingT
 import qualified Protocol.Fund.Types            as FundT
-import qualified Protocol.InvestUnit.Types      as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types      as InvestUnitT
 import qualified Protocol.PABContracts          as PABContracts
 import qualified Protocol.PABTypes              as T
 import qualified Protocol.Protocol.Types        as ProtocolT
@@ -140,7 +140,7 @@ pabEndSimulation (walletNro', walletCount) protocolPABParams' pabShutdown = do
 
 isCoreTeam :: Maybe Integer -> Bool
 isCoreTeam Nothing          = False
-isCoreTeam (Just walletNro) = Ledger.unPaymentPubKeyHash (PABHelpers.walletPaymentPubKeyHash walletNro) `P.elem` T.coreTeamWallets
+isCoreTeam (Just walletNro) = Ledger.unPaymentPubKeyHash (PABHelpers.walletPaymentPubKeyHash walletNro) `P.elem` T.coreTeamWallets_aux
 
 --------------------------------------------------------------------------------2
 

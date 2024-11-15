@@ -43,6 +43,10 @@ import qualified Protocol.Types            as T
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the scriptVersion on Protocol.Script.Types
+
+--------------------------------------------------------------------------------2
+
 {-# INLINEABLE mkPolicyID #-}
 mkPolicyID :: T.PolicyParams -> BuiltinData -> BuiltinData -> ()
 mkPolicyID  (T.PolicyParams !protocolPolicyID_CS) !redRaw !ctxRaw =
@@ -98,7 +102,7 @@ mkPolicyID  (T.PolicyParams !protocolPolicyID_CS) !redRaw !ctxRaw =
                        ------------------
                         -- it runs along with Script Validator (ValidatorRedeemerDelete)
                             -- traceIfFalse "not isSignedByAdmin nor isAdminTokenPresent" isSignedByAdminOrIsAdminTokenPresent
-                            -- && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                            -- && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                             -- && traceIfFalse "not isBurning_ScriptIDs" isBurning_ScriptIDs
                             -- && traceIfFalse "not Correct Withdraw Amount_SendBackToAdmin" isCorrectAmount_SendBackToAdmin
                         ------------------
@@ -135,7 +139,7 @@ mkValidator (T.ValidatorParams !scriptPolicyID_CS !protocolPolicyID_CS)  _ !redR
                         -- traceIfFalse "not isBurningAllTokenOwnCSAnyAmount" (OnChainHelpers.isBurningAllTokenOwnCSAnyAmount ctx)
                     ------------------
                        traceIfFalse "not isSignedByAdmin nor isAdminTokenPresent" isSignedByAdminOrIsAdminTokenPresent
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "not isBurning_ScriptIDs" isBurning_ScriptIDs
                     && traceIfFalse "not Correct Withdraw Amount_SendBackToAdmin" isCorrectAmount_SendBackToAdmin
                 where

@@ -1,13 +1,13 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 --------------------------------------------------------------------------------3
 {- HLINT ignore "Use camelCase"          -}
@@ -20,38 +20,47 @@ module Protocol.SwapOffer.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson             as DataAeson
-import qualified Data.OpenApi.Schema    as DataOpenApiSchema
-import qualified GHC.Generics           as GHCGenerics
-import qualified Plutus.V2.Ledger.Api   as LedgerApiV2
+import qualified Data.Aeson as DataAeson
+import qualified Data.OpenApi.Schema as DataOpenApiSchema
+import qualified GHC.Generics as GHCGenerics
+import qualified Ledger
+import qualified Ledger.Value as LedgerValue
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified PlutusTx
-import           PlutusTx.Prelude
-import qualified Prelude                as P
+import PlutusTx.Prelude
 import qualified Schema
+import qualified Prelude as P
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
 import qualified Generic.OnChainHelpers as OnChainHelpers
-import qualified Generic.Types          as T
-import qualified Ledger
-import qualified Protocol.Types         as T
+import qualified Generic.Types as T
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Types as FundT
+import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Protocol.Types as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the swapOfferVersion
+swapOfferVersion :: Integer
+swapOfferVersion = 1
+
+ownVersion :: Integer
+ownVersion = T.mkVersionWithDependency [ProtocolT.protocolVersion, FundT.fundVersion] swapOfferVersion
+
 --------------------------------------------------------------------------------2
 -- Params
 --------------------------------------------------------------------------------2
 
-data PolicyParams
-    = PolicyParams
-          { ppProtocolPolicyID_CS      :: T.CS
-          , ppSwapOffer_Validator_Hash :: LedgerApiV2.ValidatorHash
-          , ppTokenMAYZ_AC             :: Ledger.AssetClass
-          }
+data PolicyParams = PolicyParams
+    { ppProtocolPolicyID_CS :: T.CS
+    , ppSwapOffer_Validator_Hash :: LedgerApiV2.ValidatorHash
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
 instance Eq PolicyParams where
@@ -59,16 +68,14 @@ instance Eq PolicyParams where
     p1 == p2 =
         ppProtocolPolicyID_CS p1 == ppProtocolPolicyID_CS p2
             && ppSwapOffer_Validator_Hash p1 == ppSwapOffer_Validator_Hash p2
-            && ppTokenMAYZ_AC p1 == ppTokenMAYZ_AC p2
 
 PlutusTx.makeLift ''PolicyParams
 PlutusTx.makeIsDataIndexed ''PolicyParams [('PolicyParams, 0)]
 
-data ValidatorParams
-    = ValidatorParams
-          { vpProtocolPolicyID_CS          :: T.CS
-          , vpTokenEmergencyAdminPolicy_CS :: LedgerApiV2.CurrencySymbol
-          }
+data ValidatorParams = ValidatorParams
+    { vpProtocolPolicyID_CS :: T.CS
+    , vpTokenEmergencyAdminPolicy_CS :: LedgerApiV2.CurrencySymbol
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
 instance Eq ValidatorParams where
@@ -84,29 +91,38 @@ PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
 -- Datums
 --------------------------------------------------------------------------------2
 
-data SwapOffer_DatumType
-    = SwapOffer_DatumType
-          { sodSwapOfferPolicyID_CS     :: T.CS
-          , sodFundPolicy_CS            :: T.CS
-          , sodSellerPaymentPKH         :: T.WalletPaymentPKH
-          , sodSellerStakePKH           :: Maybe T.WalletPaymentPKH
-          , sodAskedCommission_InBPx1e3 :: Integer
-          , sodAmount_FT_Available      :: Integer
-          , sodAmount_ADA_Available     :: Integer
-          , sodTotal_FT_Earned          :: Integer
-          , sodTotal_ADA_Earned         :: Integer
-          , sodOrder_AllowSellFT        :: Integer
-          , sodOrder_AllowSellADA       :: Integer
-          , sodOrder_Status             :: Integer
-          , sodMAYZ                     :: Integer
-          , sodMinADA                   :: Integer
-          }
+data SwapOffer_DatumType = SwapOffer_DatumType
+    { -- Version Control
+      sodVersion :: Integer -- Contract version
+    , -- Policy References
+      sodSwapOfferPolicyID_CS :: T.CS -- SwapOffer policy ID
+    , sodFundPolicy_CS :: T.CS -- Fund policy ID for FTs
+    , -- Seller Information
+      sodSellerPaymentPKH :: T.WalletPaymentPKH -- Seller's payment key hash
+    , sodSellerStakePKH :: Maybe T.WalletPaymentPKH -- Optional stake key hash
+    , -- Commission and Balances
+      sodAskedCommission_InBPx1e3 :: Integer -- Seller's rate in BPx1000
+    , sodAmount_FT_Available :: Integer -- Available Fund Tokens
+    , sodAmount_ADA_Available :: Integer -- Available ADA
+    , -- Earnings Tracking
+      sodTotal_FT_Earned :: Integer -- FT commissions earned
+    , sodTotal_ADA_Earned :: Integer -- ADA commissions earned
+    , -- Trading Options
+      sodOrder_AllowSellFT :: Integer -- Allow FT sales (1=yes, 0=no)
+    , sodOrder_AllowSellADA :: Integer -- Allow ADA sales (1=yes, 0=no)
+    , sodOrder_Status :: Integer -- 1=open, 2=closed
+    , -- Token Requirements and used
+      sodTokenMAYZ_AC :: LedgerValue.AssetClass -- MAYZ token identifier
+    , sodRequiredMAYZ :: Integer -- Required MAYZ stake used
+    , sodMinADA :: Integer -- Minimum ADA used in UTXO
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
 instance Eq SwapOffer_DatumType where
     {-# INLINEABLE (==) #-}
     sd1 == sd2 =
-        sodSwapOfferPolicyID_CS sd1 == sodSwapOfferPolicyID_CS sd2
+        sodVersion sd1 == sodVersion sd2
+            && sodSwapOfferPolicyID_CS sd1 == sodSwapOfferPolicyID_CS sd2
             && sodFundPolicy_CS sd1 == sodFundPolicy_CS sd2
             && sodSellerPaymentPKH sd1 == sodSellerPaymentPKH sd2
             && sodSellerStakePKH sd1 == sodSellerStakePKH sd2
@@ -118,7 +134,8 @@ instance Eq SwapOffer_DatumType where
             && sodOrder_AllowSellFT sd1 == sodOrder_AllowSellFT sd2
             && sodOrder_AllowSellADA sd1 == sodOrder_AllowSellADA sd2
             && sodOrder_Status sd1 == sodOrder_Status sd2
-            && sodMAYZ sd1 == sodMAYZ sd2
+            && sodTokenMAYZ_AC sd1 == sodTokenMAYZ_AC sd2
+            && sodRequiredMAYZ sd1 == sodRequiredMAYZ sd2
             && sodMinADA sd1 == sodMinADA sd2
 
 PlutusTx.makeIsDataIndexed ''SwapOffer_DatumType [('SwapOffer_DatumType, 0)]
@@ -140,22 +157,22 @@ getSwapOffer_DatumType (SwapOffer_Datum sdType) = sdType
 {-# INLINEABLE getSwapOffer_DatumType_From_UTxO #-}
 getSwapOffer_DatumType_From_UTxO :: LedgerApiV2.TxOut -> SwapOffer_DatumType
 getSwapOffer_DatumType_From_UTxO utxo = case OnChainHelpers.getInlineDatum_From_TxOut @ValidatorDatum utxo of
-                    Nothing     -> P.error "No SwapOffer Datum found"
-                    Just datum' -> getSwapOffer_DatumType datum'
+    Nothing -> P.error "No SwapOffer Datum found"
+    Just datum' -> getSwapOffer_DatumType datum'
 
 instance T.ShowDatum ValidatorDatum where
     showCborAsDatumType cbor = case LedgerApiV2.fromBuiltinData @ValidatorDatum cbor of
         Nothing -> Nothing
-        Just d  -> Just $ P.show d
+        Just d -> Just $ P.show d
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkSwapOffer_DatumType #-}
-mkSwapOffer_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> SwapOffer_DatumType
-mkSwapOffer_DatumType = SwapOffer_DatumType
+mkSwapOffer_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> LedgerValue.AssetClass -> Integer -> Integer -> SwapOffer_DatumType
+mkSwapOffer_DatumType = SwapOffer_DatumType ownVersion
 
 {-# INLINEABLE mkSwapOffer_Datum #-}
-mkSwapOffer_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> ValidatorDatum
+mkSwapOffer_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> Integer -> LedgerValue.AssetClass -> Integer -> Integer -> ValidatorDatum
 mkSwapOffer_Datum
     swapOfferPolicyID_CS
     fundPolicy_CS
@@ -169,7 +186,8 @@ mkSwapOffer_Datum
     allowSellFT
     allowSellADA
     order_Status
-    amountMAYZ
+    tokenMAYZ_AC
+    requiredMAYZ
     minADA =
         SwapOffer_Datum $
             mkSwapOffer_DatumType
@@ -185,7 +203,8 @@ mkSwapOffer_Datum
                 allowSellFT
                 allowSellADA
                 order_Status
-                amountMAYZ
+                tokenMAYZ_AC
+                requiredMAYZ
                 minADA
 
 mkDatum :: SwapOffer_DatumType -> LedgerApiV2.Datum
@@ -201,7 +220,10 @@ instance Eq PolicyRedeemerMintIDType where
     {-# INLINEABLE (==) #-}
     r1 == r2 = r1 == r2
 
-PlutusTx.unstableMakeIsData ''PolicyRedeemerMintIDType
+PlutusTx.makeIsDataIndexed
+    ''PolicyRedeemerMintIDType
+    [('PolicyRedeemerMintIDType, 0)]
+
 
 data PolicyRedeemerBurnIDType = PolicyRedeemerBurnIDType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
@@ -209,7 +231,9 @@ instance Eq PolicyRedeemerBurnIDType where
     {-# INLINEABLE (==) #-}
     r1 == r2 = r1 == r2
 
-PlutusTx.unstableMakeIsData ''PolicyRedeemerBurnIDType
+PlutusTx.makeIsDataIndexed
+    ''PolicyRedeemerBurnIDType
+    [('PolicyRedeemerBurnIDType, 0)]
 
 data PolicyRedeemer
     = PolicyRedeemerMintID PolicyRedeemerMintIDType
@@ -220,7 +244,7 @@ instance Eq PolicyRedeemer where
     {-# INLINEABLE (==) #-}
     PolicyRedeemerMintID rmtx1 == PolicyRedeemerMintID rmtx2 = rmtx1 == rmtx2
     PolicyRedeemerBurnID rmtx1 == PolicyRedeemerBurnID rmtx2 = rmtx1 == rmtx2
-    _ == _                                                   = False
+    _ == _ = False
 
 PlutusTx.makeIsDataIndexed
     ''PolicyRedeemer
@@ -233,14 +257,13 @@ PlutusTx.makeIsDataIndexed
 getPolicyRedeemerName :: Maybe PolicyRedeemer -> Maybe P.String
 getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = Just "MintID"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
-getPolicyRedeemerName _                                                      = Nothing
+getPolicyRedeemerName _ = Nothing
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
 --------------------------------------------------------------------------------2
 
-newtype ValidatorRedeemerUpdateStatusType
-    = ValidatorRedeemerUpdateStatusType { rusNewStatus :: Integer }
+newtype ValidatorRedeemerUpdateStatusType = ValidatorRedeemerUpdateStatusType {rusNewStatus :: Integer}
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateStatusType where
@@ -249,8 +272,7 @@ instance Eq ValidatorRedeemerUpdateStatusType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateStatusType [('ValidatorRedeemerUpdateStatusType, 0)]
 
-newtype ValidatorRedeemerUpdateAskedCommissionRateType
-    = ValidatorRedeemerUpdateAskedCommissionRateType { rucrNewCommissionRate :: Integer }
+newtype ValidatorRedeemerUpdateAskedCommissionRateType = ValidatorRedeemerUpdateAskedCommissionRateType {rucrNewCommissionRate :: Integer}
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateAskedCommissionRateType where
@@ -259,11 +281,10 @@ instance Eq ValidatorRedeemerUpdateAskedCommissionRateType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateAskedCommissionRateType [('ValidatorRedeemerUpdateAskedCommissionRateType, 0)]
 
-data ValidatorRedeemerUpdateSellRestrictionsType
-    = ValidatorRedeemerUpdateSellRestrictionsType
-          { rusrAllowSellFT  :: Integer
-          , rusrAllowSellADA :: Integer
-          }
+data ValidatorRedeemerUpdateSellRestrictionsType = ValidatorRedeemerUpdateSellRestrictionsType
+    { rusrAllowSellFT :: Integer
+    , rusrAllowSellADA :: Integer
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerUpdateSellRestrictionsType where
@@ -282,11 +303,10 @@ instance Eq ValidatorRedeemerUpdateMinADAType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateMinADAType [('ValidatorRedeemerUpdateMinADAType, 0)]
 
-data ValidatorRedeemerDepositType
-    = ValidatorRedeemerDepositType
-          { rdNewDeposit_FT  :: Integer
-          , rdNewDeposit_ADA :: Integer
-          }
+data ValidatorRedeemerDepositType = ValidatorRedeemerDepositType
+    { rdNewDeposit_FT :: Integer
+    , rdNewDeposit_ADA :: Integer
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerDepositType where
@@ -297,11 +317,10 @@ instance Eq ValidatorRedeemerDepositType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerDepositType [('ValidatorRedeemerDepositType, 0)]
 
-data ValidatorRedeemerWithdrawType
-    = ValidatorRedeemerWithdrawType
-          { rwNewWithdraw_FT  :: Integer
-          , rwNewWithdraw_ADA :: Integer
-          }
+data ValidatorRedeemerWithdrawType = ValidatorRedeemerWithdrawType
+    { rwNewWithdraw_FT :: Integer
+    , rwNewWithdraw_ADA :: Integer
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerWithdrawType where
@@ -312,14 +331,13 @@ instance Eq ValidatorRedeemerWithdrawType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerWithdrawType [('ValidatorRedeemerWithdrawType, 0)]
 
-data ValidatorRedeemerSwapFTxADAType
-    = ValidatorRedeemerSwapFTxADAType
-          { rsfxaAmount_FT        :: Integer
-          , rsfxaAmount_ADA       :: Integer
-          , rsfxaCommission_ADA   :: Integer
-          , rsfxaOracle_Data      :: T.Oracle_Data
-          , rsfxaOracle_Signature :: Ledger.Signature
-          }
+data ValidatorRedeemerSwapFTxADAType = ValidatorRedeemerSwapFTxADAType
+    { rsfxaAmount_FT :: Integer
+    , rsfxaAmount_ADA :: Integer
+    , rsfxaCommission_ADA :: Integer
+    , rsfxaOracle_Data :: T.Oracle_Data
+    , rsfxaOracle_Signature :: Ledger.Signature
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerSwapFTxADAType where
@@ -333,14 +351,13 @@ instance Eq ValidatorRedeemerSwapFTxADAType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerSwapFTxADAType [('ValidatorRedeemerSwapFTxADAType, 0)]
 
-data ValidatorRedeemerSwapADAxFTType
-    = ValidatorRedeemerSwapADAxFTType
-          { rsaxfAmount_ADA       :: Integer
-          , rsaxfAmount_FT        :: Integer
-          , rsaxfCommission_FT    :: Integer
-          , rsaxfOracle_Data      :: T.Oracle_Data
-          , rsaxfOracle_Signature :: Ledger.Signature
-          }
+data ValidatorRedeemerSwapADAxFTType = ValidatorRedeemerSwapADAxFTType
+    { rsaxfAmount_ADA :: Integer
+    , rsaxfAmount_FT :: Integer
+    , rsaxfCommission_FT :: Integer
+    , rsaxfOracle_Data :: T.Oracle_Data
+    , rsaxfOracle_Signature :: Ledger.Signature
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerSwapADAxFTType where
@@ -389,17 +406,17 @@ data ValidatorRedeemer
 
 instance Eq ValidatorRedeemer where
     {-# INLINEABLE (==) #-}
-    ValidatorRedeemerUpdateStatus rmf1 == ValidatorRedeemerUpdateStatus rmf2                             = rmf1 == rmf2
+    ValidatorRedeemerUpdateStatus rmf1 == ValidatorRedeemerUpdateStatus rmf2 = rmf1 == rmf2
     ValidatorRedeemerUpdateAskedCommissionRate rmcp1 == ValidatorRedeemerUpdateAskedCommissionRate rmcp2 = rmcp1 == rmcp2
-    ValidatorRedeemerUpdateSellRestrictions rmcp1 == ValidatorRedeemerUpdateSellRestrictions rmcp2       = rmcp1 == rmcp2
-    ValidatorRedeemerUpdateMinADA rmcp1 == ValidatorRedeemerUpdateMinADA rmcp2                           = rmcp1 == rmcp2
-    ValidatorRedeemerDeposit rmcp1 == ValidatorRedeemerDeposit rmcp2                                     = rmcp1 == rmcp2
-    ValidatorRedeemerWithdraw rmcp1 == ValidatorRedeemerWithdraw rmcp2                                   = rmcp1 == rmcp2
-    ValidatorRedeemerSwapFTxADA rmcp1 == ValidatorRedeemerSwapFTxADA rmcp2                               = rmcp1 == rmcp2
-    ValidatorRedeemerSwapADAxFT rmcp1 == ValidatorRedeemerSwapADAxFT rmcp2                               = rmcp1 == rmcp2
-    ValidatorRedeemerDelete rmcp1 == ValidatorRedeemerDelete rmcp2                                       = rmcp1 == rmcp2
-    ValidatorRedeemerEmergency rmcp1 == ValidatorRedeemerEmergency rmcp2                                 = rmcp1 == rmcp2
-    _ == _                                                                                               = False
+    ValidatorRedeemerUpdateSellRestrictions rmcp1 == ValidatorRedeemerUpdateSellRestrictions rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerUpdateMinADA rmcp1 == ValidatorRedeemerUpdateMinADA rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerDeposit rmcp1 == ValidatorRedeemerDeposit rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerWithdraw rmcp1 == ValidatorRedeemerWithdraw rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerSwapFTxADA rmcp1 == ValidatorRedeemerSwapFTxADA rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerSwapADAxFT rmcp1 == ValidatorRedeemerSwapADAxFT rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerDelete rmcp1 == ValidatorRedeemerDelete rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerEmergency rmcp1 == ValidatorRedeemerEmergency rmcp2 = rmcp1 == rmcp2
+    _ == _ = False
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemer
@@ -418,17 +435,17 @@ PlutusTx.makeIsDataIndexed
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
-getValidatorRedeemerName (Just (ValidatorRedeemerUpdateStatus (ValidatorRedeemerUpdateStatusType _)))                           = Just "UpdateStatus"
+getValidatorRedeemerName (Just (ValidatorRedeemerUpdateStatus (ValidatorRedeemerUpdateStatusType _))) = Just "UpdateStatus"
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateAskedCommissionRate (ValidatorRedeemerUpdateAskedCommissionRateType _))) = Just "UpdateAskedCommissionRate"
-getValidatorRedeemerName (Just (ValidatorRedeemerUpdateSellRestrictions (ValidatorRedeemerUpdateSellRestrictionsType _ _)))     = Just "UpdateSellRestrictions"
-getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType))                               = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerDeposit (ValidatorRedeemerDepositType _ _)))                                   = Just "Deposit"
-getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw (ValidatorRedeemerWithdrawType _ _)))                                 = Just "Withdraw"
-getValidatorRedeemerName (Just (ValidatorRedeemerSwapFTxADA ValidatorRedeemerSwapFTxADAType {}))                                = Just "SwapFTxADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerSwapADAxFT ValidatorRedeemerSwapADAxFTType {}))                                = Just "SwapADAxFT"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType))                                           = Just "Delete"
-getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType))                                     = Just "Emergency"
-getValidatorRedeemerName _                                                                                                      = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerUpdateSellRestrictions (ValidatorRedeemerUpdateSellRestrictionsType _ _))) = Just "UpdateSellRestrictions"
+getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
+getValidatorRedeemerName (Just (ValidatorRedeemerDeposit (ValidatorRedeemerDepositType _ _))) = Just "Deposit"
+getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw (ValidatorRedeemerWithdrawType _ _))) = Just "Withdraw"
+getValidatorRedeemerName (Just (ValidatorRedeemerSwapFTxADA ValidatorRedeemerSwapFTxADAType {})) = Just "SwapFTxADA"
+getValidatorRedeemerName (Just (ValidatorRedeemerSwapADAxFT ValidatorRedeemerSwapADAxFTType {})) = Just "SwapADAxFT"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType)) = Just "Delete"
+getValidatorRedeemerName (Just (ValidatorRedeemerEmergency ValidatorRedeemerEmergencyType)) = Just "Emergency"
+getValidatorRedeemerName _ = Nothing
 
 --------------------------------------------------------------------------------2
 
@@ -450,13 +467,15 @@ mkUpdateStatusRedeemer :: Integer -> LedgerApiV2.Redeemer
 mkUpdateStatusRedeemer newStatus =
     LedgerApiV2.Redeemer $
         LedgerApiV2.toBuiltinData $
-            ValidatorRedeemerUpdateStatus $ ValidatorRedeemerUpdateStatusType newStatus
+            ValidatorRedeemerUpdateStatus $
+                ValidatorRedeemerUpdateStatusType newStatus
 
 mkUpdateAskedCommissionRateRedeemer :: Integer -> LedgerApiV2.Redeemer
 mkUpdateAskedCommissionRateRedeemer newCommissionRate =
     LedgerApiV2.Redeemer $
         LedgerApiV2.toBuiltinData $
-            ValidatorRedeemerUpdateAskedCommissionRate $ ValidatorRedeemerUpdateAskedCommissionRateType newCommissionRate
+            ValidatorRedeemerUpdateAskedCommissionRate $
+                ValidatorRedeemerUpdateAskedCommissionRateType newCommissionRate
 
 mkUpdateSellRestrictionsRedeemer :: Integer -> Integer -> LedgerApiV2.Redeemer
 mkUpdateSellRestrictionsRedeemer newAllowSellFT newAllowSellADA =

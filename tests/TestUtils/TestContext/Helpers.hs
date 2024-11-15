@@ -27,10 +27,10 @@ someTxId = LedgerApiV2.TxId "dd"
 --------------------------------------------------------------------------------
 
 createValidRange :: LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTimeRange
-createValidRange date' = LedgerInterval.interval (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) + 1) (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) -1)
+createValidRange date' = LedgerInterval.interval (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) + 1) (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) -1)
 
 createInValidRange :: LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTimeRange
-createInValidRange date' = LedgerInterval.interval (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) + 1) (date' + (T.validTimeRange * 2))
+createInValidRange date' = LedgerInterval.interval (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) + 1) (date' + (T.validTxTimeRange * 2))
 
 ---------------------------------------------------------------------------------
 

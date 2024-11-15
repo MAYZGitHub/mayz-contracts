@@ -26,7 +26,8 @@
 ## Introduction
 Welcome to the MAYZ Protocol Smart Contracts Repository. This repository contains the core smart contracts that power the MAYZ Protocol, a decentralized finance (DeFi) ecosystem built on the Cardano blockchain. Our contracts are written in Plutus, Cardano's native smart contract language, aiming to democratize finance by providing a permissionless platform for creating and managing investment funds, facilitating liquidity, and empowering users through innovative mechanisms.
 
-For a detailed overview of the protocol's smart contracts, datums, redeemers, and their interactions, please refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.
+> For implementation details and technical deep-dives, please refer to our [Technical Documentation](./docs/TECHNICAL.md).  
+> For a complete overview of the protocol's smart contracts, datums, redeemers, and their interactions, see the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.
 
 ## Current Status
 
@@ -47,6 +48,8 @@ We encourage community members to join our Discord server for the latest updates
 - **Multi-UTXO Fund Holdings**: Optimize concurrency and scalability through innovative fund structure design.
 - **Delegation System**: Allow MAYZ token holders to delegate their tokens to funds and earn commissions.
 
+> For detailed technical implementation of these features, see our [Technical Documentation](./docs/TECHNICAL.md#key-features).
+
 ## Architecture Overview
 The MAYZ Protocol is built on a modular architecture, leveraging Cardano's extended UTXO model. Our system comprises interconnected components:
 - **Fund Factory**: Facilitates decentralized investment fund creation and management.
@@ -55,6 +58,8 @@ The MAYZ Protocol is built on a modular architecture, leveraging Cardano's exten
 - **Re-indexing Mechanism**: Allows dynamic fund composition adjustments.
 - **Multi-UTXO Management**: Optimizes fund operations and user concurrency.
 - **Delegation System**: Manages MAYZ token delegations and commission distributions.
+
+> For in-depth technical details about our architecture and UTXO model implementation, see the [Technical Documentation](./docs/TECHNICAL.md#architecture-overview).
 
 ## Smart Contracts
 Our protocol utilizes advanced smart contracts for secure and efficient operations:
@@ -66,7 +71,8 @@ Our protocol utilizes advanced smart contracts for secure and efficient operatio
 - **Delegation Contract**: Manages MAYZ token delegations to funds.
 - **Script Contract**: Oversees deployed scripts on-chain.
 
-For detailed information on each contract, refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.
+> For detailed information on each contract, refer to the [Smart Contracts](./docs/SMART-CONTRACTS.md) documentation.  
+> For technical implementation details and internal mechanisms, see our [Technical Documentation](./docs/TECHNICAL.md#smart-contracts).
 
 ## Key Concepts
 - **Investment Unit (IU)**: Defines token composition of each fund.
@@ -76,7 +82,8 @@ For detailed information on each contract, refer to the [Smart Contracts](./docs
 - **Commission System**: Paid upfront for the remaining fund lifetime, with partial refunds upon early withdrawal.
 - **Delegation**: MAYZ token holders can delegate tokens to funds to earn a share of commissions.
 
-For in-depth explanations, see our Key Concepts Guide [TODO]
+> For in-depth explanations, see our Key Concepts Guide [TODO].  
+> For technical implementation details of these concepts, refer to our [Technical Documentation](./docs/TECHNICAL.md#key-concepts).
 
 ## Repository Structure
 ```
@@ -118,6 +125,8 @@ To set up the development environment:
 1. Clone this repository
 2. Run `cabal build` to compile the contracts
 
+> For detailed technical setup requirements and development environment configuration, see our [Technical Documentation](./docs/TECHNICAL.md#development-environment).
+
 ## Testing
 
 We employ a comprehensive testing strategy with four main test suites:
@@ -127,30 +136,35 @@ We employ a comprehensive testing strategy with four main test suites:
 3. **Performance Tests**: Evaluate resource usage and optimization.
 4. **Automatic Tests**: Generate and run complex test scenarios automatically.
 
-For detailed information on our testing approach, test cases, and how to run tests, please refer to our [Testing](./docs/TESTING.md) documentation.
+> For detailed information on our testing approach, test cases, and how to run tests, please refer to our [Testing](./docs/TESTING.md) documentation.  
+> For technical details about test implementation and architecture, see our [Technical Documentation](./docs/TECHNICAL.md#testing).
 
 Run all tests with:
 
-```bash
+```
 cabal test
 ```
 
 To run a specific test suite:
-```bash
+```
 cabal test <suite-name>
 ```
 
 Replace <suite-name> with UnitTests, PropertyBasedTests, PerformanceTests, or AutomaticTests.
 
 ## Deployment
-For detailed deployment instructions, refer to the Deployment Guide [TODO].
+> For detailed deployment instructions, refer to the Deployment Guide [TODO].  
+> For technical deployment specifications and requirements, see our [Technical Documentation](./docs/TECHNICAL.md#deployment).
 
 ## Security Considerations
 - **Rounding errors**: Commission calculations use high-precision arithmetic.
 - **Oracle dependency**: Price manipulations are mitigated through multi-source oracles.
 - **Multi-UTXO design**: Enhances concurrency and resists certain types of attacks.
 
-We are committed to ongoing security audits. For more information, see our Security Policy [TODO].
+We are committed to ongoing security audits. 
+
+> For more information, see our Security Policy [TODO].  
+> For technical security implementation details and considerations, refer to our [Technical Documentation](./docs/TECHNICAL.md#security).
 
 ## Token Economics
 The $MAYZ token serves multiple crucial functions:
@@ -159,7 +173,8 @@ The $MAYZ token serves multiple crucial functions:
 - **Delegation**: Delegate $MAYZ to funds to earn a share of commissions.
 - **Incentivization**: Reward active participants and align community interests.
 
-For more information, see the [Token Economics](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics) documentation.
+> For more information, see the [Token Economics](https://mayz.gitbook.io/mayz-whitepaper-v2/introduction/tokenomics) documentation.  
+> For technical implementation details of token mechanics, see our [Technical Documentation](./docs/TECHNICAL.md#token-economics).
 
 ## Oracle Integration
 Our oracle system:
@@ -168,7 +183,8 @@ Our oracle system:
 - Provides real-time updates for fair valuations and swaps
 - Integrates with smart contracts for on-chain price verification
 
-For more information, refer to the Oracle documentation [TODO]
+> For more information, refer to the Oracle documentation [TODO].  
+> For technical implementation details of our oracle system, see our [Technical Documentation](./docs/TECHNICAL.md#oracle-integration).
 
 ## Development Roadmap
 
@@ -177,15 +193,17 @@ For our full development roadmap, visit the [Project Roadmap](https://mayz.gitbo
 ## Community and Support
 
 Join our vibrant community and stay updated:
-- [Website](https://mayz.io)
-- [Twitter](https://twitter.com/MAYZprotocol)
-- [Discord](https://discord.gg/mayzprotocol)
-- [Medium](https://medium.com/@MAYZprotocol)
+- [MAYZ Website](https://mayz.io/)
+- [MAYZ X](https://twitter.com/MAYZProtocol)
+- [MAYZ Medium](https://medium.com/@MAYZprotocol)
+- [MAYZ Discord](https://discord.com/invite/6xkbynuNrj)
+- [MAYZ GitHub](https://github.com/MAYZGitHub/)
 
-For technical support, open a ticket in our GitHub repository or reach out on [Discord](https://discord.gg/mayzprotocol).
+> For technical support, open a ticket in our GitHub repository or reach out on [Discord](https://discord.com/invite/6xkbynuNrj).
 
 ## Additional Documentation
 - **Whitepaper Documentation**: Detailed information about MAYZ Protocol. [Whitepaper v2](https://mayz.gitbook.io/mayz-whitepaper-v2)
+- **Technical Documentation**: In-depth technical details and implementation specifics. [Link](./docs/TECHNICAL.md).
 - **Smart Contracts Documentation**: Comprehensive guide to all contracts, datums, and redeemers. [Link](./docs/SMART-CONTRACTS.md).
 - **Re-indexing Basics**: Overview of the fund re-indexing process. [Link](./docs/REINDEXING-BASICS.md).
 - **Re-indexing Deep Dive**: Detailed explanation of re-indexing methodology. [Link](./docs/REINDEXING-DEEP.md).
@@ -197,9 +215,10 @@ For technical support, open a ticket in our GitHub repository or reach out on [D
 - **Oracle Documentation**: Information on our oracle implementation. [TODO].
 - **Contributing Guidelines**: See our Contributing Guidelines. [TODO].
 
-For more documentation, refer to the `docs/` directory.  
-
-If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.gg/mayzprotocol).
+> For more documentation, refer to the `docs/` directory. For technical implementation details of any aspect of the protocol, see our [Technical Documentation](./docs/TECHNICAL.md).  
+> If you have any questions, feel free to open an issue or reach out on [Discord](https://discord.com/invite/6xkbynuNrj.
 
 ## Contributing
-See our Contributing Guidelines [TODO] for more information.
+
+See our Contributing Guidelines [TODO] for more information.  
+> For technical contribution requirements and guidelines, refer to our [Technical Documentation](./docs/TECHNICAL.md#contributing).

@@ -1,14 +1,14 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE InstanceSigs          #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 --------------------------------------------------------------------------------3
 {- HLINT ignore "Use camelCase"          -}
@@ -21,60 +21,66 @@ module Protocol.Delegation.Types where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified Data.Aeson           as DataAeson
-import qualified Data.OpenApi.Schema  as DataOpenApiSchema
-import qualified GHC.Generics         as GHCGenerics
-import qualified Ledger
+import qualified Data.Aeson as DataAeson
+import qualified Data.OpenApi.Schema as DataOpenApiSchema
+import qualified GHC.Generics as GHCGenerics
+import qualified Ledger.Value as LedgerValue
 import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified PlutusTx
-import           PlutusTx.Prelude
-import qualified Prelude              as P
+import PlutusTx.Prelude
 import qualified Schema
+import qualified Prelude as P
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Types        as T
-import qualified Protocol.Types       as T
+import qualified Generic.Types as T
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Types as FundT
+import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Protocol.Types as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the delegationVersion
+
+delegationVersion :: Integer
+delegationVersion = 1
+
+ownVersion :: Integer
+ownVersion = T.mkVersionWithDependency [ProtocolT.protocolVersion, FundT.fundVersion] delegationVersion
+
 --------------------------------------------------------------------------------2
 -- Params
 --------------------------------------------------------------------------------2
 
-data PolicyParams
-    = PolicyParams
-          { ppProtocolPolicyID_CS       :: T.CS
-          , ppDelegation_Validator_Hash :: LedgerApiV2.ValidatorHash
-          , ppTokenMAYZ_AC              :: Ledger.AssetClass
-          }
+data PolicyParams = PolicyParams
+    { ppProtocolPolicyID_CS :: T.CS
+    , ppDelegation_Validator_Hash :: LedgerApiV2.ValidatorHash
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
 instance Eq PolicyParams where
     {-# INLINEABLE (==) #-}
-    p1 == p2 = ppProtocolPolicyID_CS p1 == ppProtocolPolicyID_CS p2 &&
-        ppDelegation_Validator_Hash p1 == ppDelegation_Validator_Hash p2 &&
-        ppTokenMAYZ_AC p1 == ppTokenMAYZ_AC p2
+    p1 == p2 =
+        ppProtocolPolicyID_CS p1 == ppProtocolPolicyID_CS p2
+            && ppDelegation_Validator_Hash p1 == ppDelegation_Validator_Hash p2
 
 PlutusTx.makeLift ''PolicyParams
 PlutusTx.makeIsDataIndexed ''PolicyParams [('PolicyParams, 0)]
 
-data ValidatorParams
-    = ValidatorParams
-          { vpProtocolPolicyID_CS :: T.CS
-          , vpTokenMAYZ_AC        :: Ledger.AssetClass
-          }
+newtype ValidatorParams = ValidatorParams
+    { vpProtocolPolicyID_CS :: T.CS
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
 
 instance Eq ValidatorParams where
     {-# INLINEABLE (==) #-}
     p1 == p2 =
-        vpProtocolPolicyID_CS p1 == vpProtocolPolicyID_CS p2 &&
-        vpTokenMAYZ_AC p1 == vpTokenMAYZ_AC p2
+        vpProtocolPolicyID_CS p1 == vpProtocolPolicyID_CS p2
 
 PlutusTx.makeLift ''ValidatorParams
 PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
@@ -83,25 +89,28 @@ PlutusTx.makeIsDataIndexed ''ValidatorParams [('ValidatorParams, 0)]
 -- Datums
 --------------------------------------------------------------------------------2
 
-data Delegation_DatumType
-    = Delegation_DatumType
-          { ddDelegationPolicyID_CS :: T.CS
-          , ddFundPolicy_CS         :: T.CS
-          , ddDelegatorPaymentPKH   :: T.WalletPaymentPKH
-          , ddDelegatorStakePKH     :: Maybe T.WalletPaymentPKH
-          , ddDelegated_Mayz        :: Integer
-          , ddMinADA                :: Integer
-          }
+data Delegation_DatumType = Delegation_DatumType
+    { ddVersion :: Integer
+    , ddDelegationPolicyID_CS :: T.CS
+    , ddFundPolicy_CS :: T.CS
+    , ddDelegatorPaymentPKH :: T.WalletPaymentPKH
+    , ddDelegatorStakePKH :: Maybe T.WalletPaymentPKH
+    , ddTokenMAYZ_AC :: LedgerValue.AssetClass
+    , ddDelegated_MAYZ :: Integer
+    , ddMinADA :: Integer
+    }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Eq, P.Ord, P.Show)
 
 instance Eq Delegation_DatumType where
     {-# INLINEABLE (==) #-}
     sd1 == sd2 =
-            ddDelegationPolicyID_CS sd1 == ddDelegationPolicyID_CS sd2
+        ddVersion sd1 == ddVersion sd2
+            && ddDelegationPolicyID_CS sd1 == ddDelegationPolicyID_CS sd2
             && ddFundPolicy_CS sd1 == ddFundPolicy_CS sd2
             && ddDelegatorPaymentPKH sd1 == ddDelegatorPaymentPKH sd2
             && ddDelegatorStakePKH sd1 == ddDelegatorStakePKH sd2
-            && ddDelegated_Mayz sd1 == ddDelegated_Mayz sd2
+            && ddTokenMAYZ_AC sd1 == ddTokenMAYZ_AC sd2
+            && ddDelegated_MAYZ sd1 == ddDelegated_MAYZ sd2
             && ddMinADA sd1 == ddMinADA sd2
 
 PlutusTx.makeIsDataIndexed ''Delegation_DatumType [('Delegation_DatumType, 0)]
@@ -123,36 +132,36 @@ getDelegation_DatumType (Delegation_Datum sdType) = sdType
 instance T.ShowDatum ValidatorDatum where
     showCborAsDatumType cbor = case LedgerApiV2.fromBuiltinData @ValidatorDatum cbor of
         Nothing -> Nothing
-        Just d  -> Just $ P.show d
+        Just d -> Just $ P.show d
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkDelegation_Datum #-}
-mkDelegation_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer -> Integer -> ValidatorDatum
+mkDelegation_Datum :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> LedgerValue.AssetClass -> Integer -> Integer -> ValidatorDatum
 mkDelegation_Datum
     delegationPolicyID_CS
     fundPolicy_CS
     delegatorPaymentPKH
     delegatorStakePKH
-    delegated_Mayz
-    minADA
-    =
+    tokenMAYZ_AC
+    delegated_MAYZ
+    minADA =
         Delegation_Datum $
             mkDelegation_DatumType
                 delegationPolicyID_CS
                 fundPolicy_CS
                 delegatorPaymentPKH
                 delegatorStakePKH
-                delegated_Mayz
+                tokenMAYZ_AC
+                delegated_MAYZ
                 minADA
 
 {-# INLINEABLE mkDelegation_DatumType #-}
-mkDelegation_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> Integer ->  Integer  -> Delegation_DatumType
-mkDelegation_DatumType = Delegation_DatumType
+mkDelegation_DatumType :: T.CS -> T.CS -> T.WalletPaymentPKH -> Maybe T.WalletPaymentPKH -> LedgerValue.AssetClass -> Integer -> Integer -> Delegation_DatumType
+mkDelegation_DatumType = Delegation_DatumType ownVersion
 
 mkDatum :: Delegation_DatumType -> LedgerApiV2.Datum
 mkDatum = LedgerApiV2.Datum . LedgerApiV2.toBuiltinData . Delegation_Datum
-
 
 --------------------------------------------------------------------------------2
 -- PolicyRedeemer
@@ -164,7 +173,9 @@ instance Eq PolicyRedeemerMintIDType where
     {-# INLINEABLE (==) #-}
     r1 == r2 = r1 == r2
 
-PlutusTx.unstableMakeIsData ''PolicyRedeemerMintIDType
+PlutusTx.makeIsDataIndexed
+    ''PolicyRedeemerMintIDType
+    [('PolicyRedeemerMintIDType, 0)]
 
 data PolicyRedeemerBurnIDType = PolicyRedeemerBurnIDType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
@@ -172,7 +183,9 @@ instance Eq PolicyRedeemerBurnIDType where
     {-# INLINEABLE (==) #-}
     r1 == r2 = r1 == r2
 
-PlutusTx.unstableMakeIsData ''PolicyRedeemerBurnIDType
+PlutusTx.makeIsDataIndexed
+    ''PolicyRedeemerBurnIDType
+    [('PolicyRedeemerBurnIDType, 0)]
 
 data PolicyRedeemer
     = PolicyRedeemerMintID PolicyRedeemerMintIDType
@@ -183,21 +196,20 @@ instance Eq PolicyRedeemer where
     {-# INLINEABLE (==) #-}
     PolicyRedeemerMintID rmtx1 == PolicyRedeemerMintID rmtx2 = rmtx1 == rmtx2
     PolicyRedeemerBurnID rmtx1 == PolicyRedeemerBurnID rmtx2 = rmtx1 == rmtx2
-    _ == _                                                   = False
+    _ == _ = False
 
 PlutusTx.makeIsDataIndexed
     ''PolicyRedeemer
-    [ ('PolicyRedeemerMintID, 1),
-      ('PolicyRedeemerBurnID, 2)
+    [ ('PolicyRedeemerMintID, 1)
+    , ('PolicyRedeemerBurnID, 2)
     ]
-
 
 --------------------------------------------------------------------------------2
 
 getPolicyRedeemerName :: Maybe PolicyRedeemer -> Maybe P.String
 getPolicyRedeemerName (Just (PolicyRedeemerMintID PolicyRedeemerMintIDType)) = Just "MintID"
 getPolicyRedeemerName (Just (PolicyRedeemerBurnID PolicyRedeemerBurnIDType)) = Just "BurnID"
-getPolicyRedeemerName _                                                      = Nothing
+getPolicyRedeemerName _ = Nothing
 
 --------------------------------------------------------------------------------2
 -- ValidatorRedeemer
@@ -211,27 +223,23 @@ instance Eq ValidatorRedeemerUpdateMinADAType where
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerUpdateMinADAType [('ValidatorRedeemerUpdateMinADAType, 0)]
 
-
-newtype ValidatorRedeemerDepositType
-    = ValidatorRedeemerDepositType { vrdDelegated_Mayz_Change :: Integer }
+newtype ValidatorRedeemerDepositType = ValidatorRedeemerDepositType {vrdDelegated_MAYZ_Change :: Integer}
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerDepositType where
     {-# INLINEABLE (==) #-}
-    r1 == r2 = vrdDelegated_Mayz_Change r1 == vrdDelegated_Mayz_Change r2
+    r1 == r2 = vrdDelegated_MAYZ_Change r1 == vrdDelegated_MAYZ_Change r2
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerDepositType [('ValidatorRedeemerDepositType, 0)]
 
-newtype ValidatorRedeemerWithdrawType
-    = ValidatorRedeemerWithdrawType { vrdwDelegated_Mayz_Change :: Integer }
+newtype ValidatorRedeemerWithdrawType = ValidatorRedeemerWithdrawType {vrdwDelegated_MAYZ_Change :: Integer}
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
 instance Eq ValidatorRedeemerWithdrawType where
     {-# INLINEABLE (==) #-}
-    r1 == r2 = vrdwDelegated_Mayz_Change r1 == vrdwDelegated_Mayz_Change r2
+    r1 == r2 = vrdwDelegated_MAYZ_Change r1 == vrdwDelegated_MAYZ_Change r2
 
 PlutusTx.makeIsDataIndexed ''ValidatorRedeemerWithdrawType [('ValidatorRedeemerWithdrawType, 0)]
-
 
 data ValidatorRedeemerDeleteType = ValidatorRedeemerDeleteType deriving (DataAeson.FromJSON, DataAeson.ToJSON, GHCGenerics.Generic, P.Show)
 
@@ -252,32 +260,29 @@ data ValidatorRedeemer
 instance Eq ValidatorRedeemer where
     {-# INLINEABLE (==) #-}
     ValidatorRedeemerUpdateMinADA rmcp1 == ValidatorRedeemerUpdateMinADA rmcp2 = rmcp1 == rmcp2
-    ValidatorRedeemerDeposit rmcp1 == ValidatorRedeemerDeposit rmcp2           = rmcp1 == rmcp2
-    ValidatorRedeemerWithdraw rmcp1 == ValidatorRedeemerWithdraw rmcp2         = rmcp1 == rmcp2
-    ValidatorRedeemerDelete rmcp1 == ValidatorRedeemerDelete rmcp2             = rmcp1 == rmcp2
-    _ == _                                                                     = False
+    ValidatorRedeemerDeposit rmcp1 == ValidatorRedeemerDeposit rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerWithdraw rmcp1 == ValidatorRedeemerWithdraw rmcp2 = rmcp1 == rmcp2
+    ValidatorRedeemerDelete rmcp1 == ValidatorRedeemerDelete rmcp2 = rmcp1 == rmcp2
+    _ == _ = False
 
 PlutusTx.makeIsDataIndexed
     ''ValidatorRedeemer
-    [
-      ('ValidatorRedeemerUpdateMinADA, 0),
-      ('ValidatorRedeemerDeposit, 1),
-      ('ValidatorRedeemerWithdraw, 2),
-      ('ValidatorRedeemerDelete, 3)
-
+    [ ('ValidatorRedeemerUpdateMinADA, 0)
+    , ('ValidatorRedeemerDeposit, 1)
+    , ('ValidatorRedeemerWithdraw, 2)
+    , ('ValidatorRedeemerDelete, 3)
     ]
 
 --------------------------------------------------------------------------------2
 
 getValidatorRedeemerName :: Maybe ValidatorRedeemer -> Maybe P.String
 getValidatorRedeemerName (Just (ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType)) = Just "UpdateMinADA"
-getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {}))        = Just "Deposit"
-getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {}))      = Just "Withdraw"
-getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType))             = Just "Delete"
-getValidatorRedeemerName _                                                                        = Nothing
+getValidatorRedeemerName (Just (ValidatorRedeemerDeposit ValidatorRedeemerDepositType {})) = Just "Deposit"
+getValidatorRedeemerName (Just (ValidatorRedeemerWithdraw ValidatorRedeemerWithdrawType {})) = Just "Withdraw"
+getValidatorRedeemerName (Just (ValidatorRedeemerDelete ValidatorRedeemerDeleteType)) = Just "Delete"
+getValidatorRedeemerName _ = Nothing
 
 --------------------------------------------------------------------------------2
-
 
 mkMintIDRedeemer :: LedgerApiV2.Redeemer
 mkMintIDRedeemer =
@@ -300,19 +305,18 @@ mkUpdateMinADARedeemer =
             ValidatorRedeemerUpdateMinADA ValidatorRedeemerUpdateMinADAType
 
 mkDepositRedeemer :: Integer -> LedgerApiV2.Redeemer
-mkDepositRedeemer delegated_Mayz_Change =
+mkDepositRedeemer delegated_MAYZ_Change =
     LedgerApiV2.Redeemer $
         LedgerApiV2.toBuiltinData $
             ValidatorRedeemerDeposit $
-                ValidatorRedeemerDepositType delegated_Mayz_Change
+                ValidatorRedeemerDepositType delegated_MAYZ_Change
 
-
-mkWithdrawRedeemer :: Integer ->  LedgerApiV2.Redeemer
-mkWithdrawRedeemer  delegated_Mayz_Change =
+mkWithdrawRedeemer :: Integer -> LedgerApiV2.Redeemer
+mkWithdrawRedeemer delegated_MAYZ_Change =
     LedgerApiV2.Redeemer $
         LedgerApiV2.toBuiltinData $
             ValidatorRedeemerWithdraw $
-                ValidatorRedeemerWithdrawType delegated_Mayz_Change
+                ValidatorRedeemerWithdrawType delegated_MAYZ_Change
 
 mkDeleteRedeemer :: LedgerApiV2.Redeemer
 mkDeleteRedeemer =
@@ -321,4 +325,3 @@ mkDeleteRedeemer =
             ValidatorRedeemerDelete ValidatorRedeemerDeleteType
 
 --------------------------------------------------------------------------------2
-

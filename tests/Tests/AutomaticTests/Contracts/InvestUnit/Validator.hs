@@ -24,7 +24,7 @@ import qualified Test.Tasty                             as Tasty
 -- Project imports
 
 import qualified Protocol.Constants                     as T
-import qualified Protocol.InvestUnit.Types              as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types              as InvestUnitT
 import           TestUtils.Automatic.ParamsGenerators
 import           TestUtils.Automatic.TestCases
 import           TestUtils.Automatic.TestConfigTree

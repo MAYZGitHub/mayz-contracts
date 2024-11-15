@@ -4,7 +4,7 @@ version:       1.0.5
 author:        Manuel Padilla
 maintainer:    manuelpad@gmail.com
 build-type:    Simple
-copyright:     © 2022 Manuel Padilla
+copyright:     © 2024 Manuel Padilla
 license:       Apache-2.0
 license-files: LICENSE
 
@@ -46,8 +46,6 @@ common plutus-tx-config
     -fno-strictness -fno-unbox-strict-fields
     -fno-unbox-small-strict-fields -fno-full-laziness
     -fno-expose-all-unfoldings
-
-  -- -fexpose-all-unfoldings
   ---------------------------------
   -- DEFAULT GHC RECOMENDATION:
   -- https://plutus.cardano.intersectmbo.org/docs/using-plutus-tx/compiling-plutus-tx
@@ -222,6 +220,7 @@ library
     Protocol.Delegation.PABSimulator
     Protocol.Delegation.Types
     Protocol.Deploy
+    Protocol.DeployPAB
     Protocol.Fund.Helpers
     Protocol.Fund.Holding.OnChain
     Protocol.Fund.Holding.Types
@@ -231,8 +230,8 @@ library
     Protocol.Fund.PABSimulatorCommissions
     Protocol.Fund.PABSimulatorUser
     Protocol.Fund.Types
-    Protocol.InvestUnit.OnChain
-    Protocol.InvestUnit.Types
+    Protocol.Fund.InvestUnit.OnChain
+    Protocol.Fund.InvestUnit.Types
     Protocol.OffChainHelpers
     Protocol.OnChainHelpers
     Protocol.Others.OffChain

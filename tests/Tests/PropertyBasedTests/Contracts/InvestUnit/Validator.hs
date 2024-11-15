@@ -28,7 +28,7 @@ import           PlutusTx.Prelude                          ()
 -- Project imports
 import qualified Generic.OnChainHelpers                    as OnChainHelpers
 import qualified Protocol.Fund.Holding.Types               as FundHoldingT
-import qualified Protocol.InvestUnit.Types                 as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types                 as InvestUnitT
 import qualified Protocol.OnChainHelpers                   as OnChainHelpers (oracleReIdxDataToBBS)
 import qualified Protocol.Types                            as T
 import qualified Test.QuickCheck                           as QC

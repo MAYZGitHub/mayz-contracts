@@ -126,9 +126,9 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Valid_Deposit =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -136,9 +136,9 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Deposit_VerySmall =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParamNoDecimals "investUnitTokens" "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 1 True "investUnitTokens"
@@ -146,41 +146,41 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Deposit_Max =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdrawInFunds T.maxDepositAndWithdrawInFunds True "investUnitTokens"
+                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux T.maxDepositAndWithdraw_aux True "investUnitTokens"
                 ]
         txParamsGenerators_Deposit_ZeroCommission =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" 0 0
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdrawInFunds T.maxDepositAndWithdrawInFunds True "investUnitTokens"
+                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux T.maxDepositAndWithdraw_aux True "investUnitTokens"
                 ]
 
         txParamsGenerators_Deposit_MaxCommission =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" 10_000_000 10_000_000
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdrawInFunds T.maxDepositAndWithdrawInFunds True "investUnitTokens"
+                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux T.maxDepositAndWithdraw_aux True "investUnitTokens"
                 ]
 
         txParamsGenerators_Invalid_InvestUnit =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 40 45
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -188,9 +188,9 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Invalid_Amount_LessZero =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 0 (-100_000_000) True "investUnitTokens"
@@ -198,19 +198,19 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Invalid_Amount_MoreMax =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdrawInFunds (T.maxDepositAndWithdrawInFunds + 100_000_000) True "investUnitTokens"
+                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux (T.maxDepositAndWithdraw_aux + 100_000_000) True "investUnitTokens"
                 ]
         txParamsGenerators_Invalid_Amount_Granularity =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" True "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 False "investUnitTokens"
@@ -218,9 +218,9 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Valid_With_MinLifeTime =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" minLifeTime T.validTimeRange "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" minLifeTime T.validTxTimeRange "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -229,7 +229,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Invalid_DepositDate_TooEarly =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
                 , dependentBeforePosixTimeRangeParam "depositDate" maxError "beginDate"
                 , intRangeParam "investUnitTokensQty" 1 20
@@ -239,7 +239,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Invalid_DepositDate_TooLate =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
                 , dependentAfterPosixTimeRangeParam "depositDate" maxError "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
@@ -342,10 +342,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Valid_Withdraw =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -355,10 +355,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Withdraw_VerySmall =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParamNoDecimals "investUnitTokens" "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -367,22 +367,22 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Withdraw_Max =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdrawInFunds T.maxDepositAndWithdrawInFunds True "investUnitTokens"
+                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux T.maxDepositAndWithdraw_aux True "investUnitTokens"
                 , dependentWithdrawParam "withdrawAmount" 0 0 True False "investUnitTokens" "depositAmount" "beginDate" "deadlineDate" "depositDate" "fundCommission_PerYear_InBPx1e3"
                 ]
         txParamsGenerators_Withdraw_ZeroCommission =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" 0 0
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -392,10 +392,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Withdraw_MaxCommission =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" 10_000_000 10_000_000
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -405,10 +405,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Invalid_InvestUnit =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 35 45
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -418,10 +418,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Invalid_Amount_LessZero =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -431,23 +431,23 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Invalid_Amount_MoreMax =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
-                , dependentWithdrawParam "withdrawAmount" T.maxDepositAndWithdrawInFunds (T.maxDepositAndWithdrawInFunds + 100_000_000) True False "investUnitTokens" "depositAmount" "beginDate" "deadlineDate" "depositDate" "fundCommission_PerYear_InBPx1e3"
+                , dependentWithdrawParam "withdrawAmount" T.maxDepositAndWithdraw_aux (T.maxDepositAndWithdraw_aux + 100_000_000) True False "investUnitTokens" "depositAmount" "beginDate" "deadlineDate" "depositDate" "fundCommission_PerYear_InBPx1e3"
                 ]
 
         txParamsGenerators_Invalid_Amount_Granularity =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" True "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -457,10 +457,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Valid_With_MinLifeTime =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" minLifeTime T.validTimeRange "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" minLifeTime T.validTxTimeRange "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
@@ -470,9 +470,9 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Valid_WithdrawDate_TooLate =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , dependentAfterPosixTimeRangeParam "withdrawDate" maxError "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
@@ -504,10 +504,10 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         txParamsGenerators_Invalid_WithdrawAmount_MoreThanDeposit =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTimeRange maxLifeTime "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange maxLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
-                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTimeRange "beginDate" "deadlineDate"
-                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTimeRange "depositDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
+                , dependentBetweenPlusPosixTimeRangeParam "withdrawDate" T.validTxTimeRange "depositDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"

@@ -45,9 +45,13 @@ import qualified Protocol.Types as T
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the swapOfferVersion on Protocol.SwapOffer.Types
+
+--------------------------------------------------------------------------------2
+
 {-# INLINEABLE mkPolicyID #-}
 mkPolicyID :: T.PolicyParams -> BuiltinData -> BuiltinData -> ()
-mkPolicyID (T.PolicyParams !protocolPolicyID_CS !swapOffer_Validator_Hash !tokenMAYZ_AC) !redRaw !ctxRaw =
+mkPolicyID (T.PolicyParams !protocolPolicyID_CS !swapOffer_Validator_Hash) !redRaw !ctxRaw =
     let
         ------------------
         !useThisToMakeScriptUnique = protocolPolicyID_CS /= LedgerApiV2.adaSymbol
@@ -84,16 +88,16 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !swapOffer_Validator_Hash !token
                         ------------------
                         !inputs_Own_TxOuts =
                             [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info, let
-                                                                                                                        address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
-                                                                                                                       in
-                                                                                                                        OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
+                                                                                                                            address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+                                                                                                                        in
+                                                                                                                            OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
                             ]
                         ------------------
                         !outputs_Own_TxOuts =
                             [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, let
-                                                                                address = LedgerApiV2.txOutAddress txOut
-                                                                               in
-                                                                                OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
+                                                                                    address = LedgerApiV2.txOutAddress txOut
+                                                                                in
+                                                                                    OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
                             ]
                         ------------------
                         !output_Own_TxOut_And_SwapOffer_Datum = case OnChainHelpers.getTxOuts_And_DatumTypes_From_TxOuts_By_AC
@@ -141,7 +145,9 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !swapOffer_Validator_Hash !token
                         !fundFT_TN_AC = LedgerValue.AssetClass (T.sodFundPolicy_CS swapOffer_Datum_Out, fundFT_TN)
                         ------------------
                         !commissionSwapOffer_InBPx1e3 = ProtocolT.pdCommissionSwapOffer_InBPx1e3 protocolDatum_In
-                        ---------------------
+                        ------------------
+                        !tokenMAYZ_AC = ProtocolT.pdTokenMAYZ_AC protocolDatum_In
+                        ------------------
                         !requiredMAYZ = ProtocolT.pdRequiredMAYZForSwapOffer protocolDatum_In
                         ---------------------
                         !valueOf_RequiredMAYZ = LedgerValue.assetClassValue tokenMAYZ_AC requiredMAYZ
@@ -168,6 +174,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !swapOffer_Validator_Hash !token
                                         (T.sodOrder_AllowSellFT swapOffer_Datum_Out)
                                         (T.sodOrder_AllowSellADA swapOffer_Datum_Out)
                                         (T.sodOrder_Status swapOffer_Datum_Out)
+                                        tokenMAYZ_AC
                                         requiredMAYZ
                                         (T.sodMinADA swapOffer_Datum_Out)
                             in
@@ -251,13 +258,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         else error ()
             False ->
                 if traceIfFalse "" useThisToMakeScriptUnique
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "Expected exactly one SwapOffer input" (length inputs_Own_TxOuts == 1)
                     && validateRedeemerDeleteAndOthers
                     then ()
                     else error ()
                 where
-                    ---------------------
+                    ------------------
                     !useThisToMakeScriptUnique = protocolPolicyID_CS /= LedgerApiV2.adaSymbol
                     ------------------
                     !datum = LedgerApiV2.unsafeFromBuiltinData @T.ValidatorDatum datumRaw
@@ -267,9 +274,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                     ------------------
                     !inputs_Own_TxOuts =
                         [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info, let
-                                                                                                                    address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
-                                                                                                                   in
-                                                                                                                    OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
+                                                                                                                        address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+                                                                                                                    in
+                                                                                                                        OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
                         ]
                     ------------------
                     !swapOffer_Datum_In = T.getSwapOffer_DatumType datum
@@ -346,9 +353,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             ------------------
                             !outputs_Own_TxOuts =
                                 [ txOut | !txOut <- LedgerApiV2.txInfoOutputs info, let
-                                                                                    address = LedgerApiV2.txOutAddress txOut
-                                                                                   in
-                                                                                    OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
+                                                                                        address = LedgerApiV2.txOutAddress txOut
+                                                                                    in
+                                                                                        OnChainHelpers.isScriptAddress address && address == swapOffer_Validator_Address
                                 ]
                             ------------------
                             !inputRef_TxOut_And_FundDatum =
@@ -586,7 +593,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         traceIfFalse "not isOrderOpen" isOrderOpen
                                             && traceIfFalse "isOrderRestrictedForSellingADA" (not isOrderRestrictedForSellingADA)
                                             && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rsfxaOracle_Signature)
-                                            && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsfxaOracle_Data))
+                                            && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsfxaOracle_Data) (ProtocolT.pdOracleData_Valid_Time protocolDatum_In))
                                             && traceIfFalse "not isCorrect_Conversion" (isCorrect_Conversion rsfxaOracle_Data rsfxaAmount_FT rsfxaAmount_ADA)
                                             && traceIfFalse "not isCorrect_Commission" (isCorrect_Commission rsfxaAmount_ADA rsfxaCommission_ADA)
                                             && traceIfFalse "not isAmount_ADA_Available" (isAmount_ADA_Available (rsfxaAmount_ADA - rsfxaCommission_ADA))
@@ -633,7 +640,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         traceIfFalse "not isOrderOpen" isOrderOpen
                                             && traceIfFalse "isOrderRestrictedForSellingFT" (not isOrderRestrictedForSellingFT)
                                             && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rsaxfOracle_Signature)
-                                            && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsaxfOracle_Data))
+                                            && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsaxfOracle_Data) (ProtocolT.pdOracleData_Valid_Time protocolDatum_In))
                                             && traceIfFalse "not isCorrect_Conversion" (isCorrect_Conversion rsaxfOracle_Data rsaxfAmount_FT rsaxfAmount_ADA)
                                             && traceIfFalse "not isCorrect_Commission" (isCorrect_Commission rsaxfAmount_FT rsaxfCommission_FT)
                                             && traceIfFalse "not isAmount_FT_Available" (isAmount_FT_Available (rsaxfAmount_FT - rsaxfCommission_FT))
@@ -665,7 +672,8 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     ----------------
                                     validateSwapADAxFT _ = False
                                     ----------------
-                                    !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey getLazyProtocolDatum_In
+                                    !protocolDatum_In = getLazyProtocolDatum_In
+                                    !oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey protocolDatum_In
                                     ------------------
                                     isCorrect_Conversion :: T.Oracle_Data -> Integer -> Integer -> Bool
                                     isCorrect_Conversion oracle_Data !amount_FT !amount_ADA =
@@ -797,17 +805,16 @@ policyID params =
                     `PlutusTx.applyCode` PlutusTx.liftCode params
 
 {-# INLINEABLE mkWrappedPolicyID #-}
-mkWrappedPolicyID :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ()
-mkWrappedPolicyID protocolPolicyID_CS swapOffer_Validator_Hash tokenMAYZ_CS tokenMAYZ_TN = mkPolicyID params
+mkWrappedPolicyID :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ()
+mkWrappedPolicyID protocolPolicyID_CS swapOffer_Validator_Hash = mkPolicyID params
     where
         params =
             T.PolicyParams
                 { ppProtocolPolicyID_CS = PlutusTx.unsafeFromBuiltinData protocolPolicyID_CS
                 , ppSwapOffer_Validator_Hash = PlutusTx.unsafeFromBuiltinData swapOffer_Validator_Hash
-                , ppTokenMAYZ_AC = LedgerValue.AssetClass (PlutusTx.unsafeFromBuiltinData tokenMAYZ_CS, PlutusTx.unsafeFromBuiltinData tokenMAYZ_TN)
                 }
 
-policyIDCode :: PlutusTx.CompiledCode (BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ())
+policyIDCode :: PlutusTx.CompiledCode (BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ())
 policyIDCode = $$(PlutusTx.compile [||mkWrappedPolicyID||])
 
 ----------------------------------------------------------------------------

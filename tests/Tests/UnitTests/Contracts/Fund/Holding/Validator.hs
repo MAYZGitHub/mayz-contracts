@@ -34,7 +34,7 @@ import qualified Generic.Constants as T
 import qualified Protocol.Fund.Helpers as FundHelpers
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
 import qualified Protocol.Fund.Types as FundT
-import qualified Protocol.InvestUnit.Types as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types as InvestUnitT
 import qualified Protocol.OnChainHelpers as OnChainHelpers
 import qualified Protocol.PABTypes as T
 import qualified Protocol.Types as T
@@ -154,11 +154,11 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp =
                 , Tasty.testCase "Depositing date outside valid range must fail" $ do
                     let
                         -- valid range for tx is created with tpDepositDate as date, and then subs and adds hald of valid time
-                        -- (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) + 1) (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTimeRange `divide` 2) -1)
-                        -- so if we set in redeemer the date (tpDepositDate tp+T.validTimeRange ) it must fail
+                        -- (date'  - LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) + 1) (date' + LedgerApiV2.POSIXTime (LedgerApiV2.getPOSIXTime T.validTxTimeRange `divide` 2) -1)
+                        -- so if we set in redeemer the date (tpDepositDate tp+T.validTxTimeRange ) it must fail
                         ctx' =
                             ctx
-                                |> setInputsAndAddRedeemers [(fundHolding_UTxO_With_NoDeposits_MockData tp, FundHoldingT.mkDepositRedeemer (tpDepositDate tp + T.validTimeRange) deposit_MockData)]
+                                |> setInputsAndAddRedeemers [(fundHolding_UTxO_With_NoDeposits_MockData tp, FundHoldingT.mkDepositRedeemer (tpDepositDate tp + T.validTxTimeRange) deposit_MockData)]
                     results <- testContextWrapper tp ctx'
                     (Just selectedRedeemer, results)
                         `assertResultsContainAnyOf` ["not isDateInRange"]

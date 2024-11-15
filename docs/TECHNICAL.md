@@ -1,28 +1,42 @@
-# MAYZ Protocol Smart Contract Architecture
+# MAYZ Protocol - Technical Documentation
 
 ## Table of Contents
-- [MAYZ Protocol Smart Contract Architecture](#mayz-protocol-smart-contract-architecture)
+- [MAYZ Protocol - Technical Documentation](#mayz-protocol---technical-documentation)
   - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Component Hierarchy](#component-hierarchy)
-  - [Understanding UTXOs and Their Identification](#understanding-utxos-and-their-identification)
-    - [The UTXO Model vs Account Model](#the-utxo-model-vs-account-model)
-    - [Why UTXO Identification Matters](#why-utxo-identification-matters)
-    - [Solution: Identification Tokens](#solution-identification-tokens)
-  - [Concurrency Through Multiple Holdings](#concurrency-through-multiple-holdings)
-  - [Multi-Script Operations](#multi-script-operations)
-  - [Transaction Types \& Scripts Involved](#transaction-types--scripts-involved)
-    - [Protocol Management](#protocol-management)
-    - [Fund Operations](#fund-operations)
-    - [User Operations](#user-operations)
-    - [Fund Management](#fund-management)
+  - [Introduction](#introduction)
+  - [Architecture Overview](#architecture-overview)
+    - [Component Hierarchy](#component-hierarchy)
+    - [Understanding UTXOs and Their Identification](#understanding-utxos-and-their-identification)
+      - [The UTXO Model vs Account Model](#the-utxo-model-vs-account-model)
+      - [Why UTXO Identification Matters](#why-utxo-identification-matters)
+      - [Solution: Identification Tokens](#solution-identification-tokens)
+    - [Concurrency Through Multiple Holdings](#concurrency-through-multiple-holdings)
+    - [Multi-Script Operations](#multi-script-operations)
+  - [Key Features Implementation](#key-features-implementation)
+  - [Smart Contracts Implementation](#smart-contracts-implementation)
+    - [Transaction Types \& Scripts Involved](#transaction-types--scripts-involved)
+      - [Protocol Management](#protocol-management)
+      - [Fund Operations](#fund-operations)
+      - [User Operations](#user-operations)
+      - [Fund Management](#fund-management)
+  - [Key Concepts Implementation](#key-concepts-implementation)
+  - [Development Environment Details](#development-environment-details)
+  - [Testing Implementation](#testing-implementation)
+  - [Deployment Implementation](#deployment-implementation)
+  - [Security Implementation](#security-implementation)
+  - [Token Economics Implementation](#token-economics-implementation)
+  - [Oracle Integration Implementation](#oracle-integration-implementation)
   - [Key Design Principles](#key-design-principles)
 
-## Overview
+## Introduction
+
 The MAYZ Protocol manages decentralized investment funds on Cardano using a UTXO-based architecture. This document explains the complete system structure and operation.
 
-## Component Hierarchy
+> Note: This technical documentation complements our [Smart Contracts Documentation](./SMART-CONTRACTS.md). While that document provides interfaces and interactions, this one focuses on implementation details, internal mechanisms, and technical architecture decisions.
 
+## Architecture Overview
+
+### Component Hierarchy
 ```
 Protocol Level
 ├── Protocol UTXO (Protocol ID Token)
@@ -41,9 +55,9 @@ Fund Level
     └── Holding UTXO N
 ```
 
-## Understanding UTXOs and Their Identification
+### Understanding UTXOs and Their Identification
 
-### The UTXO Model vs Account Model
+#### The UTXO Model vs Account Model
 Traditional Account Model:
 - Fixed address holds state
 - Balance updates in place
@@ -55,7 +69,7 @@ Cardano UTXO Model:
 - Anyone can create UTXOs with any data
 - Need way to identify official UTXOs
 
-### Why UTXO Identification Matters
+#### Why UTXO Identification Matters
 Key challenges with UTXOs:
 - Anyone can create a transaction that creates new UTXOs
 - Any UTXO can hold any datum (data)
@@ -80,7 +94,7 @@ This creates several issues:
 - Could process wrong parameters
 - No inherent authenticity
 
-### Solution: Identification Tokens
+#### Solution: Identification Tokens
 We add special tokens that can only be minted under strict rules:
 
 ```
@@ -108,7 +122,7 @@ Real World Analogy:
 - Banks only accept documents with valid seals
 - Our validators only accept UTXOs with valid ID tokens
 
-## Concurrency Through Multiple Holdings
+### Concurrency Through Multiple Holdings
 
 Problem:
 - UTXO gets locked during transaction
@@ -126,7 +140,7 @@ Example:
 - Charlie deposits using Holding 3
 - All happen simultaneously
 
-## Multi-Script Operations
+### Multi-Script Operations
 
 Many operations require multiple scripts working together:
 
@@ -140,9 +154,22 @@ Many operations require multiple scripts working together:
    - Fund Holding Validator: Handles token exchange
    - Both ensure value preservation
 
-## Transaction Types & Scripts Involved
+## Key Features Implementation
+[TODO]
+- Decentralized Investment Funds Implementation Details
+- Dynamic Fund Tokens (FTs) Technical Implementation
+- Swap Offers Mechanism
+- Oracle-Powered Pricing System
+- Re-indexing Technical Details
+- Multi-UTXO Fund Holdings Architecture
+- Delegation System Implementation
 
-### Protocol Management
+## Smart Contracts Implementation 
+For contract interfaces, datums, and redeemers, please refer to [Smart Contracts Documentation](./SMART-CONTRACTS.md).
+
+### Transaction Types & Scripts Involved
+
+#### Protocol Management
 - Create Protocol
   * Scripts: Protocol Policy
   * Purpose: One-time setup
@@ -151,7 +178,7 @@ Many operations require multiple scripts working together:
   * Scripts: Protocol Validator
   * Purpose: Change global parameters
 
-### Fund Operations
+#### Fund Operations
 - Create Fund
   * Scripts: Fund Policy, Protocol Validator
   * Purpose: Initialize new fund
@@ -164,7 +191,7 @@ Many operations require multiple scripts working together:
   * Scripts: Fund Validator, Fund Holding Policy
   * Purpose: Manage concurrent capacity
 
-### User Operations
+#### User Operations
 - Deposit
   * Scripts: Fund Holding Validator, Fund Policy
   * Purpose: Add tokens, mint FTs
@@ -173,7 +200,7 @@ Many operations require multiple scripts working together:
   * Scripts: Fund Holding Validator, Fund Policy
   * Purpose: Remove tokens, burn FTs
 
-### Fund Management
+#### Fund Management
 - Re-index Fund
   * Scripts: Invest Unit Validator, Fund Holding Validator
   * Purpose: Change fund composition
@@ -181,6 +208,59 @@ Many operations require multiple scripts working together:
 - Balance Holdings
   * Scripts: Fund Holding Validator
   * Purpose: Redistribute tokens
+
+## Key Concepts Implementation
+[TODO]
+- Investment Unit (IU) Internal Implementation
+- Fund Tokens Technical Architecture
+- Multi-UTXO Management System
+- Re-indexing Process Technical Details
+- Commission System Calculation Implementation
+- Delegation Mechanism Architecture
+
+## Development Environment Details
+[TODO]
+- Detailed Setup Requirements
+- Build System Configuration
+- Development Tools and Utilities
+- Local Testing Environment
+
+## Testing Implementation
+[TODO]
+- Testing Framework Architecture
+- Unit Tests Implementation
+- Property Tests Design
+- Performance Tests Methodology
+- Automated Test Generation System
+
+## Deployment Implementation
+[TODO]
+- Deployment Pipeline
+- Contract Migration Strategy
+- Version Management System
+- Upgrade Procedures
+
+## Security Implementation
+[TODO]
+- Rounding Error Prevention Mechanisms
+- Oracle Security Implementation
+- Multi-UTXO Security Model
+- Attack Vector Mitigations
+- Emergency Procedures
+
+## Token Economics Implementation
+[TODO]
+- Token Distribution System
+- Commission Calculation Engine
+- Staking Mechanism Implementation
+- Reward Distribution System
+
+## Oracle Integration Implementation
+[TODO]
+- Oracle Architecture
+- Price Feed Implementation
+- Data Validation System
+- Failure Recovery Mechanisms
 
 ## Key Design Principles
 
@@ -204,4 +284,3 @@ Many operations require multiple scripts working together:
    - Clean separation of concerns
    - Extensible architecture
 
-This architecture enables secure, concurrent fund management while maintaining protocol integrity through specialized validators and identification tokens.

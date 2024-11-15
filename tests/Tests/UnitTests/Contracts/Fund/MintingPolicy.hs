@@ -351,7 +351,7 @@ fund_Policy_Redeemer_MintID_Tests tp =
                         , Tasty.testCase "Fund with wrong MAYZ in datum must fail" $ do
                             let fund_DatumType' =
                                     (fund_DatumType_MockData tp)
-                                        { FundT.fdMAYZ = ProtocolT.fcRequiredMAYZ (tpFundCategory tp) + sum_ANY_INVALID_NUMBER
+                                        { FundT.fdRequiredMAYZ = ProtocolT.fcRequiredMAYZ (tpFundCategory tp) + sum_ANY_INVALID_NUMBER
                                         }
                                 fund_UTxO_MockData' =
                                     (fund_UTxO_MockData tp)

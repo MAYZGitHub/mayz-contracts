@@ -1,12 +1,12 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 --------------------------------------------------------------------------------2
 {- HLINT ignore "Use camelCase"          -}
@@ -21,36 +21,40 @@ module Protocol.Fund.OnChain where
 --------------------------------------------------------------------------------2
 
 import qualified Ledger
-import qualified Ledger.Ada                  as LedgerAda
-import qualified Ledger.Value                as LedgerValue
+import qualified Ledger.Ada as LedgerAda
+import qualified Ledger.Value as LedgerValue
 import qualified Plutonomy
-import qualified Plutus.V2.Ledger.Api        as LedgerApiV2
-import qualified Plutus.V2.Ledger.Contexts   as LedgerContextsV2
-import           PlutusTx                    (CompiledCode)
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
+import qualified Plutus.V2.Ledger.Contexts as LedgerContextsV2
+import PlutusTx (CompiledCode)
 import qualified PlutusTx
-import           PlutusTx.Prelude
+import PlutusTx.Prelude
 
 --------------------------------------------------------------------------------2
 -- Import Internos
 --------------------------------------------------------------------------------2
 
-import qualified Generic.Constants           as T
-import qualified Generic.OnChainHelpers      as OnChainHelpers
-import qualified Protocol.Constants          as T
-import qualified Protocol.Fund.Helpers       as FundHelpers
+import qualified Generic.Constants as T
+import qualified Generic.OnChainHelpers as OnChainHelpers
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Helpers as FundHelpers
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Fund.Types         as T
-import qualified Protocol.InvestUnit.Types   as InvestUnitT
-import qualified Protocol.Protocol.Types     as ProtocolT
-import qualified Protocol.Types              as T
+import qualified Protocol.Fund.Types as T
+import qualified Protocol.Fund.InvestUnit.Types as InvestUnitT
+import qualified Protocol.Protocol.Types as ProtocolT
+import qualified Protocol.Types as T
 
 --------------------------------------------------------------------------------2
 -- Modulo
 --------------------------------------------------------------------------------2
 
+-- Any change in the logic, datum or redeemer must change the version of the fundVersion on Protocol.Fund.Types
+      
+--------------------------------------------------------------------------------2
+
 {-# INLINEABLE mkPolicy #-}
 mkPolicy :: T.PolicyParams -> BuiltinData -> BuiltinData -> ()
-mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidator_Hash !tokenMAYZ_AC) !redRaw !ctxRaw =
+mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidator_Hash) !redRaw !ctxRaw =
     if traceIfFalse "" useThisToMakeScriptUnique
         && validate
         then ()
@@ -114,7 +118,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 protocolID_AC
                                 ProtocolT.getProtocol_DatumType of
                                 [x] -> x
-                                _   -> traceError "Expected exactly one Protocol input ref"
+                                _ -> traceError "Expected exactly one Protocol input ref"
                         ------------------
                         !protocolDatum_In = OnChainHelpers.getDatum_In_TxOut_And_Datum inputRef_TxOut_And_ProtocolDatum
                         ------------------
@@ -128,7 +132,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !(outputs_txOuts_index0, outputs_txOuts_index1) =
                             if length outputs_txOuts < 2
                                 then traceError "Expected at least two outputs to script addresses"
-                                else (head outputs_txOuts,  outputs_txOuts!!1)
+                                else (head outputs_txOuts, outputs_txOuts !! 1)
                         ------------------
                         !output_Own_TxOut_And_FundDatum =
                             fromMaybe
@@ -172,6 +176,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !commissionFund_PerYear_InBPx1e3 = ProtocolT.pdCommissionFund_PerYear_InBPx1e3 protocolDatum_In
                         !selectedFundCategory' = find (\fundCategory' -> ProtocolT.fcCategoryNumber fundCategory' == fundCategoryNumber) fundCategories
                         ---------------------
+                        !tokenMAYZ_AC = ProtocolT.pdTokenMAYZ_AC protocolDatum_In
                         !requiredMAYZ = case selectedFundCategory' of
                             Nothing ->
                                 traceError "Can't find Fund Category"
@@ -222,6 +227,8 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 commissions_Table_Numerator_1e6
                                 holdingsCount
                                 holdingsIndex
+                                (ProtocolT.pdMaxDepositAndWithdraw protocolDatum_In)
+                                tokenMAYZ_AC
                                 requiredMAYZ
                                 minADA_For_FundDatum
                         ---------------------
@@ -245,22 +252,23 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         isCorrect_Output_CommissionsTable :: Bool
                         !isCorrect_Output_CommissionsTable =
                             let
-                                !monthsRemainingPlusOne = monthsRemaining +1
+                                !monthsRemainingPlusOne = monthsRemaining + 1
                                 -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
                                 den = 120_000_000
                                 commissions_Table_Numerator_1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemainingPlusOne
                             in
-                            -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
-                            -- that is why there are 2 elements in the table more than the life of the fund
-                            monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse  commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
+                                -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
+                                -- that is why there are 2 elements in the table more than the life of the fund
+                                monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
                         ------------------
                         isCorrect_Output_Fund_Value :: Bool
                         !isCorrect_Output_Fund_Value =
                             let
                                 !valueOf_FundDatum_Out = OnChainHelpers.getValue_In_TxOut_And_Datum output_Own_TxOut_And_FundDatum
                                 !currentMAYZ = OnChainHelpers.getAmt_With_AC_InValue valueOf_FundDatum_Out tokenMAYZ_AC
-                            in  traceIfFalse "not currentMAYZ == requiredMAYZ" (currentMAYZ == requiredMAYZ)
-                                && valueOf_FundDatum_Out
+                            in
+                                traceIfFalse "not currentMAYZ == requiredMAYZ" (currentMAYZ == requiredMAYZ)
+                                    && valueOf_FundDatum_Out
                                     `OnChainHelpers.isEqValue` valueFor_FundDatum_Out_Control
                         -----------------
                         isCorrect_Output_InvestUnit_Datum :: Bool
@@ -313,14 +321,14 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                     -- que se este minteando FT, no importa la cantidad, eso esta controlado en FundHolding Validator (ValidatorRedeemerDeposit)
                     -- que el fondo este abierto
                     ------------------
-                        traceIfFalse "not isFundOpen" isFundOpen
+                    traceIfFalse "not isFundOpen" isFundOpen
                         && traceIfFalse "not isMintingFT" isMintingFT
                     where
                         ------------------
                         !redeemerFundHoldingDatum = get_Redeemer_FundHoldingDatum
                         !validatorRedeemerDepositType = case redeemerFundHoldingDatum of
-                                                            FundHoldingT.ValidatorRedeemerDeposit x -> x
-                                                            _                                       -> traceError "Expected FundHolding ValidatorRedeemerDeposit"
+                            FundHoldingT.ValidatorRedeemerDeposit x -> x
+                            _ -> traceError "Expected FundHolding ValidatorRedeemerDeposit"
                         ------------------
                         !deposit = FundHoldingT.rdAmount validatorRedeemerDepositType
                         ------------------
@@ -340,19 +348,19 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                     -- si no pongo esta condicion permitiría quemar FT por otros medios, si alguien quiere eliminarlos de su wallet por ejemplo
                     -- que se este quemando FT
                     ------------------
-                        traceIfFalse "not isBurningFT" isBurningFT
+                    traceIfFalse "not isBurningFT" isBurningFT
                     where
                         ------------------
                         !redeemerFundHoldingDatum = get_Redeemer_FundHoldingDatum
                         !validatorRedeemerWithdrawType = case redeemerFundHoldingDatum of
-                                                            FundHoldingT.ValidatorRedeemerWithdraw x -> x
-                                                            _                                        -> traceError "Expected FundHolding ValidatorRedeemerWithdraw"
+                            FundHoldingT.ValidatorRedeemerWithdraw x -> x
+                            _ -> traceError "Expected FundHolding ValidatorRedeemerWithdraw"
                         ------------------
                         !withdrawPlusComissions = FundHoldingT.rwAmountPlusComissions validatorRedeemerWithdrawType
                         ------------------
                         isBurningFT :: Bool
                         !isBurningFT = OnChainHelpers.isOnlyToken_Burning_With_AC_AndAmt fundFT_AC (negate withdrawPlusComissions) info
-                        ------------------
+                ------------------
                 _ -> False
             where
                 ------------------
@@ -367,7 +375,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         fundID_AC
                         T.getFund_DatumType of
                         [x] -> x
-                        _   -> traceError "Expected exactly one Fund input ref"
+                        _ -> traceError "Expected exactly one Fund input ref"
                 ------------------
                 !fundDatum_In = OnChainHelpers.getDatum_In_TxOut_And_Datum input_TxOut_And_FundDatum
                 ------------------
@@ -375,7 +383,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                 !fundFT_AC = LedgerValue.AssetClass (fundPolicy_CS, fundFT_TN)
                 ------------------
                 get_Redeemer_FundHoldingDatum :: FundHoldingT.ValidatorRedeemer
-                get_Redeemer_FundHoldingDatum  =
+                get_Redeemer_FundHoldingDatum =
                     let
                         !fundHoldingPolicyID_CS = T.fdFundHoldingPolicyID_CS fundDatum_In
                         ------------------
@@ -390,7 +398,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 fundHoldingPolicyID_CS
                                 FundHoldingT.getFundHolding_DatumType of
                                 [x] -> x
-                                _   -> traceError "Expected exactly one FundHolding input"
+                                _ -> traceError "Expected exactly one FundHolding input"
                         ------------------
                         !redeemerFor_FundHoldingDatum' = OnChainHelpers.getRedeemerForConsumeInput ((\(txOutRef, _, _) -> txOutRef) input_TxOutRef_TxOut_And_FundHoldingDatum) info
                     in
@@ -399,7 +407,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                             Just fundHoldingRedeemerRaw ->
                                 case LedgerApiV2.fromBuiltinData @FundHoldingT.ValidatorRedeemer $ LedgerApiV2.getRedeemer fundHoldingRedeemerRaw of
                                     Just x -> x
-                                    _      -> traceError "Expected valid redeemer for FundHolding input"
+                                    _ -> traceError "Expected valid redeemer for FundHolding input"
 
 --------------------------------------------------------------------------------2
 
@@ -417,7 +425,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
         !isEmergencyRedeemer =
             case redeemer of
                 (T.ValidatorRedeemerEmergency _) -> True
-                _                                -> False
+                _ -> False
     in
         ------------------
         case isEmergencyRedeemer of
@@ -432,7 +440,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         else error ()
             False ->
                 if traceIfFalse "" useThisToMakeScriptUnique
-                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTimeRange)
+                    && traceIfFalse "not isValidRange" (OnChainHelpers.isValidRange info T.validTxTimeRange)
                     && traceIfFalse "Expected exactly one Fund input" (length inputs_Own_TxOuts == 1)
                     && ( validateAdminAction
                             && validateRedeemerAdmin
@@ -448,9 +456,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                     !input_TxOut_BeingValidated = OnChainHelpers.getUnsafe_Own_Input_TxOut ctx
                     !fund_Validator_Address = LedgerApiV2.txOutAddress input_TxOut_BeingValidated
                     ------------------
-                    !inputs_Own_TxOuts = [LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info,
-                        let address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
-                        in  OnChainHelpers.isScriptAddress address && address == fund_Validator_Address]
+                    !inputs_Own_TxOuts =
+                        [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoInputs info, let
+                                                                                                                        address = LedgerApiV2.txOutAddress (LedgerApiV2.txInInfoResolved txInfoInput)
+                                                                                                                    in
+                                                                                                                        OnChainHelpers.isScriptAddress address && address == fund_Validator_Address
+                        ]
                     ------------------
                     !fundDatum_In = T.getFund_DatumType datum
                     ------------------
@@ -469,9 +480,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                             ------------------
                             isAdminTokenPresent :: Bool
                             isAdminTokenPresent = case LedgerApiV2.txInfoOutputs info of
-                                []         -> False
+                                [] -> False
                                 -- search admin token in output 0
-                                (output:_) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
+                                (output : _) -> OnChainHelpers.isToken_With_AC_InValue (LedgerApiV2.txOutValue output) tokenAdmin_AC
                                 where
                                     !tokenAdminPolicy_CS = T.getAdminToken_CS fundDatum_In
                                     !tokenAdmin_AC = LedgerValue.AssetClass (tokenAdminPolicy_CS, T.fundTokenAdmin_TN)
@@ -618,7 +629,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     -- Que el FundDatum value cambie con el min ADA nuevo
                                     -- no hay restricciones temporales
                                     ------------------
-                                        traceIfFalse "not min ADA > 0" (newMinADA > 0)
+                                    traceIfFalse "not min ADA > 0" (newMinADA > 0)
                                         && traceIfFalse "not isCorrect_Output_Fund_Datum_UpdatedMinADA" isCorrect_Output_Fund_Datum_UpdatedMinADA
                                         && traceIfFalse "not isCorrect_Output_Fund_Value_With_MinADAChanged" isCorrect_Output_Fund_Value_With_MinADAChanged
                                     where
@@ -707,8 +718,8 @@ validator params =
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkWrappedPolicyID #-}
-mkWrappedPolicyID :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ()
-mkWrappedPolicyID protocolPolicyID_CS fundPolicy_TxHash fundPolicy_TxOutputIndex fundValidator_Hash tokenMAYZ_CS tokenMAYZ_TN = mkPolicy params
+mkWrappedPolicyID :: BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ()
+mkWrappedPolicyID protocolPolicyID_CS fundPolicy_TxHash fundPolicy_TxOutputIndex fundValidator_Hash = mkPolicy params
     where
         tid = PlutusTx.unsafeFromBuiltinData fundPolicy_TxHash :: BuiltinByteString
         txout =
@@ -721,10 +732,9 @@ mkWrappedPolicyID protocolPolicyID_CS fundPolicy_TxHash fundPolicy_TxOutputIndex
                 { ppProtocolPolicyID_CS = PlutusTx.unsafeFromBuiltinData protocolPolicyID_CS
                 , ppFundPolicy_TxOutRef = txout
                 , ppFundValidator_Hash = PlutusTx.unsafeFromBuiltinData fundValidator_Hash
-                , ppTokenMAYZ_AC = LedgerValue.AssetClass (PlutusTx.unsafeFromBuiltinData tokenMAYZ_CS, PlutusTx.unsafeFromBuiltinData tokenMAYZ_TN)
                 }
 
-policyCode :: CompiledCode (BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ())
+policyCode :: CompiledCode (BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> BuiltinData -> ())
 policyCode = $$(PlutusTx.compile [||mkWrappedPolicyID||])
 
 --------------------------------------------------------------------------------2

@@ -126,7 +126,7 @@ To cover more cases, we can vary the parameters of the Protocol datum. Achieving
 instance QC.Arbitrary ProtocolDatumType where
     arbitrary =
         ProtocolDatumType
-            <$> (return 2 :: QC.Gen Integer) -- pdProtocolFactoryVersion
+            <$> (return 2 :: QC.Gen Integer) -- pdProtocolVersion
             <*> QC.arbitrary -- pdScriptPolicyID_CS
             <*> QC.arbitrary -- pdScriptValidator_Hash
             <*> QC.arbitrary -- pdOraclePaymentPubKey

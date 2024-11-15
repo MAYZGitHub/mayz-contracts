@@ -14,14 +14,16 @@ import           Prelude                                  as P hiding (negate, (
 
 -- IOG imports
 import qualified Plutus.V2.Ledger.Api                     as LedgerApiV2
-import           PlutusTx.Prelude                         (negate, (<>), head)
+import           PlutusTx.Prelude                         (negate, (<>))
+import qualified PlutusTx.Ratio as TxRatio
+import qualified PlutusTx.Prelude as Ptx
 
 -- Project imports
 import qualified Generic.OnChainHelpers                   as OnChainHelpers
 import qualified Protocol.Fund.Helpers                    as FundHelpers
 import qualified Protocol.Fund.Holding.Types              as FundHoldingT
 import qualified Protocol.Fund.Types                      as FundT
-import qualified Protocol.InvestUnit.Types                as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types                as InvestUnitT
 import qualified Protocol.OffChainHelpers                 as OffChainHelpers
 import qualified Protocol.OnChainHelpers                  as OnChainHelpers
 import qualified Protocol.Types                           as T
@@ -32,8 +34,7 @@ import           TestUtils.HelpersMAYZ
 import           TestUtils.TestContext.Helpers
 import           TestUtils.Types
 import           TestUtils.TypesMAYZ
-import qualified PlutusTx.Ratio as TxRatio
-import qualified PlutusTx.Prelude as Ptx
+
 
 --------------------------------------------------------------------------------
 -- FundHolding Contract

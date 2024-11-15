@@ -13,7 +13,7 @@ module TestUtils.HelpersMAYZ where
 
 -- Non-IOG imports
 import           Prelude                        as P
-import qualified Protocol.Deploy                as Deploy
+import qualified Protocol.DeployPAB                as DeployPAB
 import qualified System.Directory               as SystemDirectory
 
 -- IOG imports
@@ -35,7 +35,7 @@ import qualified Protocol.Delegation.Types      as DelegationT
 import qualified Protocol.Fund.Helpers          as FundHelpers
 import qualified Protocol.Fund.Holding.Types    as FundHoldingT
 import qualified Protocol.Fund.Types            as FundT
-import qualified Protocol.InvestUnit.Types      as InvestUnitT
+import qualified Protocol.Fund.InvestUnit.Types      as InvestUnitT
 import qualified Protocol.PABTypes              as T
 import qualified Protocol.Protocol.Types        as ProtocolT
 import qualified Protocol.Script.Types          as ScriptT
@@ -77,7 +77,7 @@ loadDeployParams filePath = do
             ------------------------------
             OffChainHelpers.readDecodedFromFile filePath
         else do
-            deployParams <- Deploy.deploy_PRE "export" "test" False
+            deployParams <- DeployPAB.deploy_PRE "export" "test" False
             return $ Just deployParams
 
 --------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ generateTestParams deployAllParams = do
         ------------
         tokenEmergencyAdminPolicy_CS = "0000000000000000000000000000000000000000000000000000000000000003"
         tokenAdminPolicy_CS = "0000000000000000000000000000000000000000000000000000000000000002"
-        tokenMAYZ_CS = "0000000000000000000000000000000000000000000000000000000000000001"
-        tokenMAYZ_TN = "MAYZ"
+        tokenMAYZ_CS = T.tokenMAYZ_CS_aux
+        tokenMAYZ_TN = T.tokenMAYZ_TN_aux
         fundFT_TN = "FT"
         ------------
         fundLifeTime =
@@ -245,9 +245,7 @@ generateTestParams deployAllParams = do
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     (LedgerApiV2.ValidatorHash hash) = swapOfferValidator_Hash
                     param2 = TxBuiltins.mkB hash
-                    param3 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
-                    param4 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
-                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 `PlutusTx.applyCode` PlutusTx.liftCode param3 `PlutusTx.applyCode` PlutusTx.liftCode param4
+                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 
                 LedgerApiV2.mkMintingPolicyScript appliedCode
     let
         swapOfferPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy swapOfferPolicyID
@@ -274,9 +272,7 @@ generateTestParams deployAllParams = do
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     (LedgerApiV2.ValidatorHash hash) = buyOrderValidator_Hash
                     param2 = TxBuiltins.mkB hash
-                    param3 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
-                    param4 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
-                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 `PlutusTx.applyCode` PlutusTx.liftCode param3 `PlutusTx.applyCode` PlutusTx.liftCode param4
+                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 
                 LedgerApiV2.mkMintingPolicyScript appliedCode
     let
         buyOrderPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy buyOrderPolicyID
@@ -288,9 +284,7 @@ generateTestParams deployAllParams = do
                     code = tccsDelegationValidator_Pre testCompiledCodeScripts
                     -- params = exampleDelegationValiParams
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
-                    param2 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
-                    param3 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
-                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 `PlutusTx.applyCode` PlutusTx.liftCode param3
+                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 
                 LedgerApiV2.mkValidatorScript appliedCode
     let
         delegationValidator_Hash = OffChainHelpers.hashValidator delegationValidator
@@ -305,9 +299,7 @@ generateTestParams deployAllParams = do
                     param1 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol protocolPolicyID_CS
                     (LedgerApiV2.ValidatorHash hash) = delegationValidator_Hash
                     param2 = TxBuiltins.mkB hash
-                    param3 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
-                    param4 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
-                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2 `PlutusTx.applyCode` PlutusTx.liftCode param3 `PlutusTx.applyCode` PlutusTx.liftCode param4
+                    appliedCode = code `PlutusTx.applyCode` PlutusTx.liftCode param1 `PlutusTx.applyCode` PlutusTx.liftCode param2
                 LedgerApiV2.mkMintingPolicyScript appliedCode
     let
         delegationPolicyID_CS = OffChainHelpers.getCurSymbolOfPolicy delegationPolicyID
@@ -350,16 +342,12 @@ generateTestParams deployAllParams = do
                     param3 = TxBuiltins.mkI $ LedgerApiV2.txOutRefIdx fundPolicy_TxOutRef
                     (LedgerApiV2.ValidatorHash hash) = fundValidator_Hash
                     param4 = TxBuiltins.mkB hash
-                    param5 = TxBuiltins.mkB $ LedgerApiV2.unCurrencySymbol tokenMAYZ_CS
-                    param6 = TxBuiltins.mkB $ LedgerApiV2.unTokenName tokenMAYZ_TN
                     appliedCode =
                         code
                             `PlutusTx.applyCode` PlutusTx.liftCode param1
                             `PlutusTx.applyCode` PlutusTx.liftCode param2
                             `PlutusTx.applyCode` PlutusTx.liftCode param3
                             `PlutusTx.applyCode` PlutusTx.liftCode param4
-                            `PlutusTx.applyCode` PlutusTx.liftCode param5
-                            `PlutusTx.applyCode` PlutusTx.liftCode param6
                 LedgerApiV2.mkMintingPolicyScript appliedCode
     let
         fundPolicy_CS = OffChainHelpers.getCurSymbolOfPolicy fundPolicy

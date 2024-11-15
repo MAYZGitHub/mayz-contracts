@@ -21,7 +21,6 @@ import           PlutusTx.Prelude       hiding (unless)
 import qualified Generic.OnChainHelpers as OnChainHelpers
 import qualified Protocol.Types         as T
 import qualified Ledger
-import qualified Protocol.Constants as T
 
 --------------------------------------------------------------------------------2
 -- Module
@@ -85,20 +84,12 @@ isCorrect_Oracle_Signature priceData oraclePaymentPubKey oracle_Signature =
         checkSignature oraclePaymentPubKey priceData oracle_Signature
 
 {-# INLINEABLE isCorrect_Oracle_InRangeTime #-}
-isCorrect_Oracle_InRangeTime :: LedgerApiV2.TxInfo -> LedgerApiV2.POSIXTime -> Bool
-isCorrect_Oracle_InRangeTime !info !oracle_Time =
-    let
-        ------------------
-        !validRange = LedgerApiV2.txInfoValidRange info
-        ------------------
-        newLowerLimitValue :: LedgerApiV2.POSIXTime
-        !newLowerLimitValue = case Ledger.ivFrom validRange of
-            Ledger.LowerBound (Ledger.Finite a) True -> a - T.oracleData_Valid_Time
-            _                                        -> traceError "Interval has no lower bound"
-        ------------------
-        !newInterval = Ledger.Interval (Ledger.LowerBound (Ledger.Finite newLowerLimitValue) True) (Ledger.ivTo validRange )
-    in
-        oracle_Time `Ledger.member` newInterval
+isCorrect_Oracle_InRangeTime :: LedgerApiV2.TxInfo -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Bool
+isCorrect_Oracle_InRangeTime !info !oracle_Time !oracleData_Valid_Time =
+    case Ledger.ivFrom (LedgerApiV2.txInfoValidRange info) of
+        Ledger.LowerBound (Ledger.Finite txStartTime) _ -> 
+            txStartTime - oracle_Time <= oracleData_Valid_Time
+        _ -> traceError "Interval has no lower bound"
 
 --------------------------------------------------------------------------------
 
