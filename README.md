@@ -10,6 +10,10 @@
   - [Key Features](#key-features)
   - [Architecture Overview](#architecture-overview)
   - [Smart Contracts](#smart-contracts)
+    - [Basic Protocol Structure](#basic-protocol-structure)
+    - [Extended Protocol Structure](#extended-protocol-structure)
+    - [Transactions Overview](#transactions-overview)
+    - [Transactions Flow](#transactions-flow)
   - [Key Concepts](#key-concepts)
   - [Repository Structure](#repository-structure)
   - [Development Environment](#development-environment)
@@ -99,7 +103,7 @@ Our protocol utilizes advanced smart contracts for secure and efficient operatio
 - **Delegation Contract**: Manages MAYZ token delegations to funds.
 - **Script Contract**: Oversees deployed scripts on-chain.
 
-
+### Basic Protocol Structure  
 ```mermaid
 %% Basic Protocol Structure
 flowchart TB
@@ -125,6 +129,8 @@ flowchart TB
     FHD:::dataStyle
     IUD:::dataStyle
 ```
+
+### Extended Protocol Structure
 
 ```mermaid
 %% Extended Protocol Structure
@@ -159,6 +165,8 @@ flowchart TB
     SOD:::dataStyle
     DD:::dataStyle
 ```
+
+### Transactions Overview
 
 ```mermaid
 %% Transactions Overview
@@ -235,6 +243,8 @@ flowchart TB
     classDef commissionStyle fill:#d6a2e8,stroke:#333,stroke-width:2px
     classDef oracleStyle fill:#ff9999,stroke:#333,stroke-width:2px
 ```
+
+### Transactions Flow
 
 ```mermaid
 %% Transaction Flow
