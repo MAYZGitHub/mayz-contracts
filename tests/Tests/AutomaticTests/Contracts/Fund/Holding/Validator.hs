@@ -218,7 +218,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         txParamsGenerators_Valid_With_MinLifeTime =
             TxParamGenerators
                 [ posixTimeRangeParam "beginDate" fromTime toTime
-                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" minLifeTime T.validTxTimeRange "beginDate"
+                , dependentAfterPlusPosixTimeRangeParam "deadlineDate" T.validTxTimeRange minLifeTime "beginDate"
                 , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
                 , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
