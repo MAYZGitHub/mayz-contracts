@@ -111,7 +111,7 @@ investUnit_Validator_Redeemer_ReIndexing_Tests tp =
                                             )
                             results <- testContextWrapper tp ctx'
                             (Just selectedRedeemer, results)
-                                    `assertResultsContainAnyOf` ["Interval has no lower bound"]
+                                    `assertResultsContainAnyOf` ["Transaction interval has no finite bounds"]
                         , Tasty.testCase "Not including Protocol UTxO as InputRef must fail" $ do
                             let
                                 ctx' = ctx
