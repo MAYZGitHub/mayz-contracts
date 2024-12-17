@@ -687,7 +687,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             amount_ADA' = OnChainHelpers.multiply_By_Scaled_1e6_And_RoundUp amount_FT price_FT_in_ADA
                                         in
                                             --------
-
                                             amount_ADA == amount_ADA'
                                     ------------------
                                     isAmount_FT_Available :: Integer -> Bool

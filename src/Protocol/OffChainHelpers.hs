@@ -254,6 +254,9 @@ checkCollateral uTxOsAtUser = do
 
 --------------------------------------------------------------------------------
 
+-- cabal repl
+-- import Protocol.OffChainHelpers
+
 -- readStringDecodedAsProtocolValidatorDatum "{\"getDatum\":\"d8799fd8799f0180581c786139173b79832ace8b3a55c04d8e43586724fcd497cd286bf27345581c3afcf1924a5ee2cfe4c11c642dcdcf97ed7436648f431175ba3664a100009f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff9fd8799f030405ffffd8799f000000ff0000d8799f000000ffd8799f000000ffd8799f000000ff0000008000ffff\"}"
 -- readStringDecodedAsProtocolValidatorDatum "{\"getDatum\":\"d8799fd8799f0180581c786139173b79832ace8b3a55c04d8e43586724fcd497cd286bf27345581c3afcf1924a5ee2cfe4c11c642dcdcf97ed7436648f431175ba3664a100009f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff9fd8799f040506ffffd8799f000000ff0000d8799f000000ffd8799f000000ffd8799f000000ff0000009f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff00ffff\"}"
 -- readStringDecodedAsProtocolValidatorDatum "{\"getDatum\":\"d8799fd8799f0180581c786139173b79832ace8b3a55c04d8e43586724fcd497cd286bf27345581c3afcf1924a5ee2cfe4c11c642dcdcf97ed7436648f431175ba3664a100008080d8799f000000ff0000d8799f000000ffd8799f000000ffd8799f000000ff00000080001a001f91b8ffff\"}"
@@ -315,6 +318,9 @@ readStringDecodedAsPolicyRedeemerRedeemer encoded = do
 
 --------------------------------------------------------------------------------
 
+-- cabal repl
+-- import Protocol.OffChainHelpers
+
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c31bfa53cf3cd05ddb7e3e2230d78bbdbd6735c4018a1deb6b022a60c581c71818ecb72f7f5ac542566360ae318a3dd25a2541db9791414b09a2e581cf1e013aee32c3c7b5e318d8e24e50a4e1e1a03430c0a2212096c185e9f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b0000018971a313b81b00000189ad3dddb8d87a8000000080001a001ef015ffff\"}"
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26b581c7287baa38b03be764476101673c803b4d6d85640e37addce20ad2d68581cb1cb50589461b2f66955ca45707eb80a7a5a289600953ec5ef96843a9f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001897ab39aa31b00000189b64e64a3d87a8000000080001a001ef015ffff\"}"
 -- readStringDecodedAsFundValidatorDatum "{\"getDatum\":\"d8799fd8799f0100581c7a1cea9e91d69cee0aee8cb3a61e3cf1c815ce9b1793c83d212d1614581c7ab790f20e31972f1b1e84c0e7468932018cdae8010aac890ed9a65f581c1a5595a496b3cc8161a61bff8109bdab3ddb30f1ff3d9ddb07ffda069f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabff011b000001897ae5973d1b00000189b680613dd87a8000000080001a001ef015ffff\"}"
@@ -353,6 +359,9 @@ readStringDecodedAsFundValidatorRedeemer encoded = do
 
 
 --------------------------------------------------------------------------------
+
+-- cabal repl
+-- import Protocol.OffChainHelpers
 
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799fd8799f41aa41aa05ffd8799f41aa410005ffff1a001ef015ffff\"}"
 -- readStringDecodedAsInvestUnitValidatorDatum "{\"getDatum\":\"d8799fd8799f581c9eca19af35e1e13892a7ea1215a163b32fa68db748863521c067e26bd8799f9f9f404005ffffff1a001ef015ffff\"}"
@@ -413,6 +422,7 @@ readStringDecodedAsFundHoldingPolicyRedeemer encoded = do
 --------------------------------------------------------------------------------
 
 -- readStringDecodedAsSwapOfferValidatorRedeemer "{\"getRedeemer\":\"d87e9fd8799f0a19021705d8799fd8799f9fd8799f581c70f7fee602900e395d84c1a3cfe1603303fb8c48435777be6455a8bc44343635341836ffffff1b0000018a52a7ad15ff5840529e9eb87717a6fbe10203615a465e50eb99ae2908e6ab0dc94302ec18f4b787b24aefce16b772795dcfde40947037952fe91888919ed06049c2362ed1e19a0dffff\"}"
+-- readStringDecodedAsSwapOfferValidatorRedeemer "{\"getRedeemer\":\"d905009fd8799f1a060dce801a000f55e119c44bd8799fd8799f9fd8799f581c2ddca5115822192681029c3a8a065ba3f484c21cff33e6720edd729f45674d41595a1a06060eccffffff1b00000193d615ca57ff5840475f9c912a951b1317e61be715002a1afa6cc9b85b4846000220ef36bd360fc81352b5c29253e847b746f925b164d07adbb23b861fad450c446d65a545d58a03ffff\"}"
 
 readStringDecodedAsSwapOfferValidatorRedeemer :: P.String -> P.IO SwapOfferT.ValidatorRedeemer
 readStringDecodedAsSwapOfferValidatorRedeemer encoded = do
@@ -422,9 +432,16 @@ readStringDecodedAsSwapOfferValidatorRedeemer encoded = do
     P.putStrLn $ "Result: " ++ P.show result
     return result
 
+-- cabal repl
+-- import Protocol.OffChainHelpers
+
 -- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f000000000000000000001a00223332ffff\"}"
 -- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d87e9fd8799f0a19022105d8799fd8799f80ff1b0000018a52965795ff58406b8d97c54e097f202c3f2a443242c9db22164414a0c149147035475c85d4d3443dd941151f6a02b5375331cc21621f554753e896ddfcd2d8f05f735d62b7d90cffff\"}"
 -- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f581ca28ef1f69611287b85222b8586b248614561eb31b7f40d9f8a4a921b581cb12bdf271f678c97ed08886f906eadef6c84fd0c91b6bde7a8dd8014581ced03815867fcf3d4339e0ea59c761dc15d569af70604c988eb311e53d8799f581c57982a2da187bd107cc6f73e5ee6c3a7a3cb9524d3b216e874dea4fbff1a000186a01a0bf39de11b00000079dc73c33e1913d31a0e523b79011a002b16e8ffff\"}"
+
+-- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d8799fd8799f1928a4581cca4cfe0efeb690fe4ed7357df3a45be462f2cf69568857af7a093697581c2ddca5115822192681029c3a8a065ba3f484c21cff33e6720edd729f581ce44c67c53e593671792cc27f095bbcc69aaee2ff1b4d875bdbff5cabd87a801a0007a1201b0000003cc85935651a06a3855c0000010101d8799f581ce0b33937400326885f7186e2725a84786266ec1eb06d397680233f80444d41595aff1a05f5e1001a002cf86affff\"}"
+-- readStringDecodedAsSwapOfferValidatorDatum "{\"getDatum\":\"d87f9fd8799f1a05f5e0f31a000f55e119c44bd8799fd8799f9fd8799f581c2ddca5115822192681029c3a8a065ba3f484c21cff33e6720edd729f45674d41595a1a05ee3fe0ffffff1b00000193d60a2646ff5840667a92e63e932c2eba86e3aff1d3b030c562e3eda3a1e35a36496698177e8200f9cddd2f898bbd481dbcb357639a30fd63e142851ae27f5f7a8799efc79a5d06ffff\"}"
+
 
 readStringDecodedAsSwapOfferValidatorDatum :: P.String -> P.IO SwapOfferT.ValidatorDatum
 readStringDecodedAsSwapOfferValidatorDatum encoded = do

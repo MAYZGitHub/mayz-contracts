@@ -1280,9 +1280,9 @@ the behavior of PlutusTx.Ratio.truncate.
 -}
 {-# INLINEABLE multiply_By_Scaled_And_RoundUp #-}
 multiply_By_Scaled_And_RoundUp :: Integer -> Integer -> Integer -> Integer
-multiply_By_Scaled_And_RoundUp amount number1e2 base =
+multiply_By_Scaled_And_RoundUp amount number_scaled base =
     let
-        multiplied = amount * number1e2
+        multiplied = amount * number_scaled
         (result, remainder') = abs multiplied `divMod` base
     in
         if multiplied >= 0
@@ -1291,9 +1291,9 @@ multiply_By_Scaled_And_RoundUp amount number1e2 base =
 
 {-# INLINEABLE multiply_By_Scaled_And_RoundDown #-}
 multiply_By_Scaled_And_RoundDown :: Integer -> Integer -> Integer -> Integer
-multiply_By_Scaled_And_RoundDown amount number1e2 base =
+multiply_By_Scaled_And_RoundDown amount number_scaled base =
     let
-        multiplied = amount * number1e2
+        multiplied = amount * number_scaled
         result = abs multiplied `divide` base
     in
         if multiplied >= 0 then result else negate result
