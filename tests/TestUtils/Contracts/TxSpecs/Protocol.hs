@@ -88,19 +88,22 @@ protocol_DatumUpdate_TxSpecs tp =
                         -- Extract values from the current protocol datum
                         -------------------
                         oraclePaymentPubKey = ProtocolT.pdOraclePaymentPubKey input_Protocol_Datum
+                        oracleData_Valid_Time = ProtocolT.pdOracleData_Valid_Time input_Protocol_Datum
                         _admins = ProtocolT.pdAdmins input_Protocol_Datum
+                        delegatorsAdmins = ProtocolT.pdDelegatorsAdmins input_Protocol_Datum
                         tokenAdminPolicy_CS = ProtocolT.pdTokenAdminPolicy_CS input_Protocol_Datum
                         fundCategories = ProtocolT.pdFundCategories input_Protocol_Datum
                         fundLifeTime = ProtocolT.pdFundLifeTime input_Protocol_Datum
+                        tokenMAYZ_AC = ProtocolT.pdTokenMAYZ_AC input_Protocol_Datum
                         requiredMAYZForSwapOffer = ProtocolT.pdRequiredMAYZForSwapOffer input_Protocol_Datum
                         requiredMAYZForBuyOrder = ProtocolT.pdRequiredMAYZForBuyOrder input_Protocol_Datum
                         commissionFund_PerYear_InBPx1e3 = ProtocolT.pdCommissionFund_PerYear_InBPx1e3 input_Protocol_Datum
                         commissionSwapOffer_InBPx1e3 = ProtocolT.pdCommissionSwapOffer_InBPx1e3 input_Protocol_Datum
                         commissionBuyOrder_InBPx1e3 = ProtocolT.pdCommissionBuyOrder_InBPx1e3 input_Protocol_Datum
                         share_InBPx1e2_Protocol = ProtocolT.pdShare_InBPx1e2_Protocol input_Protocol_Datum
-                        share_InBPx1e2_Delegators = ProtocolT.pdShare_InBPx1e2_Delegators input_Protocol_Datum
                         share_InBPx1e2_Managers = ProtocolT.pdShare_InBPx1e2_Managers input_Protocol_Datum
-                        delegatorsAdmins = ProtocolT.pdDelegatorsAdmins input_Protocol_Datum
+                        share_InBPx1e2_Delegators = ProtocolT.pdShare_InBPx1e2_Delegators input_Protocol_Datum
+                        maxDepositAndWithdraw = ProtocolT.pdMaxDepositAndWithdraw input_Protocol_Datum
                         -------------------
                         admins_updated = []
                         -------------------
@@ -108,19 +111,22 @@ protocol_DatumUpdate_TxSpecs tp =
                         Protocol.mkUpdated_Protocol_Datum_With_NormalChanges
                             input_Protocol_Datum
                             oraclePaymentPubKey
+                            oracleData_Valid_Time
                             admins_updated
+                            delegatorsAdmins
                             tokenAdminPolicy_CS
                             fundCategories
                             fundLifeTime
+                            tokenMAYZ_AC
                             requiredMAYZForSwapOffer
                             requiredMAYZForBuyOrder
                             commissionFund_PerYear_InBPx1e3
                             commissionSwapOffer_InBPx1e3
                             commissionBuyOrder_InBPx1e3
                             share_InBPx1e2_Protocol
-                            share_InBPx1e2_Delegators
                             share_InBPx1e2_Managers
-                            delegatorsAdmins
+                            share_InBPx1e2_Delegators
+                            maxDepositAndWithdraw
         -----------------
         output_Protocol_UTxO =
             (protocol_UTxO_MockData tp)

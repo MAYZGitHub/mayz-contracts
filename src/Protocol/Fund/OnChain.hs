@@ -528,7 +528,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         isCorrect_Output_Fund_Datum_Updated :: Bool
                                         !isCorrect_Output_Fund_Datum_Updated =
                                             let
-                                                !fundDatum_Out_Control = FundHelpers.mkUpdated_Fund_Datum_With_NormalChanges fundDatum_In (T.fdAdmins fundDatum_Out) (T.fdTokenAdminPolicy_CS fundDatum_Out)
+                                                !fundDatum_Out_Control = FundHelpers.mkUpdated_Fund_Datum_With_NormalChanges fundDatum_In (T.fdAdmins fundDatum_Out) (T.fdTokenAdminPolicy_CS fundDatum_Out)  (T.fdMaxDepositAndWithdraw fundDatum_Out)
                                             in
                                                 fundDatum_Out `OnChainHelpers.isUnsafeEqDatums` fundDatum_Out_Control
                                 ------------------

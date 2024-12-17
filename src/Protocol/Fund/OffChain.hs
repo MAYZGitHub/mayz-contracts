@@ -56,6 +56,7 @@ import qualified Protocol.OnChainHelpers as OnChainHelpers
 import qualified Protocol.PABTypes as T
 import qualified Protocol.Protocol.Types as ProtocolT
 import qualified Protocol.Types as T
+import Protocol.Constants (maxDepositAndWithdraw_aux)
 
 --------------------------------------------------------------------------------2
 -- Module
@@ -307,6 +308,7 @@ endPointFundUpdate T.PABFundUpdateParams {..} = PlutusContract.handleError OffCh
     let
         !admins = pfupAdmins
         !tokenAdminPolicy_CS = pfupTokenAdminPolicy_CS
+        !maxDepositAndWithdraw = maxDepositAndWithdraw_aux
         ---------------------
         !fundDatum_Out =
             FundT.FundDatum $
@@ -314,6 +316,7 @@ endPointFundUpdate T.PABFundUpdateParams {..} = PlutusContract.handleError OffCh
                     fundDatum_In
                     admins
                     tokenAdminPolicy_CS
+                    maxDepositAndWithdraw
     ---------------------
     PlutusContract.logInfo @P.String $ TextPrintf.printf "fundDatum_In: %s" (P.show fundDatum_In)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "-------------------"

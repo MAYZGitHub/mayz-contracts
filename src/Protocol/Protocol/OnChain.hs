@@ -112,8 +112,8 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
         !commissionSwapOffer_InBPx1e3 = T.pdCommissionSwapOffer_InBPx1e3 protocolDatum_Out
         !commissionBuyOrder_InBPx1e3 = T.pdCommissionBuyOrder_InBPx1e3 protocolDatum_Out
         !share_InBPx1e2_Protocol = T.pdShare_InBPx1e2_Protocol protocolDatum_Out
-        !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
         !share_InBPx1e2_Managers = T.pdShare_InBPx1e2_Managers protocolDatum_Out
+        !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
         !oracleData_Valid_Time = T.pdOracleData_Valid_Time protocolDatum_Out
         !maxDepositAndWithdraw = T.pdMaxDepositAndWithdraw protocolDatum_Out
         ---------------------
@@ -122,7 +122,9 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 (T.pdScriptPolicyID_CS protocolDatum_Out)
                 (T.pdScriptValidator_Hash protocolDatum_Out)
                 (T.pdOraclePaymentPubKey protocolDatum_Out)
+                oracleData_Valid_Time
                 (T.pdAdmins protocolDatum_Out)
+                (T.pdDelegatorsAdmins protocolDatum_Out)
                 (T.pdTokenAdminPolicy_CS protocolDatum_Out)
                 fundCategories
                 fundLifeTime
@@ -133,10 +135,8 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
-                share_InBPx1e2_Delegators
                 share_InBPx1e2_Managers
-                (T.pdDelegatorsAdmins protocolDatum_Out)
-                oracleData_Valid_Time
+                share_InBPx1e2_Delegators
                 maxDepositAndWithdraw
                 minADA_For_ProtocolDatum
         ---------------------
@@ -161,7 +161,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 && traceIfFalse "not isValidMinMaxDef commissionBuyOrder_InBPx1e3" (T.isValidMinMaxDef commissionBuyOrder_InBPx1e3)
                 && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
                 && traceIfFalse "not Max commissionBuyOrder_InBPx1e3 <= 100%" (T.mmdMax commissionBuyOrder_InBPx1e3 <= 10_000_000)
-                && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers == 1_000_000) -- 1_000_000 BPx1e2 = 100%
+                && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators == 1_000_000) -- 1_000_000 BPx1e2 = 100%
                 && traceIfFalse "not (racleData_Valid_Time > 0" (oracleData_Valid_Time > 0)
                 && traceIfFalse "not (maxDepositAndWithdraw > 0" (maxDepositAndWithdraw > 0)
         ------------------
@@ -311,26 +311,31 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     !commissionSwapOffer_InBPx1e3 = T.pdCommissionSwapOffer_InBPx1e3 protocolDatum_Out
                                     !commissionBuyOrder_InBPx1e3 = T.pdCommissionBuyOrder_InBPx1e3 protocolDatum_Out
                                     !share_InBPx1e2_Protocol = T.pdShare_InBPx1e2_Protocol protocolDatum_Out
-                                    !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
                                     !share_InBPx1e2_Managers = T.pdShare_InBPx1e2_Managers protocolDatum_Out
+                                    !share_InBPx1e2_Delegators = T.pdShare_InBPx1e2_Delegators protocolDatum_Out
+                                    !oracleData_Valid_Time = T.pdOracleData_Valid_Time protocolDatum_Out
+                                    !maxDepositAndWithdraw = T.pdMaxDepositAndWithdraw protocolDatum_Out
                                     ---------------------
                                     !protocolDatum_Out_Control =
                                         ProtocolHelpers.mkUpdated_Protocol_Datum_With_NormalChanges
                                             protocolDatum_In
                                             (T.pdOraclePaymentPubKey protocolDatum_Out)
+                                            oracleData_Valid_Time
                                             (T.pdAdmins protocolDatum_Out)
+                                            (T.pdDelegatorsAdmins protocolDatum_Out)
                                             (T.pdTokenAdminPolicy_CS protocolDatum_Out)
                                             fundCategories
                                             fundLifeTime
+                                            (T.pdTokenMAYZ_AC protocolDatum_Out)
                                             requiredMAYZForSwapOffer
                                             requiredMAYZForBuyOrder
                                             commissionFund_PerYear_InBPx1e3
                                             commissionSwapOffer_InBPx1e3
                                             commissionBuyOrder_InBPx1e3
                                             share_InBPx1e2_Protocol
-                                            share_InBPx1e2_Delegators
                                             share_InBPx1e2_Managers
-                                            (T.pdDelegatorsAdmins protocolDatum_Out)
+                                            share_InBPx1e2_Delegators
+                                            maxDepositAndWithdraw
                                     ---------------------
                                     isCorrect_Output_Protocol_Datum_Updated :: Bool
                                     !isCorrect_Output_Protocol_Datum_Updated =
@@ -349,7 +354,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             && traceIfFalse "not Min commissionSwapOffer_InBPx1e3 >= 0" (T.mmdMin commissionSwapOffer_InBPx1e3 >= 0)
                                             && traceIfFalse "not isValidMinMaxDef commissionBuyOrder_InBPx1e3" (T.isValidMinMaxDef commissionBuyOrder_InBPx1e3)
                                             && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
-                                            && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers == 1_000_000) -- 1_000_000 BPx1e2 = 100%
+                                            && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators == 1_000_000) -- 1_000_000 BPx1e2 = 100%
+                                            && traceIfFalse "not (racleData_Valid_Time > 0" (oracleData_Valid_Time > 0)
+                                            && traceIfFalse "not (maxDepositAndWithdraw > 0" (maxDepositAndWithdraw > 0)
                                             ------------------
                                     isCorrect_Output_Protocol_Value_NotChanged :: Bool
                                     !isCorrect_Output_Protocol_Value_NotChanged =

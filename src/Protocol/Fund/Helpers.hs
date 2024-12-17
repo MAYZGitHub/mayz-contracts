@@ -36,9 +36,9 @@ import qualified Protocol.Types              as T
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkUpdated_Fund_Datum_With_NormalChanges #-}
-mkUpdated_Fund_Datum_With_NormalChanges :: T.FundDatumType -> [T.WalletPaymentPKH] -> LedgerApiV2.CurrencySymbol -> T.FundDatumType
-mkUpdated_Fund_Datum_With_NormalChanges !fundDatum_In !admins !tokenAdminPolicy_CS =
-    fundDatum_In { T.fdAdmins = admins, T.fdTokenAdminPolicy_CS = tokenAdminPolicy_CS }
+mkUpdated_Fund_Datum_With_NormalChanges :: T.FundDatumType -> [T.WalletPaymentPKH] -> LedgerApiV2.CurrencySymbol -> Integer -> T.FundDatumType
+mkUpdated_Fund_Datum_With_NormalChanges !fundDatum_In !admins !tokenAdminPolicy_CS !maxDepositAndWithdraw =
+    fundDatum_In { T.fdAdmins = admins, T.fdTokenAdminPolicy_CS = tokenAdminPolicy_CS, T.fdMaxDepositAndWithdraw = maxDepositAndWithdraw }
 
 --------------------------------------------------------------------------------2
 

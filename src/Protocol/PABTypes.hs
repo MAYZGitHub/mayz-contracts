@@ -296,8 +296,8 @@ data PABProtocolPrepareParams = PABProtocolPrepareParams
     , ppppCommissionSwapOffer_InBPx1e3 :: ProtocolT.MinMaxDef Integer
     , ppppCommissionBuyOrder_InBPx1e3 :: ProtocolT.MinMaxDef Integer
     , ppppShare_InBPx1e2_Protocol :: Integer
-    , ppppShare_InBPx1e2_Delegators :: Integer
     , ppppShare_InBPx1e2_Managers :: Integer
+    , ppppShare_InBPx1e2_Delegators :: Integer
     , ppppDelegatorsAdmins :: [T.WalletPaymentPKH]
     }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
@@ -317,8 +317,8 @@ data PABProtocolUpdateParams = PABProtocolUpdateParams
     , ppupCommissionSwapOffer_InBPx1e3 :: ProtocolT.MinMaxDef Integer
     , ppupCommissionBuyOrder_InBPx1e3 :: ProtocolT.MinMaxDef Integer
     , ppupShare_InBPx1e2_Protocol :: Integer
-    , ppupShare_InBPx1e2_Delegators :: Integer
     , ppupShare_InBPx1e2_Managers :: Integer
+    , ppupShare_InBPx1e2_Delegators :: Integer
     , ppupDelegatorsAdmins :: [T.WalletPaymentPKH]
     }
     deriving (DataAeson.FromJSON, DataAeson.ToJSON, DataOpenApiSchema.ToSchema, GHCGenerics.Generic, P.Eq, P.Ord, P.Show, Schema.ToSchema)
@@ -785,8 +785,8 @@ examplePABProtocolPrepareParams =
         , ppppCommissionSwapOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger
         , ppppCommissionBuyOrder_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger
         , ppppShare_InBPx1e2_Protocol = exampleInteger
-        , ppppShare_InBPx1e2_Delegators = exampleInteger
         , ppppShare_InBPx1e2_Managers = exampleInteger
+        , ppppShare_InBPx1e2_Delegators = exampleInteger
         , ppppDelegatorsAdmins = [exampleWalletPaymentPKH]
         }
 
@@ -805,8 +805,8 @@ examplePABProtocolUpdateParams =
         , ppupCommissionSwapOffer_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger
         , ppupCommissionBuyOrder_InBPx1e3 = ProtocolT.mkMinMaxDef exampleInteger exampleInteger exampleInteger
         , ppupShare_InBPx1e2_Protocol = exampleInteger
-        , ppupShare_InBPx1e2_Delegators = exampleInteger
         , ppupShare_InBPx1e2_Managers = exampleInteger
+        , ppupShare_InBPx1e2_Delegators = exampleInteger
         , ppupDelegatorsAdmins = [exampleWalletPaymentPKH]
         }
 

@@ -67,7 +67,7 @@ fund_Validator_Redeemer_DatumUpdate_Tests tp =
     in
         Tasty.testGroup ("TX NAME: " ++ txName ++ " - REDEEMER: " ++ redeemerName ++ " - Tests") $
                 let
-                    ctx = fund_DatumUpdate_TxContext tp [] "aaff"
+                    ctx = fund_DatumUpdate_TxContext tp [] "aaff" 100
                 in
                     [
                         Tasty.testCase "Update Datum with not change must succeed" $ do

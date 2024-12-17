@@ -62,8 +62,8 @@ fund_Withdraw_TxContext = fundHolding_Withdraw_TxContext
 
 --------------------------------------------------------------------------------
 
-fund_DatumUpdate_TxContext :: TestParams -> [T.WalletPaymentPKH] -> LedgerApiV2.CurrencySymbol -> LedgerApiV2.ScriptContext
-fund_DatumUpdate_TxContext tp admins tokenAdminPolicy_CS =
+fund_DatumUpdate_TxContext :: TestParams -> [T.WalletPaymentPKH] -> LedgerApiV2.CurrencySymbol -> Integer -> LedgerApiV2.ScriptContext
+fund_DatumUpdate_TxContext tp admins tokenAdminPolicy_CS maxDepositAndWithdraw =
     let
         input_Fund_UTxO = fund_UTxO_MockData tp
         input_Fund_Datum = FundT.getFund_DatumType_From_UTxO input_Fund_UTxO
@@ -71,6 +71,7 @@ fund_DatumUpdate_TxContext tp admins tokenAdminPolicy_CS =
         output_Fund_Datum = FundHelpers.mkUpdated_Fund_Datum_With_NormalChanges
                 input_Fund_Datum
                 admins tokenAdminPolicy_CS
+                maxDepositAndWithdraw
         output_Fund_UTxO = input_Fund_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $

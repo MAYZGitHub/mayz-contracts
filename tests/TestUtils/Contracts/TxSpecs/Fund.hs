@@ -127,6 +127,7 @@ fund_DatumUpdate_TxSpecs tp =
                     let
                         _admins = FundT.fdAdmins input_Fund_Datum
                         tokenAdminPolicy_CS = FundT.fdTokenAdminPolicy_CS input_Fund_Datum
+                        maxDepositAndWithdraw = FundT.fdMaxDepositAndWithdraw input_Fund_Datum
                         -------------------
                         admins_updated = []
                         -------------------
@@ -135,6 +136,7 @@ fund_DatumUpdate_TxSpecs tp =
                             input_Fund_Datum
                             admins_updated
                             tokenAdminPolicy_CS
+                            maxDepositAndWithdraw
 
         -----------------
         output_Fund_UTxO =

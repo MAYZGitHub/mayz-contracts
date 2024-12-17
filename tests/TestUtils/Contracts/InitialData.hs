@@ -148,7 +148,9 @@ protocol_DatumType_MockData tp =
         (tpScriptPolicyID_CS tp) -- pdScriptPolicyID_CS
         (tpScriptValidator_Hash tp) -- pdScriptValidator_Hash
         (tpOraclePaymentPubKey tp) -- pdOraclePaymentPubKey
+        T.oracleData_Valid_Time_aux -- pdOracleData_Valid_Time
         (tpProtocolAdmins tp) -- pdAdmins
+        (tpDelegatorsAdmins tp) -- pdDelegatorsAdmins
         (tpTokenAdminPolicy_CS tp) -- pdTokenAdminPolicy_CS
         [tpFundCategory tp] -- fundCategories
         (tpFundLifeTime tp) -- pdFundLifeTime
@@ -159,10 +161,8 @@ protocol_DatumType_MockData tp =
         (tp_MinMaxDef_CommissionSwapOffer_InBPx1e3 tp) -- pdCommissionSwapOffer_InBPx1e3
         (tp_MinMaxDef_CommissionBuyOrder_InBPx1e3 tp) -- pdCommissionBuyOrder_InBPx1e3
         (tpShare_InBPx1e2_Protocol tp) -- pdShare_InBPx1e2_Protocol
-        (tpShare_InBPx1e2_Delegators tp) -- pdShare_InBPx1e2_Delegators
         (tpShare_InBPx1e2_Managers tp) -- pdShare_InBPx1e2_Managers
-        (tpDelegatorsAdmins tp) -- pdDelegatorsAdmins
-        T.oracleData_Valid_Time_aux -- pdOracleData_Valid_Time
+        (tpShare_InBPx1e2_Delegators tp) -- pdShare_InBPx1e2_Delegators
         T.maxDepositAndWithdraw_aux -- pdMaxDepositAndWithdraw
         minAdaProtocolDatum -- pdMinADA
 

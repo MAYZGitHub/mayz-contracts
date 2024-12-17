@@ -248,8 +248,8 @@ getRandomPrice iu1 iu2 = do
 --             <*> QC.arbitrary -- pdCommissionSwapOffer_InBPx1e3
 --             <*> QC.arbitrary -- pdCommissionBuyOrder_InBPx1e3
 --             <*> QC.arbitrary -- pdShare_InBPx1e2_Protocol
---             <*> QC.arbitrary -- pdShare_InBPx1e2_Delegators
 --             <*> QC.arbitrary -- pdShare_InBPx1e2_Managers
+--             <*> QC.arbitrary -- pdShare_InBPx1e2_Delegators
 --             <*> (do sort <$> QC.arbitrary) -- pdDelegatorsAdmins
 --             <*> QC.arbitrary -- pdMinADA
 

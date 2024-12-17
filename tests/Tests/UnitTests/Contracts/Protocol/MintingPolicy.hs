@@ -200,19 +200,19 @@ protocol_Policy_Redeemer_MintID_Tests tp =
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
                                 `assertResultsContainAnyOf` ["not Max commissionBuyOrder_InBPx1e3 <= 100%"],
 
-                        -- Test case for "not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%"
+                        -- Test case for "not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%"
                         Tasty.testCase "Invalid share distribution must fail" $ do
                             let
                                 outputDatum = (protocol_DatumType_MockData tp)
                                                 { ProtocolT.pdShare_InBPx1e2_Protocol = 300000
-                                                , ProtocolT.pdShare_InBPx1e2_Delegators = 300000
                                                 , ProtocolT.pdShare_InBPx1e2_Managers = 300000
+                                                , ProtocolT.pdShare_InBPx1e2_Delegators = 300000
                                                 }
                                 outputProtocolUTxO = (protocol_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ ProtocolT.mkDatum outputDatum}
                                 ctx' = ctx |> setOutputs [outputProtocolUTxO]
                             results <- testContextWrapper tp ctx'
                             (Just (RedeemerLogPolicy (Just Protocol_MintID_TestRedeemer)), results)
-                                `assertResultsContainAnyOf` ["not share_InBPx1e2_Protocol + share_InBPx1e2_Delegators + share_InBPx1e2_Managers = 1_000_000 BPx1e2 = 100%"]
+                                `assertResultsContainAnyOf` ["not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%"]
                     ]
 
 

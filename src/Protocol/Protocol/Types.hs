@@ -179,8 +179,8 @@ data ProtocolDatumType = ProtocolDatumType
     , -- Commission Distribution (basis points x 100)
       -- Must sum to 1,000,000 = 100%
       pdShare_InBPx1e2_Protocol :: Integer -- Protocol's share
-    , pdShare_InBPx1e2_Delegators :: Integer -- Delegators' share
     , pdShare_InBPx1e2_Managers :: Integer -- Fund managers' share
+    , pdShare_InBPx1e2_Delegators :: Integer -- Delegators' share
     , -- Operation Limits
       pdMaxDepositAndWithdraw :: Integer -- Maximum single transaction amount
     , -- Minimum ADA
@@ -206,8 +206,8 @@ instance Eq ProtocolDatumType where
             && pdCommissionSwapOffer_InBPx1e3 ps1 == pdCommissionSwapOffer_InBPx1e3 ps2
             && pdCommissionBuyOrder_InBPx1e3 ps1 == pdCommissionBuyOrder_InBPx1e3 ps2
             && pdShare_InBPx1e2_Protocol ps1 == pdShare_InBPx1e2_Protocol ps2
-            && pdShare_InBPx1e2_Delegators ps1 == pdShare_InBPx1e2_Delegators ps2
             && pdShare_InBPx1e2_Managers ps1 == pdShare_InBPx1e2_Managers ps2
+            && pdShare_InBPx1e2_Delegators ps1 == pdShare_InBPx1e2_Delegators ps2
             && pdDelegatorsAdmins ps1 == pdDelegatorsAdmins ps2
             && pdOracleData_Valid_Time ps1 == pdOracleData_Valid_Time ps2
             && pdMaxDepositAndWithdraw ps1 == pdMaxDepositAndWithdraw ps2
@@ -255,6 +255,8 @@ mkProtocol_DatumType ::
     T.CS ->
     LedgerApiV2.ValidatorHash ->
     LedgerAddress.PaymentPubKey ->
+    LedgerApiV2.POSIXTime ->
+    [T.WalletPaymentPKH] ->
     [T.WalletPaymentPKH] ->
     LedgerApiV2.CurrencySymbol ->
     [FundCategory] ->
@@ -268,8 +270,6 @@ mkProtocol_DatumType ::
     Integer ->
     Integer ->
     Integer ->
-    [T.WalletPaymentPKH] ->
-    LedgerApiV2.POSIXTime ->
     Integer ->
     Integer ->
     ProtocolDatumType
@@ -277,7 +277,9 @@ mkProtocol_DatumType
     scriptPolicyID_CS
     scriptValidator_Hash
     oraclePaymentPubKey
+    oracleData_Valid_Time
     admins
+    delegatorsAdmins
     tokenAdminPolicy_CS
     fundCategories
     fundLifeTime
@@ -288,10 +290,8 @@ mkProtocol_DatumType
     commissionSwapOffer_InBPx1e3
     commissionBuyOrder_InBPx1e3
     share_InBPx1e2_Protocol
-    share_InBPx1e2_Delegators
     share_InBPx1e2_Managers
-    delegatorsAdmins
-    oracleData_Valid_Time
+    share_InBPx1e2_Delegators
     maxDepositAndWithdraw
     minADA =
         let
@@ -304,7 +304,9 @@ mkProtocol_DatumType
                 , pdScriptPolicyID_CS = scriptPolicyID_CS
                 , pdScriptValidator_Hash = scriptValidator_Hash
                 , pdOraclePaymentPubKey = oraclePaymentPubKey
+                , pdOracleData_Valid_Time = oracleData_Valid_Time
                 , pdAdmins = adminsOrdered
+                , pdDelegatorsAdmins = delegatorsAdminsOrdered
                 , pdTokenAdminPolicy_CS = tokenAdminPolicy_CS
                 , pdFundCategories = fundCategoriesOrdered
                 , pdFundLifeTime = fundLifeTime
@@ -315,10 +317,8 @@ mkProtocol_DatumType
                 , pdCommissionSwapOffer_InBPx1e3 = commissionSwapOffer_InBPx1e3
                 , pdCommissionBuyOrder_InBPx1e3 = commissionBuyOrder_InBPx1e3
                 , pdShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol
-                , pdShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators
                 , pdShare_InBPx1e2_Managers = share_InBPx1e2_Managers
-                , pdDelegatorsAdmins = delegatorsAdminsOrdered
-                , pdOracleData_Valid_Time = oracleData_Valid_Time
+                , pdShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators
                 , pdMaxDepositAndWithdraw = maxDepositAndWithdraw
                 , pdMinADA = minADA
                 }
@@ -328,6 +328,8 @@ mkProtocol_Datum ::
     T.CS ->
     LedgerApiV2.ValidatorHash ->
     LedgerAddress.PaymentPubKey ->
+    LedgerApiV2.POSIXTime ->
+    [T.WalletPaymentPKH] ->
     [T.WalletPaymentPKH] ->
     LedgerApiV2.CurrencySymbol ->
     [FundCategory] ->
@@ -341,8 +343,6 @@ mkProtocol_Datum ::
     Integer ->
     Integer ->
     Integer ->
-    [T.WalletPaymentPKH] ->
-    LedgerApiV2.POSIXTime ->
     Integer ->
     Integer ->
     ValidatorDatum
@@ -350,7 +350,9 @@ mkProtocol_Datum
     scriptPolicyID_CS
     scriptValidator_Hash
     oraclePaymentPubKey
+    oracleData_Valid_Time
     admins
+    delegatorsAdmins
     tokenAdminPolicy_CS
     fundCategories
     fundLifeTime
@@ -361,10 +363,8 @@ mkProtocol_Datum
     commissionSwapOffer_InBPx1e3
     commissionBuyOrder_InBPx1e3
     share_InBPx1e2_Protocol
-    share_InBPx1e2_Delegators
     share_InBPx1e2_Managers
-    delegatorsAdmins
-    oracleData_Valid_Time
+    share_InBPx1e2_Delegators
     maxDepositAndWithdraw
     minADA =
         ProtocolDatum $
@@ -372,7 +372,9 @@ mkProtocol_Datum
                 scriptPolicyID_CS
                 scriptValidator_Hash
                 oraclePaymentPubKey
+                oracleData_Valid_Time
                 admins
+                delegatorsAdmins
                 tokenAdminPolicy_CS
                 fundCategories
                 fundLifeTime
@@ -383,10 +385,8 @@ mkProtocol_Datum
                 commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
-                share_InBPx1e2_Delegators
                 share_InBPx1e2_Managers
-                delegatorsAdmins
-                oracleData_Valid_Time
+                share_InBPx1e2_Delegators
                 maxDepositAndWithdraw
                 minADA
 

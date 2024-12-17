@@ -252,6 +252,7 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
         !valueFor_ProtocolDatum = valueFor_ProtocolDatum' <> value_MinADA_For_ProtocolDatum <> LedgerAda.lovelaceValueOf 5000000
 
         !admins = ppppAdmins
+        !delegatorsAdmins = ppppDelegatorsAdmins
         !tokenAdminPolicy_CS = ppppTokenAdminPolicy_CS
         !oraclePaymentPubKey = ppppOraclePaymentPubKey
         !fundCategories = ppppFundCategories
@@ -262,9 +263,8 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
         !commissionSwapOffer_InBPx1e3 = ppppCommissionSwapOffer_InBPx1e3
         !commissionBuyOrder_InBPx1e3 = ppppCommissionBuyOrder_InBPx1e3
         !share_InBPx1e2_Protocol = ppppShare_InBPx1e2_Protocol
-        !share_InBPx1e2_Delegators = ppppShare_InBPx1e2_Delegators
         !share_InBPx1e2_Managers = ppppShare_InBPx1e2_Managers
-        !delegatorsAdmins = ppppDelegatorsAdmins
+        !share_InBPx1e2_Delegators = ppppShare_InBPx1e2_Delegators
 
         !minADA = minADA_For_ProtocolDatum
 
@@ -273,7 +273,9 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
                 scriptPolicyID_CS
                 scriptValidator_Hash
                 oraclePaymentPubKey
+                T.oracleData_Valid_Time_aux
                 admins
+                delegatorsAdmins
                 tokenAdminPolicy_CS
                 fundCategories
                 fundLifeTime
@@ -284,10 +286,8 @@ endPointProtocolPrepare T.PABProtocolPrepareParams {..} = PlutusContract.handleE
                 commissionSwapOffer_InBPx1e3
                 commissionBuyOrder_InBPx1e3
                 share_InBPx1e2_Protocol
-                share_InBPx1e2_Delegators
                 share_InBPx1e2_Managers
-                delegatorsAdmins
-                T.oracleData_Valid_Time_aux
+                share_InBPx1e2_Delegators
                 T.maxDepositAndWithdraw_aux
                 minADA
 
@@ -359,6 +359,7 @@ endPointProtocolUpdate T.PABProtocolUpdateParams {..} = PlutusContract.handleErr
     let
         !oraclePaymentPubKey = ppupOraclePaymentPubKey
         !admins = ppupAdmins
+        !delegatorsAdmins = ppupDelegatorsAdmins
         !tokenAdminPolicy_CS = ppupTokenAdminPolicy_CS
         !fundCategories = ppupFundCategories
         !fundLifeTime = ppupFundLifeTime
@@ -368,28 +369,30 @@ endPointProtocolUpdate T.PABProtocolUpdateParams {..} = PlutusContract.handleErr
         !commissionSwapOffer_InBPx1e3 = ppupCommissionSwapOffer_InBPx1e3
         !commissionBuyOrder_InBPx1e3 = ppupCommissionBuyOrder_InBPx1e3
         !share_InBPx1e2_Protocol = ppupShare_InBPx1e2_Protocol
-        !share_InBPx1e2_Delegators = ppupShare_InBPx1e2_Delegators
         !share_InBPx1e2_Managers = ppupShare_InBPx1e2_Managers
-        !delegatorsAdmins = ppupDelegatorsAdmins
+        !share_InBPx1e2_Delegators = ppupShare_InBPx1e2_Delegators
 
         !protocolDatum_Out =
             T.ProtocolDatum $
                 ProtocolHelpers.mkUpdated_Protocol_Datum_With_NormalChanges
                     protocolDatum_In
                     oraclePaymentPubKey
+                    T.oracleData_Valid_Time_aux
                     admins
+                    delegatorsAdmins
                     tokenAdminPolicy_CS
                     fundCategories
                     fundLifeTime
+                    T.tokenMAYZ_AC_aux
                     requiredMAYZForSwapOffer
                     requiredMAYZForBuyOrder
                     commissionFund_PerYear_InBPx1e3
                     commissionSwapOffer_InBPx1e3
                     commissionBuyOrder_InBPx1e3
                     share_InBPx1e2_Protocol
-                    share_InBPx1e2_Delegators
                     share_InBPx1e2_Managers
-                    delegatorsAdmins
+                    share_InBPx1e2_Delegators
+                    T.maxDepositAndWithdraw_aux
 
     PlutusContract.logInfo @P.String $ TextPrintf.printf "protocolDatum_In: %s" (P.show protocolDatum_In)
     PlutusContract.logInfo @P.String $ TextPrintf.printf "protocolDatum_Out: %s" (P.show protocolDatum_Out)

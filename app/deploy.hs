@@ -7,5 +7,5 @@ import qualified Protocol.Deploy    as Deploy
 
 main :: P.IO ()
 main = do
-  _ <- Deploy.deploy_Protocol_And_Fund_Factory_With_StringParams
+  _ <- Deploy.deploy_Protocol_And_Fund_Factory
   P.return ()

@@ -1,0 +1,7 @@
+
+cabal test UnitTests
+cabal test PropertyBasedTests
+cabal test PerformanceTests
+cabal test AutomaticTests
+
+cabal run deploy

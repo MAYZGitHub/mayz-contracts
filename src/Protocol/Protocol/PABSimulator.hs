@@ -152,8 +152,8 @@ pabProtocolPrepare (walletNro, walletCount) protocolPABParams pabReturnToMainMen
     fundCategories <- MonadIOClass.liftIO promptFundCategories
     ---------------------
     share_InBPx1e2_Protocol <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "Protocol share (1pb = 0.01% / 10,000pb = 100%)" 333_400
-    share_InBPx1e2_Delegators <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "MAYZ share (1pb = 0.01% / 10,000pb = 100%)" 333_300
     share_InBPx1e2_Managers <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "Admins share (1pb = 0.01% / 10,000pb = 100%)" 333_300
+    share_InBPx1e2_Delegators <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "MAYZ share (1pb = 0.01% / 10,000pb = 100%)" 333_300
     ---------------------
     let contract =
             PABContracts.PABProtocolPrepare
@@ -171,8 +171,8 @@ pabProtocolPrepare (walletNro, walletCount) protocolPABParams pabReturnToMainMen
                         T.ppppCommissionSwapOffer_InBPx1e3 = T.mkMinMaxDef 0 0 0,
                         T.ppppCommissionBuyOrder_InBPx1e3 = T.mkMinMaxDef 0 0 0,
                         T.ppppShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol,
-                        T.ppppShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators,
                         T.ppppShare_InBPx1e2_Managers = share_InBPx1e2_Managers,
+                        T.ppppShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators,
                         T.ppppDelegatorsAdmins = mayzHolderWallets
                     }
     contractInstance <- PABSimulator.activateContract (PABHelpers.getWallet walletNro) contract
@@ -244,8 +244,8 @@ pabProtocolUpdate (walletNro, walletCount) protocolPABParams pabReturnToMainMenu
             fundCategories <- MonadIOClass.liftIO promptFundCategories
             ---------------------
             share_InBPx1e2_Protocol <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "Protocol share (1pb = 0.01% / 10,000pb = 100%)" 333_400
-            share_InBPx1e2_Delegators <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "MAYZ share (1pb = 0.01% / 10,000pb = 100%)" 333_300
             share_InBPx1e2_Managers <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "Admins share (1pb = 0.01% / 10,000pb = 100%)" 333_300
+            share_InBPx1e2_Delegators <- MonadIOClass.liftIO  $ CLIHelpers.getIntWithDefault "MAYZ share (1pb = 0.01% / 10,000pb = 100%)" 333_300
             ---------------------
             -- TODO: leer el resto de los campos que no se actualizan del datum , apra no sobreescebirlos con default
             let
@@ -262,8 +262,8 @@ pabProtocolUpdate (walletNro, walletCount) protocolPABParams pabReturnToMainMenu
                     T.ppupCommissionSwapOffer_InBPx1e3 = T.pdCommissionSwapOffer_InBPx1e3 protocolDatum,
                     T.ppupCommissionBuyOrder_InBPx1e3 = T.pdCommissionBuyOrder_InBPx1e3 protocolDatum,
                     T.ppupShare_InBPx1e2_Protocol = share_InBPx1e2_Protocol,
-                    T.ppupShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators,
                     T.ppupShare_InBPx1e2_Managers = share_InBPx1e2_Managers,
+                    T.ppupShare_InBPx1e2_Delegators = share_InBPx1e2_Delegators,
                     T.ppupDelegatorsAdmins = mayzHolderWallets
                 }
 

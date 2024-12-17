@@ -89,8 +89,8 @@ protocol_Validator_Redeemer_DatumUpdate_Tests tp =
                                         , ProtocolT.pdCommissionSwapOffer_InBPx1e3 = ProtocolT.mkMinMaxDef 1 1 1
                                         , ProtocolT.pdCommissionBuyOrder_InBPx1e3 = ProtocolT.mkMinMaxDef 1 1 1
                                         , ProtocolT.pdShare_InBPx1e2_Protocol = 400_000
-                                        , ProtocolT.pdShare_InBPx1e2_Delegators = 300_000
                                         , ProtocolT.pdShare_InBPx1e2_Managers = 300_000
+                                        , ProtocolT.pdShare_InBPx1e2_Delegators = 300_000
                                         , ProtocolT.pdDelegatorsAdmins = [newPubKeyHash]
                                         }
                                 outputProtocolUTxO = (protocol_UTxO_MockData tp) {LedgerApiV2.txOutDatum = LedgerApiV2.OutputDatum $ ProtocolT.mkDatum outputDatum}

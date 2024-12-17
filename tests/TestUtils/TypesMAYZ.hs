@@ -113,8 +113,8 @@ data TestParams
           , tp_MinMaxDef_CommissionSwapOffer_InBPx1e3    :: ProtocolT.MinMaxDef Integer
           , tp_MinMaxDef_CommissionBuyOrder_InBPx1e3     :: ProtocolT.MinMaxDef Integer
           , tpShare_InBPx1e2_Protocol                    :: Integer
-          , tpShare_InBPx1e2_Delegators                  :: Integer
           , tpShare_InBPx1e2_Managers                    :: Integer
+          , tpShare_InBPx1e2_Delegators                  :: Integer
           , tpBeginAt                                    :: LedgerApiV2.POSIXTime
           , tpDeadline                                   :: LedgerApiV2.POSIXTime
           , tpClosedAt                                   :: Maybe LedgerApiV2.POSIXTime

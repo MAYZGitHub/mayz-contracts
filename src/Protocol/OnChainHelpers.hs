@@ -86,10 +86,12 @@ isCorrect_Oracle_Signature priceData oraclePaymentPubKey oracle_Signature =
 {-# INLINEABLE isCorrect_Oracle_InRangeTime #-}
 isCorrect_Oracle_InRangeTime :: LedgerApiV2.TxInfo -> LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Bool
 isCorrect_Oracle_InRangeTime !info !oracle_Time !oracleData_Valid_Time =
-    case Ledger.ivFrom (LedgerApiV2.txInfoValidRange info) of
-        Ledger.LowerBound (Ledger.Finite txStartTime) _ -> 
-            txStartTime - oracle_Time <= oracleData_Valid_Time
-        _ -> traceError "Interval has no lower bound"
+    case (Ledger.ivFrom (LedgerApiV2.txInfoValidRange info), Ledger.ivTo (LedgerApiV2.txInfoValidRange info)) of
+        (Ledger.LowerBound (Ledger.Finite txStartTime) _, Ledger.UpperBound (Ledger.Finite txEndTime) _) ->
+            let lowerCheck = (txStartTime - oracle_Time) <= oracleData_Valid_Time
+                upperCheck = oracle_Time <= txEndTime
+            in lowerCheck && upperCheck
+        _ -> traceError "Transaction interval has no finite bounds"
 
 --------------------------------------------------------------------------------
 
