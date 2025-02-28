@@ -163,7 +163,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_TxOutRef) _ !ctxRaw =
                 && traceIfFalse "not Max commissionBuyOrder_InBPx1e3 <= 100%" (T.mmdMax commissionBuyOrder_InBPx1e3 <= 10_000_000)
                 && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators == 1_000_000) -- 1_000_000 BPx1e2 = 100%
                 && traceIfFalse "not (racleData_Valid_Time > 0" (oracleData_Valid_Time > 0)
-                && traceIfFalse "not (maxDepositAndWithdraw > 0" (maxDepositAndWithdraw > 0)
+                && traceIfFalse "not (maxDepositAndWithdraw >= 0" (maxDepositAndWithdraw >= 0)
         ------------------
         isSequentialAndUnique :: [Integer] -> Bool
         isSequentialAndUnique xs = xs == OnChainHelpers.enumFromTo 0 (length xs - 1)
@@ -356,7 +356,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             && traceIfFalse "not Min commissionBuyOrder_InBPx1e3 >= 0" (T.mmdMin commissionBuyOrder_InBPx1e3 >= 0)
                                             && traceIfFalse "not share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators = 1_000_000 BPx1e2 = 100%" (share_InBPx1e2_Protocol + share_InBPx1e2_Managers + share_InBPx1e2_Delegators == 1_000_000) -- 1_000_000 BPx1e2 = 100%
                                             && traceIfFalse "not (racleData_Valid_Time > 0" (oracleData_Valid_Time > 0)
-                                            && traceIfFalse "not (maxDepositAndWithdraw > 0" (maxDepositAndWithdraw > 0)
+                                            && traceIfFalse "not (maxDepositAndWithdraw >= 0" (maxDepositAndWithdraw >= 0)
                                             ------------------
                                     isCorrect_Output_Protocol_Value_NotChanged :: Bool
                                     !isCorrect_Output_Protocol_Value_NotChanged =
