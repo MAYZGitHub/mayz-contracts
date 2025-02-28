@@ -502,45 +502,54 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !fundPolicy_CS !tokenEmergen
                                                 isCorrect_Outputs_FundHoldingDatums_With_UpdatedCommissionsAndRate =
                                                     let
                                                         --------------------
-                                                        -- Solo dos elementos en fundHoldingDatums_In, fundHoldingDatums_Out y alterCommissionsFT
-                                                        !datumIn1 = head fundHoldingDatums_In
-                                                        !datumIn2 = (head . tail) fundHoldingDatums_In
-                                                        !datumOut1 = head fundHoldingDatums_Out
-                                                        !datumOut2 = (head . tail) fundHoldingDatums_Out
-                                                        !alterCommissions1 = head alterCommissionsFT
+                                                        -- Ensure lists have the required elements
+                                                        isValidLength = length fundHoldingDatums_In == 2 && length fundHoldingDatums_Out == 2 && length alterCommissionsFT == 2
                                                         --------------------
-                                                        -- Obtener nuevas comisiones para el primer datum de salida
-                                                        -- Sumamos comisiones anteriores con el primer elemento de alterCommissionsFT
-                                                        !oldCommissions1 = T.hdSubtotal_FT_Commissions datumIn1
-                                                        !newCommissions1 = oldCommissions1 + alterCommissions1
-                                                        -- Obtener nuevas comisiones para el segundo datum de salida
-                                                        -- Restamos el primer elemento de alterCommissionsFT a las comisiones anteriores del segundo datum de entrada
-                                                        !oldCommissions2 = T.hdSubtotal_FT_Commissions datumIn2
-                                                        !newCommissions2 = oldCommissions2 - alterCommissions1
-                                                        --------------------
-                                                        -- Calcular el ratio de cambio basado en comisiones
-                                                        !changeRatio1 = if oldCommissions1 > 0 then
-                                                                TxRatio.unsafeRatio alterCommissions1 oldCommissions1 
-                                                            else
-                                                                traceError "Expected oldCommissions firts input to be greater than 0"
-                                                        -- Calcular el cambio en el distribution
-                                                        !oldRelease1 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn1
-                                                        !oldRelease2 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn2
-                                                        -- Cambiar Release usando el changeRatio1
-                                                        !changeRelease1 = TxRatio.truncate (changeRatio1 * TxRatio.fromInteger oldRelease1)
-                                                        -- El nuevo Release para el primer datum de salida es el Release anterior + cambio
-                                                        !newRelease1 = oldRelease1 + changeRelease1
-                                                        -- El nuevo Release para el segundo datum de salida es el Release anterior - cambio
-                                                        !newRelease2 = oldRelease2 - changeRelease1
-                                                        --------------------
-                                                        -- Crear los datums de control para validar la salida
-                                                        !datumControl1 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn1 newCommissions1 newRelease1
-                                                        !datumControl2 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn2 newCommissions2 newRelease2
                                                     in
-                                                        -- Verificamos que los datums de salida coincidan con los controlados
-                                                        OnChainHelpers.isUnsafeEqDatums datumControl1 datumOut1 &&
-                                                        OnChainHelpers.isUnsafeEqDatums datumControl2 datumOut2 &&
-                                                        traceIfFalse "not isCorrect newCommissions >=0 and newRelease >=0" (newCommissions1 >= 0 && newCommissions2 >= 0 && newRelease1 >= 0 && newRelease2 >= 0)
+                                                        if not isValidLength then
+                                                            traceError "Insufficient datums for validation"
+                                                        else
+                                                            let
+                                                                -- Solo dos elementos en fundHoldingDatums_In, fundHoldingDatums_Out y alterCommissionsFT
+                                                                !datumIn1 = head fundHoldingDatums_In
+                                                                !datumIn2 = (head . tail) fundHoldingDatums_In
+                                                                !datumOut1 = head fundHoldingDatums_Out
+                                                                !datumOut2 = (head . tail) fundHoldingDatums_Out
+                                                                !alterCommissions1 = head alterCommissionsFT
+                                                                !alterCommissions2 = (head . tail) alterCommissionsFT
+                                                                --------------------
+                                                                -- Obtener nuevas comisiones para el primer datum de salida
+                                                                -- Sumamos comisiones anteriores con el primer elemento de alterCommissionsFT
+                                                                !oldCommissions1 = T.hdSubtotal_FT_Commissions datumIn1
+                                                                !newCommissions1 = oldCommissions1 + alterCommissions1
+                                                                -- Obtener nuevas comisiones para el segundo datum de salida
+                                                                -- Restamos el primer elemento de alterCommissionsFT a las comisiones anteriores del segundo datum de entrada
+                                                                !oldCommissions2 = T.hdSubtotal_FT_Commissions datumIn2
+                                                                !newCommissions2 = oldCommissions2 + alterCommissions2
+                                                                --------------------
+                                                                -- Calcular el ratio de cambio basado en comisiones
+                                                                !changeRatio1 = if oldCommissions1 > 0 then
+                                                                        TxRatio.unsafeRatio alterCommissions1 oldCommissions1 
+                                                                    else
+                                                                        traceError "Expected oldCommissions firts input to be greater than 0"
+                                                                -- Calcular el cambio en el distribution
+                                                                !oldRelease1 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn1
+                                                                !oldRelease2 = T.hdSubtotal_FT_Commissions_Release_PerMonth_1e6 datumIn2
+                                                                -- Cambiar Release usando el changeRatio1
+                                                                !changeRelease1 = TxRatio.truncate (changeRatio1 * TxRatio.fromInteger oldRelease1)
+                                                                -- El nuevo Release para el primer datum de salida es el Release anterior + cambio
+                                                                !newRelease1 = oldRelease1 + changeRelease1
+                                                                -- El nuevo Release para el segundo datum de salida es el Release anterior - cambio
+                                                                !newRelease2 = oldRelease2 - changeRelease1
+                                                                --------------------
+                                                                -- Crear los datums de control para validar la salida
+                                                                !datumControl1 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn1 newCommissions1 newRelease1
+                                                                !datumControl2 = FundHelpers.mkUpdated_FundHolding_Datum_With_CommissionsMoved datumIn2 newCommissions2 newRelease2
+                                                            in
+                                                                -- Verificamos que los datums de salida coincidan con los controlados
+                                                                OnChainHelpers.isUnsafeEqDatums datumControl1 datumOut1 &&
+                                                                OnChainHelpers.isUnsafeEqDatums datumControl2 datumOut2 &&
+                                                                traceIfFalse "not isCorrect newCommissions >=0 and newRelease >=0" (newCommissions1 >= 0 && newCommissions2 >= 0 && newRelease1 >= 0 && newRelease2 >= 0)
                                                 ------------------
                                                 isCorrect_Output_FundHolding_Values_SameTotal :: Bool
                                                 !isCorrect_Output_FundHolding_Values_SameTotal =

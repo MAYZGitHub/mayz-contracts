@@ -1,0 +1,14 @@
+{
+  "includeFolders": [
+    {
+      "path": ".",
+      "includeSubfolders": true
+    }
+  ],
+  "excludeFolders": [],
+  "fileTypes": [
+    ".hs"
+  ],
+  "includePattern": "",
+  "excludePattern": ""
+}

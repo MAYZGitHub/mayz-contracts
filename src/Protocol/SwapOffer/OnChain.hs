@@ -345,8 +345,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                         | otherwise = False
                         where
                             ------------------
-
-                            ------------------
                             !inputsRef_TxOuts =
                                 [ LedgerApiV2.txInInfoResolved txInfoInput | !txInfoInput <- LedgerApiV2.txInfoReferenceInputs info, OnChainHelpers.isScriptAddress (LedgerApiV2.txOutAddress $ LedgerApiV2.txInInfoResolved txInfoInput)
                                 ]
@@ -428,11 +426,12 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 -- check datum update with new status
                                 -- check value not changed
                                 ------------------
-                                traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_StatusChanged" isCorrect_Output_SwapOffer_Datum_With_StatusChanged
+                                traceIfFalse "not isValidStatus swapOffer_Status_Open" (isValidStatus newStatus)
+                                    && traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_StatusChanged" isCorrect_Output_SwapOffer_Datum_With_StatusChanged
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_NotChanged" isCorrect_Output_SwapOffer_Value_NotChanged
                                 where
                                     ------------------
-
+                                    isValidStatus status = status == T.swapOffer_Status_Open || status == T.swapOffer_Status_Closed
                                     ------------------
                                     isCorrect_Output_SwapOffer_Datum_With_StatusChanged :: Bool
                                     !isCorrect_Output_SwapOffer_Datum_With_StatusChanged =
@@ -448,9 +447,9 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 ---------------------
                                 -- it runs alone
                                 ---------------------
-                                traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_CommissionChanged" isCorrect_Output_SwapOffer_Datum_With_CommissionChanged
+                                    traceIfFalse "not isInRange commissionSwapOffer_InBPx1e3" (ProtocolT.isInRange commissionSwapOffer_InBPx1e3 newCommissionRate)
+                                    && traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_CommissionChanged" isCorrect_Output_SwapOffer_Datum_With_CommissionChanged
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_NotChanged" isCorrect_Output_SwapOffer_Value_NotChanged
-                                    && traceIfFalse "not isInRange commissionSwapOffer_InBPx1e3" (ProtocolT.isInRange commissionSwapOffer_InBPx1e3 (T.sodAskedCommission_InBPx1e3 swapOffer_Datum_Out))
                                 where
                                     ------------------
                                     !commissionSwapOffer_InBPx1e3 = ProtocolT.pdCommissionSwapOffer_InBPx1e3 getLazyProtocolDatum_In
@@ -469,9 +468,15 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 ---------------------
                                 -- it runs alone
                                 ---------------------
-                                traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged" isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged
+                                traceIfFalse "not isValidAllowOption sodOrder_AllowSellFT" (isValidAllowOption rusrAllowSellFT)
+                                    && traceIfFalse "not isValidAllowOption sodOrder_AllowSellADA" (isValidAllowOption rusrAllowSellADA)
+                                    && traceIfFalse
+                                        "not isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged"
+                                        isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_NotChanged" isCorrect_Output_SwapOffer_Value_NotChanged
                                 where
+                                    ------------------
+                                    isValidAllowOption option = option == T.swapOffer_AllowSell || option == T.swapOffer_NotAllowSell
                                     ------------------
                                     isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged :: Bool
                                     !isCorrect_Output_SwapOffer_Datum_With_RestrictionsChanged =
@@ -491,8 +496,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_MinADAChanged" isCorrect_Output_SwapOffer_Datum_With_MinADAChanged
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_With_MinADAChanged" isCorrect_Output_SwapOffer_Value_With_MinADAChanged
                                 where
-                                    ------------------
-
                                     ------------------
                                     !newMinADA = T.sodMinADA swapOffer_Datum_Out
                                     ------------------
@@ -515,11 +518,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 ---------------------
                                 -- it runs alone
                                 ---------------------
-                                traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_Deposit" isCorrect_Output_SwapOffer_Datum_With_Deposit
+                                traceIfFalse "deposits amounts must be greater than zero" (newDeposit_FT >= 0 && newDeposit_ADA >= 0)
+                                    && traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_Deposit" isCorrect_Output_SwapOffer_Datum_With_Deposit
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_With_Deposit" isCorrect_Output_SwapOffer_Value_With_Deposit
                                 where
-                                    ------------------
-
                                     ------------------
                                     isCorrect_Output_SwapOffer_Datum_With_Deposit :: Bool
                                     !isCorrect_Output_SwapOffer_Datum_With_Deposit =
@@ -545,11 +547,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                 ---------------------
                                 -- it runs alone
                                 ---------------------
-                                traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_Withdraw" isCorrect_Output_SwapOffer_Datum_With_Withdraw
+                                traceIfFalse "withdraws amounts must be greater than zero" (newWithdraw_FT >= 0 && newWithdraw_ADA >= 0)
+                                    && traceIfFalse "not isCorrect_Output_SwapOffer_Datum_With_Withdraw" isCorrect_Output_SwapOffer_Datum_With_Withdraw
                                     && traceIfFalse "not isCorrect_Output_SwapOffer_Value_With_Withdraw" isCorrect_Output_SwapOffer_Value_With_Withdraw
                                 where
-                                    ------------------
-
                                     ------------------
                                     isCorrect_Output_SwapOffer_Datum_With_Withdraw :: Bool
                                     !isCorrect_Output_SwapOffer_Datum_With_Withdraw =
@@ -592,6 +593,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         ------------------
                                         traceIfFalse "not isOrderOpen" isOrderOpen
                                             && traceIfFalse "isOrderRestrictedForSellingADA" (not isOrderRestrictedForSellingADA)
+                                            && traceIfFalse "swap amounts must be greater than zero" (rsfxaAmount_FT > 0 && rsfxaAmount_ADA > 0 && rsfxaCommission_ADA >= 0)
                                             && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rsfxaOracle_Signature)
                                             && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsfxaOracle_Data) (ProtocolT.pdOracleData_Valid_Time protocolDatum_In))
                                             && traceIfFalse "not isCorrect_Conversion" (isCorrect_Conversion rsfxaOracle_Data rsfxaAmount_FT rsfxaAmount_ADA)
@@ -639,6 +641,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         ------------------
                                         traceIfFalse "not isOrderOpen" isOrderOpen
                                             && traceIfFalse "isOrderRestrictedForSellingFT" (not isOrderRestrictedForSellingFT)
+                                            && traceIfFalse "swap amounts must be greater than zero" (rsaxfAmount_ADA > 0 && rsaxfAmount_FT > 0 && rsaxfCommission_FT >= 0)
                                             && traceIfFalse "not isCorrect_Oracle_Signature" (OnChainHelpers.isCorrect_Oracle_Signature priceData oraclePaymentPubKey rsaxfOracle_Signature)
                                             && traceIfFalse "not isCorrect_Oracle_InRangeTime" (OnChainHelpers.isCorrect_Oracle_InRangeTime info (T.odTime rsaxfOracle_Data) (ProtocolT.pdOracleData_Valid_Time protocolDatum_In))
                                             && traceIfFalse "not isCorrect_Conversion" (isCorrect_Conversion rsaxfOracle_Data rsaxfAmount_FT rsaxfAmount_ADA)
@@ -678,7 +681,11 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                     isCorrect_Conversion :: T.Oracle_Data -> Integer -> Integer -> Bool
                                     isCorrect_Conversion oracle_Data !amount_FT !amount_ADA =
                                         let
-                                            !(cs, tn, priceADAx1e6) = head $ T.iuValues $ T.odFTPriceADA1xe6 oracle_Data
+                                            !values = T.iuValues $ T.odFTPriceADA1xe6 oracle_Data
+                                            !(cs, tn, priceADAx1e6) =
+                                                if null values
+                                                    then traceError "Oracle Data values are empty"
+                                                    else head values
                                             !price_FT_in_ADA =
                                                 if cs == fundPolicy_CS && tn == fundFT_TN
                                                     then priceADAx1e6
@@ -717,10 +724,7 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                             commission' = OnChainHelpers.multiply_By_Scaled_BPx1e3_And_RoundUp swap_Amount commissionRate
                                         in
                                             --------
-
                                             commission' == commission_Payed
-
-------------------
 
 --------------------------------------------------------------------------------2
 

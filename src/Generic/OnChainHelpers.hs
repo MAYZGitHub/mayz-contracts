@@ -257,6 +257,7 @@ powInteger :: Integer -> Integer -> Integer
 powInteger num n
     | n == 0    = 1
     | num == 0    = 0
+    | n < 0     = P.error "Negative exponents not supported in powInteger"
     | even n    = powInteger (num * num) (n `divide` 2)
     | otherwise = num * powInteger (num * num) (n `divide` 2)
 
@@ -266,6 +267,7 @@ powRational !num !dem !n
     | n == 0    = TxRatio.fromInteger 1
     | num == 0  = TxRatio.fromInteger 0
     | n < 0     = TxRatio.recip $ powRational num dem (negate n)
+    | dem == 0  = traceError "Denominator cannot be zero in powRational"
     | otherwise = TxRatio.unsafeRatio (num `powInteger` n) (dem `powInteger` n)
 
 --------------------------------------------------------------------------------2

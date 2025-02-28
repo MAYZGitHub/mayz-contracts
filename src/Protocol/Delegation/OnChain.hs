@@ -76,6 +76,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash) !red
                     -- que tenga el value correcto, con ID, con MAYZ delegados y con min ADA, segun Datum. De esta forma tambien se valida el Datum un poco
                     ------------------
                     traceIfFalse "not isMintingDelegationID" isMintingDelegationID
+                        && traceIfFalse "deposit amount must be greater than zero" (delegated_MAYZ > 0)
                         && traceIfFalse "not isCorrect_Output_Delegation_Datum" isCorrect_Output_Delegation_Datum
                         && traceIfFalse "not isCorrect_Output_Delegation_Value" isCorrect_Output_Delegation_Value
                         && traceIfFalse "expected zero Delegation inputs" (null inputs_Own_TxOuts)
@@ -128,6 +129,8 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash) !red
                         ------------------
                         !delegation_Datum_Out = OnChainHelpers.getDatum_In_TxOut_And_Datum output_Own_TxOut_And_Delegation_Datum
                         ---------------------
+                        !delegated_MAYZ = T.ddDelegated_MAYZ delegation_Datum_Out
+                        ---------------------
                         isMintingDelegationID :: Bool
                         isMintingDelegationID = OnChainHelpers.getUnsafeOwnMintingValue ctx `OnChainHelpers.isEqValue` valueFor_Mint_Delegation_ID
                         ------------------
@@ -141,7 +144,7 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash) !red
                                         (T.ddDelegatorPaymentPKH delegation_Datum_Out)
                                         (T.ddDelegatorStakePKH delegation_Datum_Out)
                                         tokenMAYZ_AC
-                                        (T.ddDelegated_MAYZ delegation_Datum_Out)
+                                        delegated_MAYZ
                                         (T.ddMinADA delegation_Datum_Out)
                             in
                                 delegation_Datum_Out `OnChainHelpers.isUnsafeEqDatums` delegation_Datum_Out_Control
@@ -154,7 +157,6 @@ mkPolicyID (T.PolicyParams !protocolPolicyID_CS !delegation_Validator_Hash) !red
                                 !minADA_For_Delegation_Datum = T.ddMinADA delegation_Datum_Out
                                 !value_MinADA_For_Delegation_Datum = LedgerAda.lovelaceValueOf minADA_For_Delegation_Datum
                                 ---------------------
-                                !delegated_MAYZ = T.ddDelegated_MAYZ delegation_Datum_Out
                                 !valueOf_Delegated_MAYZ = LedgerValue.assetClassValue tokenMAYZ_AC delegated_MAYZ
                                 ---------------------
                                 !valueFor_Delegation_Datum_Out_Control = valueFor_Delegation_Datum' <> value_MinADA_For_Delegation_Datum <> valueOf_Delegated_MAYZ
@@ -256,7 +258,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                 isBurningDelegationID :: Bool
                 isBurningDelegationID = OnChainHelpers.isNFT_Burning_With_AC delegationID_AC info
         ------------------
-        ------------------
         validateAllButDelete :: Bool
         validateAllButDelete
             ------------------
@@ -265,8 +266,6 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
             | redeemerType == redeemerUpdateMinADA = validateAdminAction && validateUpdateMinADA redeemer
             | otherwise = False
             where
-                ------------------
-
                 ------------------
                 !protocolID_AC = LedgerValue.AssetClass (protocolPolicyID_CS, T.protocolID_TN)
                 ------------------
@@ -320,11 +319,10 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                     -- check datum update with new minAda
                     -- check value changed ADA
                     ------------------
-                    traceIfFalse "not isCorrect_Output_Delegation_Datum_With_MinADAChanged" isCorrect_Output_Delegation_Datum_With_MinADAChanged
+                    traceIfFalse "not min ADA > 0" (newMinADA > 0)
+                        && traceIfFalse "not isCorrect_Output_Delegation_Datum_With_MinADAChanged" isCorrect_Output_Delegation_Datum_With_MinADAChanged
                         && traceIfFalse "not isCorrect_Output_Delegation_Value_With_MinADAChanged" isCorrect_Output_Delegation_Value_With_MinADAChanged
                     where
-                        ------------------
-
                         ------------------
                         !newMinADA = T.ddMinADA delegation_Datum_Out
                         ------------------
@@ -352,7 +350,8 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                     -- check datum update with deposit
                     -- check value changed with deposit
                     ------------------
-                    traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged vrdDelegated_MAYZ_Change)
+                    traceIfFalse "deposit amount must be greater than zero" (vrdDelegated_MAYZ_Change > 0)
+                        && traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged vrdDelegated_MAYZ_Change)
                         && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged vrdDelegated_MAYZ_Change)
                 ------------------
                 validateDeposit _ = False
@@ -367,7 +366,13 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS) !datumRaw !redRaw !ctxRaw =
                     -- check datum update with withdraw ... me parece que no hay cambios que se hagan en el datum en esta tx
                     -- check value changed with withdraw
                     ------------------
-                    traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged (negate vrdwDelegated_MAYZ_Change))
+                    traceIfFalse
+                        "withdraw amount must be greater than zero"
+                        (vrdwDelegated_MAYZ_Change > 0)
+                        && traceIfFalse
+                            "not withdraw <= Delegated MAYZ"
+                            (vrdwDelegated_MAYZ_Change <= T.ddDelegated_MAYZ delegation_Datum_In)
+                        && traceIfFalse "not isCorrect_Output_Delegation_Datum_With_DelegationChanged" (isCorrect_Output_Delegation_Datum_With_DelegationChanged (negate vrdwDelegated_MAYZ_Change))
                         && traceIfFalse "not isCorrect_Output_Delegation_Value_With_DelegationChanged" (isCorrect_Output_Delegation_Value_With_DelegationChanged (negate vrdwDelegated_MAYZ_Change))
                 ------------------
                 validateWithdraw _ = False

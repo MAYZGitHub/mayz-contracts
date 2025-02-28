@@ -175,17 +175,17 @@ data FactoryDeployParams = FactoryDeployParams
     , fpBuyOrderVersion :: Integer
     , fpDelegationVersion :: Integer
     , fpScriptVersion :: Integer
-    , fpProtocolPolicyID_PRE_CborHex :: P.String
-    , fpProtocolValidator_PRE_CborHex :: P.String
-    , fpScriptPolicyID_PRE_CborHex :: P.String
-    , fpScriptValidator_PRE_CborHex :: P.String
-    , fpSwapOfferPolicyID_PRE_CborHex :: P.String
-    , fpSwapOfferValidator_PRE_CborHex :: P.String
-    , fpBuyOrderPolicyID_PRE_CborHex :: P.String
-    , fpBuyOrderValidator_PRE_CborHex :: P.String
-    , fpDelegationPolicyID_PRE_CborHex :: P.String
-    , fpDelegationValidator_PRE_CborHex :: P.String
-    , fpInvestUnitValidator_PRE_CborHex :: P.String
+    , fpProtocolPolicyID_Pre_CborHex :: P.String
+    , fpProtocolValidator_Pre_CborHex :: P.String
+    , fpScriptPolicyID_Pre_CborHex :: P.String
+    , fpScriptValidator_Pre_CborHex :: P.String
+    , fpSwapOfferPolicyID_Pre_CborHex :: P.String
+    , fpSwapOfferValidator_Pre_CborHex :: P.String
+    , fpBuyOrderPolicyID_Pre_CborHex :: P.String
+    , fpBuyOrderValidator_Pre_CborHex :: P.String
+    , fpDelegationPolicyID_Pre_CborHex :: P.String
+    , fpDelegationValidator_Pre_CborHex :: P.String
+    , fpInvestUnitValidator_Pre_CborHex :: P.String
     , fpFundPolicy_Pre_CborHex :: P.String
     , fpFundValidator_Pre_CborHex :: P.String
     , fpFundHoldingPolicyID_Pre_CborHex :: P.String
