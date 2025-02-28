@@ -17,32 +17,32 @@ module Contracts.Fund.Holding.Validator where
 --------------------------------------------------------------------------------
 
 -- Non-IOG imports
-import qualified GHC.Stack                                as GHC
-import           Prelude                                  as P
-import qualified Test.Tasty                               as Tasty
+import qualified GHC.Stack as GHC
+import qualified Test.Tasty as Tasty
+import Prelude as P
 
 -- IOG imports
-import qualified Plutus.V2.Ledger.Api                     as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 
 -- Project imports
 
-import qualified Generic.Constants                        as T
-import qualified Protocol.Constants                       as T
-import qualified Protocol.Fund.Holding.Types              as FundHoldingT
-import qualified Protocol.Protocol.Types                  as ProtocolT
+import qualified Generic.Constants as T
+import qualified Protocol.Constants as T
+import qualified Protocol.Fund.Holding.Types as FundHoldingT
+import qualified Protocol.Protocol.Types as ProtocolT
 
-import           TestUtils.Automatic.ParamsGenerators
-import           TestUtils.Automatic.ParamsGeneratorsMAYZ
-import           TestUtils.Automatic.TestCases
-import           TestUtils.Automatic.TestConfigTree
-import           TestUtils.Automatic.TestRules
-import           TestUtils.Automatic.TxGenerators
-import           TestUtils.Automatic.Types
-import           TestUtils.Constants
-import           TestUtils.Contracts.InitialData
-import           TestUtils.Contracts.TxSpecs.FundHolding
-import           TestUtils.Types
-import           TestUtils.TypesMAYZ
+import TestUtils.Automatic.ParamsGenerators
+import TestUtils.Automatic.ParamsGeneratorsMAYZ
+import TestUtils.Automatic.TestCases
+import TestUtils.Automatic.TestConfigTree
+import TestUtils.Automatic.TestRules
+import TestUtils.Automatic.TxGenerators
+import TestUtils.Automatic.Types
+import TestUtils.Constants
+import TestUtils.Contracts.InitialData
+import TestUtils.Contracts.TxSpecs.FundHolding
+import TestUtils.Types
+import TestUtils.TypesMAYZ
 
 --------------------------------------------------------------------------------
 
@@ -66,7 +66,8 @@ fundHolding_Validator_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_UpdateMinADA_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_UpdateMinADA_Tx
         txSpecs = fundHolding_UpdateMinADA_TxSpecs tp
         ------------
@@ -91,14 +92,16 @@ fundHolding_Validator_Redeemer_UpdateMinADA_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
 --------------------------------------------------------------------------------
 
 fundHolding_Validator_Redeemer_Deposit_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show Fund_Deposit_Tx
         txSpecs = fundHolding_Deposit_TxSpecs tp
         ------------------------
@@ -203,7 +206,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
                 , dependentBetweenPlusPosixTimeRangeParam "depositDate" T.validTxTimeRange "beginDate" "deadlineDate"
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
-                , dependentDepositParam "depositAmount" T.maxDepositAndWithdraw_aux (T.maxDepositAndWithdraw_aux + 100_000_000) True "investUnitTokens"
+                , dependentDepositParam "depositAmount" (T.maxDepositAndWithdraw_aux + 1) (T.maxDepositAndWithdraw_aux + 100_000_000) True "investUnitTokens"
                 ]
         txParamsGenerators_Invalid_Amount_Granularity =
             TxParamGenerators
@@ -254,7 +257,7 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
             , ("Deposit with max commission rate", txParamsGenerators_Deposit_MaxCommission)
             , ("Invalid quantity of Tokens in Invest Unit", txParamsGenerators_Invalid_InvestUnit)
             , ("Invalid Deposit amount <= 0", txParamsGenerators_Invalid_Amount_LessZero)
-            , ("Invalid Deposit amount >= MAX", txParamsGenerators_Invalid_Amount_MoreMax)
+            , ("Invalid Deposit amount > MAX", txParamsGenerators_Invalid_Amount_MoreMax)
             , ("Invalid Deposit amount not multiplier of Invest Unit granularity", txParamsGenerators_Invalid_Amount_Granularity)
             , ("Valid Deposit with MinLifeTime", txParamsGenerators_Valid_With_MinLifeTime)
             , ("Invalid DepositDate too early", txParamsGenerators_Invalid_DepositDate_TooEarly)
@@ -304,7 +307,8 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
@@ -312,7 +316,8 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_Withdraw_Tests :: GHC.HasCallStack => TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show Fund_Withdraw_Tx
         txSpecs = fundHolding_Withdraw_TxSpecs tp
         ------------------------
@@ -438,7 +443,7 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
                 , intRangeParam "investUnitTokensQty" 1 20
                 , dependentInvestUnitParam "investUnitTokens" False "investUnitTokensQty"
                 , dependentDepositParam "depositAmount" 1 100_000_000 True "investUnitTokens"
-                , dependentWithdrawParam "withdrawAmount" T.maxDepositAndWithdraw_aux (T.maxDepositAndWithdraw_aux + 100_000_000) True False "investUnitTokens" "depositAmount" "beginDate" "deadlineDate" "depositDate" "fundCommission_PerYear_InBPx1e3"
+                , dependentWithdrawParam "withdrawAmount" (T.maxDepositAndWithdraw_aux + 1) (T.maxDepositAndWithdraw_aux + 100_000_000) True False "investUnitTokens" "depositAmount" "beginDate" "deadlineDate" "depositDate" "fundCommission_PerYear_InBPx1e3"
                 ]
 
         txParamsGenerators_Invalid_Amount_Granularity =
@@ -485,11 +490,13 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
             -- si quedan cero meses, comissiones es cero, y pasa bien
             -- por que NO HAY CONTROLES del amount total de withdraw... ese control va a venir solo de los tokens que realmente se encuentren en la UTXO
             -- el contrato en si no controla eso
-            let beginDate = LedgerApiV2.POSIXTime ((1 * 30 * 24 * 60 * 60 * 1000) :: Integer)
+            let
+                beginDate = LedgerApiV2.POSIXTime ((1 * 30 * 24 * 60 * 60 * 1000) :: Integer)
                 deadlineDate = LedgerApiV2.POSIXTime ((100 * 30 * 24 * 60 * 60 * 1000) :: Integer)
                 depositDate = LedgerApiV2.POSIXTime ((10 * 30 * 24 * 60 * 60 * 1000) :: Integer)
                 withdrawDate = LedgerApiV2.POSIXTime ((20 * 30 * 24 * 60 * 60 * 1000) :: Integer)
-             in TxParamGenerators
+            in
+                TxParamGenerators
                     [ posixTimeRangeParam "beginDate" beginDate beginDate
                     , posixTimeRangeParam "deadlineDate" deadlineDate deadlineDate
                     , intRangeParam "fundCommission_PerYear_InBPx1e3" (ProtocolT.mmdMin $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp) (ProtocolT.mmdMax $ tp_MinMaxDef_CommissionFund_PerYear_InBPx1e3 tp)
@@ -522,7 +529,7 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
             , ("Withdraw with max commission rate", txParamsGenerators_Withdraw_MaxCommission)
             , ("Invalid quantity of Tokens in Invest Unit", txParamsGenerators_Invalid_InvestUnit)
             , ("Invalid Withdraw amount <= 0", txParamsGenerators_Invalid_Amount_LessZero)
-            , ("Invalid Withdraw amount >= MAX", txParamsGenerators_Invalid_Amount_MoreMax)
+            , ("Invalid Withdraw amount > MAX", txParamsGenerators_Invalid_Amount_MoreMax)
             , ("Invalid Withdraw amount not multiplier of Invest Unit granularity", txParamsGenerators_Invalid_Amount_Granularity)
             , ("Valid Withdraw with MinLifeTime", txParamsGenerators_Valid_With_MinLifeTime)
             , ("Valid WithdrawDate too late", txParamsGenerators_Valid_WithdrawDate_TooLate)
@@ -536,7 +543,8 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
@@ -544,7 +552,8 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_Collect_Protocol_Commission_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Collect_Protocol_Commission_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_Collect_Protocol_Commission_Tx
         txSpecs = fundHolding_Collect_Protocol_Commission_TxSpecs tp
         ------------
@@ -560,13 +569,15 @@ fundHolding_Validator_Redeemer_Collect_Protocol_Commission_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
 fundHolding_Validator_Redeemer_Collect_Managers_Commission_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Collect_Managers_Commission_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_Collect_Managers_Commission_Tx
         txSpecs = fundHolding_Collect_Managers_Commission_TxSpecs tp
         ------------
@@ -582,13 +593,15 @@ fundHolding_Validator_Redeemer_Collect_Managers_Commission_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
 fundHolding_Validator_Redeemer_Collect_Delegators_Commission_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Collect_Delegators_Commission_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_Collect_Delegators_Commission_Tx
         txSpecs = fundHolding_Collect_Delegators_Commission_TxSpecs tp
         ------------
@@ -604,7 +617,8 @@ fundHolding_Validator_Redeemer_Collect_Delegators_Commission_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
@@ -612,7 +626,8 @@ fundHolding_Validator_Redeemer_Collect_Delegators_Commission_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_ReIndexing_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_ReIndexing_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show Fund_ReIndexing_Tx
         txSpecs = fundHolding_ReIndexing_TxSpecs tp
         ------------
@@ -628,7 +643,8 @@ fundHolding_Validator_Redeemer_ReIndexing_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
@@ -636,7 +652,8 @@ fundHolding_Validator_Redeemer_ReIndexing_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_BalanceAssets_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_BalanceAssets_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_BalanceAssets_Tx
         txSpecs = fundHolding_BalanceAssets_TxSpecs tp
         ------------
@@ -652,7 +669,8 @@ fundHolding_Validator_Redeemer_BalanceAssets_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp defaultTxSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer defaultTxSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName txSpecs txParams_Default txParamsGenerators_List updatedTestConfigTree defaultTestCaseParams
 
@@ -660,7 +678,8 @@ fundHolding_Validator_Redeemer_BalanceAssets_Tests tp ruleTree =
 
 fundHolding_Validator_Redeemer_Emergency_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Emergency_Tests tp _ =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_Emergency_Tx
         txSpecs = fundHolding_UpdateMinADA_TxSpecs tp
         ------------------------
@@ -670,7 +689,8 @@ fundHolding_Validator_Redeemer_Emergency_Tests tp _ =
         ------------------------
         defaultTxSpecs = txSpecs txParams_Default
         selectedRedeemer = RedeemerLogValidator (Just FundHolding_Emergency_TestRedeemer)
-     in ------------------------
+    in
+        ------------------------
 
         adminTokens_Tests_Gen tp txName selectedRedeemer (P.const defaultTxSpecs) FundHoldingT.mkEmergencyRedeemer (tpTokenAdminPolicy_CS tp) (tpTokenEmergencyAdminPolicy_CS tp) T.protocolTokenAdmin_TN T.protocolTokenEmergencyAdmin_TN True True
 
@@ -678,7 +698,8 @@ fundHolding_Validator_Redeemer_Emergency_Tests tp _ =
 
 fundHolding_Validator_Redeemer_Delete_Tests :: TestParams -> RuleTree -> Tasty.TestTree
 fundHolding_Validator_Redeemer_Delete_Tests tp ruleTree =
-    let ------------------------
+    let
+        ------------------------
         txName = show FundHolding_Delete_Tx
         txSpecs = fundHolding_Delete_TxSpecs tp
         defaultTestCaseParams = generateTestCaseParams txSpecs
@@ -686,7 +707,8 @@ fundHolding_Validator_Redeemer_Delete_Tests tp ruleTree =
         ------------------------
         redeemerTestConfigTree = getTestConfigTree tp txSpecs
         updatedTestConfigTree = updateConfigTreeFromRuleTree swTraceRuleTree txName selectedRedeemer txSpecs ruleTree redeemerTestConfigTree
-     in ------------------------
+    in
+        ------------------------
 
         transaction_Tests_Gen tp selectedRedeemer txName (P.const txSpecs) [] [] updatedTestConfigTree defaultTestCaseParams
 

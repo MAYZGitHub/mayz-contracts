@@ -290,7 +290,7 @@ prop_deposit_amountZeroFails tp selectedRedeemer ctxParametrizable (IntegerMinus
             --------------------
         results <- testContextWrapper tp ctx'
         (Just selectedRedeemer, results)
-            `assertResultsContainAnyOf` ["not Correct Deposit Amount"]
+            `assertResultsContainAnyOf` ["not Correct Deposit Amount","Deposit cannot be negative"]
 
 --------------------------------------------------------------------------------
 
@@ -369,7 +369,7 @@ prop_withdraw_amountZeroFails tp selectedRedeemer ctxParametrizable (IntegerPlus
         results <- testContextWrapper tp ctx'
         --------------------
         (Just selectedRedeemer, results)
-            `assertResultsContainAnyOf` ["not Correct Withdraw Amount"]
+            `assertResultsContainAnyOf` ["not Correct Withdraw Amount", "Withdraw cannot be negative"]
 
 --------------------------------------------------------------------------------
 

@@ -37,7 +37,7 @@ swapOffer_AllowSell  :: Integer
 swapOffer_AllowSell  = 1
 
 swapOffer_NotAllowSell  :: Integer
-swapOffer_NotAllowSell  = 0
+swapOffer_NotAllowSell  = 2
 
 buyOrder_Status_Open  :: Integer
 buyOrder_Status_Open  = 1

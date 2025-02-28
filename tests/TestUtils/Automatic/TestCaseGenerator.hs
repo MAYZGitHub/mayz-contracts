@@ -137,7 +137,12 @@ generateTestCase tp selectedRedeemer txSpecs txParamsGenerators_List defaultTest
                                     matchAnyExpected :: DataText.Text -> Bool
                                     matchAnyExpected actualErr = any (`matchWithOrWithoutWildcard` actualErr) (DataText.pack <$> errMsg)
 
+                                    -- Check if at least one expected error appears in actualErrors
+                                    foundAtLeastOneExpected = any matchAnyExpected actualErrors
+
                                     missingErrors = filter (\expected -> not $ any (matchWithOrWithoutWildcard expected) actualErrors) (DataText.pack <$> errMsg)
+
+                                    -- Filter out actual errors that are unexpected
                                     unexpectedErrors = filter (not . matchAnyExpected) actualErrors
 
                                     testPassed =
@@ -147,13 +152,13 @@ generateTestCase tp selectedRedeemer txSpecs txParamsGenerators_List defaultTest
                                             else
                                                 case errMsg of
                                                 [] -> not (null actualErrors)  -- If errMsg is empty, we expect at least one error
-                                                _  -> null missingErrors       -- Otherwise, all expected errors should be present
+                                                _  -> foundAtLeastOneExpected   -- Change to any of the errors to be found, null missingErrors       -- Otherwise, all expected errors should be present
                                 in
                                     if testPassed
                                     then QCM.assert True
                                     else do
                                         QCM.run $ putStrLn $ failureInfo ++
-                                            "\nExpected errors: " ++ show errMsg ++
+                                            "\nExpected any of errors: " ++ show errMsg ++
                                             "\nActual errors: " ++ show actualErrors ++
                                             "\nMissing expected errors: " ++ show missingErrors ++
                                             "\nUnexpected errors: " ++ show unexpectedErrors

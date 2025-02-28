@@ -285,7 +285,9 @@ fundHolding_Deposit_TxSpecs tp txParams =
         depositDate = getTxParam "depositDate" txParams :: LedgerApiV2.POSIXTime
         depositAmount = getTxParam "depositAmount" txParams :: Integer
         investUnitTokens = getTxParam "investUnitTokens" txParams :: T.InvestUnit
-        -----------------
+        --------------------
+        depositAmountSafe = if depositAmount < 1 then 1 else depositAmount
+        --------------------
         input_Fund_UTxO extras =
             let
                 depositDate' =
@@ -348,12 +350,12 @@ fundHolding_Deposit_TxSpecs tp txParams =
                         Just ("Valid DepositDate on Deadline", _) -> deadlineDate - T.validTxTimeRange
                         _                                         -> depositDate
             in
-                txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp (input_Fund_Datum extras) input_FundHolding_Datum investUnitTokens 0 depositAmount depositDate') FundHolding_TestEntity op
+                txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Deposits_MockData_Parametrizable tp (input_Fund_Datum extras) input_FundHolding_Datum investUnitTokens 0 depositAmountSafe depositDate') FundHolding_TestEntity op
         -----------------
         mint_FundFT_gen op _ =
             mint_Value_With_TestToken_Gen
                 tp
-                (FundFT_TestToken, Fund_MintFT_TestRedeemer) depositAmount
+                (FundFT_TestToken, Fund_MintFT_TestRedeemer) depositAmountSafe
                 op
         -----------------
         validityRange_gen' op extras =
@@ -395,7 +397,7 @@ fundHolding_Deposit_TxSpecs tp txParams =
                 ("Deposit with max commission rate", True),
                 ("Invalid quantity of Tokens in Invest Unit", True),
                 ("Invalid Deposit amount <= 0", True),
-                ("Invalid Deposit amount >= MAX", True),
+                ("Invalid Deposit amount > MAX", True),
                 ("Invalid Deposit amount not multiplier of Invest Unit granularity", True),
                 ("Valid Deposit with MinLifeTime", True),
                 ("Valid DepositDate on BeginAt", False),
@@ -420,7 +422,9 @@ fundHolding_Withdraw_TxSpecs tp txParams =
         withdrawDate_ = getTxParam "withdrawDate" txParams :: LedgerApiV2.POSIXTime
         withdrawAmount = getTxParam "withdrawAmount" txParams :: Integer
         investUnitTokens = getTxParam "investUnitTokens" txParams :: T.InvestUnit
-        -----------------
+        --------------------
+        withdrawAmountSafe = if withdrawAmount < 1 then 1 else withdrawAmount
+        --------------------
         -- FundHolding base para comenzar a editar
         base_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO (fundHolding_UTxO_With_NoDeposits_MockData tp)
         -----------------
@@ -459,7 +463,7 @@ fundHolding_Withdraw_TxSpecs tp txParams =
         consume_FundHolding_UTxO_gen op extras =
             let
                 !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnitTokens)
-                (_, withdrawPlusCommissionsGetBack, _) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp (input_Fund_Datum extras) (getWithdrawDate extras) withdrawAmount investUnit_Granularity
+                (_, withdrawPlusCommissionsGetBack, _) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp (input_Fund_Datum extras) (getWithdrawDate extras) withdrawAmountSafe investUnit_Granularity
             in
                 consume_TxOut_Gen
                     input_FundHolding_UTxO_gen
@@ -474,12 +478,12 @@ fundHolding_Withdraw_TxSpecs tp txParams =
             let
                 !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnitTokens)
             in
-                txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp (input_Fund_Datum extras) (input_FundHolding_UTxO extras) investUnitTokens withdrawAmount (getWithdrawDate extras) investUnit_Granularity) FundHolding_TestEntity op
+                txOut_With_TestEntity_Gen tp (fundHolding_UTxO_With_Withdraw_MockData_Parametrizable tp (input_Fund_Datum extras) (input_FundHolding_UTxO extras) investUnitTokens withdrawAmountSafe (getWithdrawDate extras) investUnit_Granularity) FundHolding_TestEntity op
         -----------------
         burn_FundFT_gen op extras =
             let
                 !investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues investUnitTokens)
-                (_, withdrawPlusCommissionsGetBack, _) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp (input_Fund_Datum extras) (getWithdrawDate extras) withdrawAmount investUnit_Granularity
+                (_, withdrawPlusCommissionsGetBack, _) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp (input_Fund_Datum extras) (getWithdrawDate extras) withdrawAmountSafe investUnit_Granularity
             in
                 mint_Value_With_TestToken_Gen
                     tp
@@ -520,7 +524,7 @@ fundHolding_Withdraw_TxSpecs tp txParams =
                 ("Withdraw with max commission rate", True),
                 ("Invalid quantity of Tokens in Invest Unit", True),
                 ("Invalid Withdraw amount <= 0", True),
-                ("Invalid Withdraw amount >= MAX", True),
+                ("Invalid Withdraw amount > MAX", True),
                 ("Invalid Withdraw amount not multiplier of Invest Unit granularity", True),
                 ("Valid Withdraw with MinLifeTime", True),
                 ("Valid WithdrawDate too late", True),

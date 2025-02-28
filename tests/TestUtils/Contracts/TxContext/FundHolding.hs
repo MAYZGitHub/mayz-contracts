@@ -116,6 +116,8 @@ fundHolding_Deposit_TxContext :: TestParams -> LedgerApiV2.POSIXTime -> Integer 
 fundHolding_Deposit_TxContext tp depositDate depositAmount =
     let
         --------------------
+        depositAmountSafe = if depositAmount < 1 then 1 else depositAmount
+        --------------------
         input_Fund_UTxO = fund_UTxO_MockData tp
         input_Fund_Datum = FundT.getFund_DatumType_From_UTxO input_Fund_UTxO
         --------------------
@@ -127,13 +129,13 @@ fundHolding_Deposit_TxContext tp depositDate depositAmount =
         input_FundHolding_Datum = FundHoldingT.getFundHolding_DatumType_From_UTxO input_FundHolding_UTxO
         input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
         --------------------
-        (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp input_Fund_Datum depositDate depositAmount
+        (userFT, commissionsFT, commissions_FT_Release_PerMonth_1e6) = calculateDepositCommissionsUsingMonths_Parametrizable tp input_Fund_Datum depositDate depositAmountSafe
         --------------------
-        investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit depositAmount
+        investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit depositAmountSafe
         --------------------
         output_FundHolding_Datum = FundHelpers.mkUpdated_FundHolding_Datum_With_Deposit
                 input_FundHolding_Datum
-                depositAmount userFT commissionsFT commissions_FT_Release_PerMonth_1e6
+                depositAmountSafe userFT commissionsFT commissions_FT_Release_PerMonth_1e6
         output_FundHolding_UTxO = input_FundHolding_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $
@@ -147,7 +149,7 @@ fundHolding_Deposit_TxContext tp depositDate depositAmount =
                 uTxOForValidatorAsReference tp (tpFundHoldingValidator tp), uTxOForMintingAsReference tp (tpFundPolicy tp)]
             |> setInputsAndAddRedeemers [(input_FundHolding_UTxO, FundHoldingT.mkDepositRedeemer depositDate depositAmount)]
             |> setOutputs [output_FundHolding_UTxO]
-            |> setMintAndAddRedeemers[ (LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) depositAmount, FundT.mkMintFTRedeemer)]
+            |> setMintAndAddRedeemers[ (LedgerApiV2.singleton (tpFundPolicy_CS tp) (tpFundFT_TN tp) depositAmountSafe, FundT.mkMintFTRedeemer)]
             |> setValidyRange (createValidRange depositDate)
 
 --------------------------------------------------------------------------------
@@ -164,6 +166,8 @@ fundHolding_Withdraw_TxContext_Wrapper tp txParams =
 fundHolding_Withdraw_TxContext :: TestParams -> LedgerApiV2.POSIXTime -> Integer -> LedgerApiV2.POSIXTime -> Integer -> LedgerApiV2.ScriptContext
 fundHolding_Withdraw_TxContext tp depositDate depositAmount withdrawDate withdrawAmount =
     let
+         --------------------
+        withdrawAmountSafe = if withdrawAmount < 1 then 1 else withdrawAmount
         --------------------
         input_Fund_UTxO = fund_UTxO_MockData tp
         input_Fund_Datum = FundT.getFund_DatumType_From_UTxO input_Fund_UTxO
@@ -180,13 +184,13 @@ fundHolding_Withdraw_TxContext tp depositDate depositAmount withdrawDate withdra
         input_FundHolding_Value = LedgerApiV2.txOutValue input_FundHolding_UTxO
         --------------------
         investUnit_Granularity = OnChainHelpers.getDecimalsInInvestUnit (T.iuValues input_InvestUnit)
-        (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmount investUnit_Granularity
+        (commissionsForUserFTToGetBack, withdrawPlusCommissionsGetBack, commissions_FT_Release_PerMonth_1e6) = calculateWithdrawCommissionsUsingMonths_Parametrizable tp input_Fund_Datum withdrawDate withdrawAmountSafe investUnit_Granularity
         --------------------
         investUnit_Value = OffChainHelpers.mkValue_From_InvestUnit_And_Amount2 input_InvestUnit withdrawPlusCommissionsGetBack
         --------------------
         output_FundHolding_Datum = FundHelpers.mkUpdated_FundHolding_Datum_With_Withdraw
                 input_FundHolding_Datum
-                withdrawAmount commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
+                withdrawAmountSafe commissionsForUserFTToGetBack commissions_FT_Release_PerMonth_1e6
         output_FundHolding_UTxO = input_FundHolding_UTxO
             { LedgerApiV2.txOutDatum =
                 LedgerApiV2.OutputDatum $

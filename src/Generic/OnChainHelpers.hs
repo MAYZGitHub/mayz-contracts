@@ -1,11 +1,11 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE CPP                 #-}
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE DeriveGeneric       #-}
-{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications    #-}
-{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 --------------------------------------------------------------------------------
 {- HLINT ignore "Use camelCase"          -}
@@ -18,21 +18,21 @@ module Generic.OnChainHelpers where
 -- Import Externos
 --------------------------------------------------------------------------------2
 
-import qualified GHC.Generics              as Generic
+import qualified GHC.Generics as Generic
 import qualified Ledger
-import qualified Ledger.Ada                as LedgerAda
-import qualified Ledger.Value              as LedgerValue
+import qualified Ledger.Ada as LedgerAda
+import qualified Ledger.Value as LedgerValue
 import qualified Plutus.V1.Ledger.Interval as LedgerIntervalV1 (contains, from, interval, member)
-import qualified Plutus.V2.Ledger.Api      as LedgerApiV2
+import qualified Plutus.V2.Ledger.Api as LedgerApiV2
 import qualified Plutus.V2.Ledger.Contexts as LedgerContextsV2
-import qualified Plutus.V2.Ledger.Tx       as LedgerTxV2 (OutputDatum (..), txOutDatum)
+import qualified Plutus.V2.Ledger.Tx as LedgerTxV2 (OutputDatum (..), txOutDatum)
 import qualified PlutusTx
-import qualified PlutusTx.AssocMap         as TxAssocMap
-import qualified PlutusTx.Builtins         as TxBuiltins
-import qualified PlutusTx.Foldable         as TxFold
-import           PlutusTx.Prelude
-import qualified PlutusTx.Ratio            as TxRatio
-import qualified Prelude                   as P
+import qualified PlutusTx.AssocMap as TxAssocMap
+import qualified PlutusTx.Builtins as TxBuiltins
+import qualified PlutusTx.Foldable as TxFold
+import PlutusTx.Prelude
+import qualified PlutusTx.Ratio as TxRatio
+import qualified Prelude as P
 
 --------------------------------------------------------------------------------2
 -- Import Internos
@@ -43,23 +43,24 @@ import qualified Prelude                   as P
 --------------------------------------------------------------------------------2
 
 data SignedMessageCheckError
-    = SignatureMismatch Ledger.PaymentPubKey Ledger.Signature
-    -- ^ The signature did not match the public key
+    = -- | The signature did not match the public key
+      SignatureMismatch Ledger.PaymentPubKey Ledger.Signature
     deriving (Generic.Generic, P.Show)
 
 {-# INLINEABLE checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS #-}
+
 -- | Verify the signature of a message
-checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS
-  :: Ledger.PaymentPubKey
-  -- ^ The public key of the signatory
-  -> LedgerApiV2.BuiltinByteString
-  -- ^ The message
-  -> Ledger.Signature
-  -- ^ The signed message
-  -> Either SignedMessageCheckError ()
+checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS ::
+    -- | The public key of the signatory
+    Ledger.PaymentPubKey ->
+    -- | The message
+    LedgerApiV2.BuiltinByteString ->
+    -- | The signed message
+    Ledger.Signature ->
+    Either SignedMessageCheckError ()
 checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS !paymentPubKey !signedMsg !signature =
     let
-        !pubKey= Ledger.unPaymentPubKey paymentPubKey
+        !pubKey = Ledger.unPaymentPubKey paymentPubKey
         !lb = Ledger.getPubKey pubKey
         !bbs = LedgerApiV2.getLedgerBytes lb
         !sig = Ledger.getSignature signature
@@ -69,15 +70,16 @@ checkSignature_NO_COMPILA_ONCHAIN_PORQUE_CASE_OF_BBS !paymentPubKey !signedMsg !
             else Left $ SignatureMismatch paymentPubKey signature
 
 {-# INLINEABLE checkSignatureBBS #-}
+
 -- | Verify the signature of a message
-checkSignatureBBS
-  :: LedgerApiV2.BuiltinByteString
-  -- ^ The public key of the signatory
-  -> LedgerApiV2.BuiltinByteString
-  -- ^ The message
-  -> LedgerApiV2.BuiltinByteString
-  -- ^ The signed message
-  -> Bool
+checkSignatureBBS ::
+    -- | The public key of the signatory
+    LedgerApiV2.BuiltinByteString ->
+    -- | The message
+    LedgerApiV2.BuiltinByteString ->
+    -- | The signed message
+    LedgerApiV2.BuiltinByteString ->
+    Bool
 checkSignatureBBS !paymentPubKeyBBS !signedMsgBBS !signatureBBS = verifyEd25519Signature paymentPubKeyBBS signedMsgBBS signatureBBS
 
 --------------------------------------------------------------------------------2
@@ -85,36 +87,35 @@ checkSignatureBBS !paymentPubKeyBBS !signedMsgBBS !signatureBBS = verifyEd25519S
 {-# INLINEABLE countDistinct #-}
 countDistinct :: Eq a => [a] -> Integer
 countDistinct = countDistinct' []
-  where
-    countDistinct' _ [] = 0
-    countDistinct' !seen (x:xs)
-      | x `elem` seen = countDistinct' seen xs
-      | otherwise     = 1 + countDistinct' (x:seen) xs
+    where
+        countDistinct' _ [] = 0
+        countDistinct' !seen (x : xs)
+            | x `elem` seen = countDistinct' seen xs
+            | otherwise = 1 + countDistinct' (x : seen) xs
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE flattenValueAdd #-}
 flattenValueAdd :: (Eq a, Eq b) => [(a, b, Integer)] -> [(a, b, Integer)] -> [(a, b, Integer)]
 flattenValueAdd !original [] = original
-flattenValueAdd !original (x:xs) = flattenValueAdd (addValue original x) xs
+flattenValueAdd !original (x : xs) = flattenValueAdd (addValue original x) xs
     where
         addValue :: (Eq a, Eq b) => [(a, b, Integer)] -> (a, b, Integer) -> [(a, b, Integer)]
         addValue [] !newTuple = [newTuple]
-        addValue ((!cs, !tn, !value):xs') newTuple@(!cs', !tn',  !value')
-              | cs == cs' && tn == tn' = if value + value' == 0 then xs' else (cs, tn, value +  value') : xs'
-              | otherwise = (cs, tn, value) : addValue xs' newTuple
-
+        addValue ((!cs, !tn, !value) : xs') newTuple@(!cs', !tn', !value')
+            | cs == cs' && tn == tn' = if value + value' == 0 then xs' else (cs, tn, value + value') : xs'
+            | otherwise = (cs, tn, value) : addValue xs' newTuple
 
 {-# INLINEABLE flattenValueSub #-}
 flattenValueSub :: (Eq a, Eq b) => [(a, b, Integer)] -> [(a, b, Integer)] -> [(a, b, Integer)]
 flattenValueSub !original [] = original
-flattenValueSub !original (x:xs) = flattenValueSub (subValue original x) xs
+flattenValueSub !original (x : xs) = flattenValueSub (subValue original x) xs
     where
         subValue :: (Eq a, Eq b) => [(a, b, Integer)] -> (a, b, Integer) -> [(a, b, Integer)]
         subValue [] !newTuple = [newTuple]
-        subValue ((!cs, !tn, !value):xs') newTuple@(!cs', !tn',  !value')
-              | cs == cs' && tn == tn' = if value - value' == 0 then xs' else (cs, tn, value -  value') : xs'
-              | otherwise = (cs, tn, value) : subValue xs' newTuple
+        subValue ((!cs, !tn, !value) : xs') newTuple@(!cs', !tn', !value')
+            | cs == cs' && tn == tn' = if value - value' == 0 then xs' else (cs, tn, value - value') : xs'
+            | otherwise = (cs, tn, value) : subValue xs' newTuple
 
 --------------------------------------------------------------------------------2
 
@@ -135,13 +136,15 @@ flattenValueToValue !list =
     --         Just innerMap ->
     --             let updatedInnerMap = insertToInnerMap innerMap (tokenName, value)
     --             in TxAssocMap.insert currencySymbol updatedInnerMap outerMap
--- foldr insertToOuterMap TxAssocMap.empty list
-    let mapElement acc cs tn value =
+    -- foldr insertToOuterMap TxAssocMap.empty list
+    let
+        mapElement acc cs tn value =
             case TxAssocMap.lookup cs acc of
-                Nothing       -> TxAssocMap.insert cs (TxAssocMap.singleton tn value) acc
+                Nothing -> TxAssocMap.insert cs (TxAssocMap.singleton tn value) acc
                 Just innerMap -> TxAssocMap.insert cs (TxAssocMap.insert tn value innerMap) acc
         mapList = foldl (\acc (cs, tn, value) -> mapElement acc cs tn value) TxAssocMap.empty list
-    in LedgerValue.Value mapList
+    in
+        LedgerValue.Value mapList
 
 --------------------------------------------------------------------------------2
 
@@ -159,11 +162,11 @@ setAndLoosePrecision !r !n
         let
             !scaled = r * scaleFactorRational
             !rounded = TxRatio.truncate scaled
-        in TxRatio.unsafeRatio rounded scaleFactor
+        in
+            TxRatio.unsafeRatio rounded scaleFactor
     where
         !scaleFactor = 10 `powInteger` n
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
-
 
 {-# INLINEABLE setAndLoosePrecision1e9 #-}
 setAndLoosePrecision1e9 :: Rational -> Rational
@@ -173,7 +176,8 @@ setAndLoosePrecision1e9 !r
         let
             !scaled = r * scaleFactorRational
             !rounded = TxRatio.truncate scaled
-        in TxRatio.unsafeRatio rounded scaleFactor
+        in
+            TxRatio.unsafeRatio rounded scaleFactor
     where
         !scaleFactor = 1_000_000_000
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
@@ -186,11 +190,11 @@ setAndLoosePrecision1e6 !r
         let
             !scaled = r * scaleFactorRational
             !rounded = TxRatio.truncate scaled
-        in TxRatio.unsafeRatio rounded scaleFactor
+        in
+            TxRatio.unsafeRatio rounded scaleFactor
     where
         !scaleFactor = 1_000_000
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
-
 
 {-# INLINEABLE setAndLoosePrecision1e3 #-}
 setAndLoosePrecision1e3 :: Rational -> Rational
@@ -200,7 +204,8 @@ setAndLoosePrecision1e3 !r
         let
             !scaled = r * scaleFactorRational
             !rounded = TxRatio.truncate scaled
-        in TxRatio.unsafeRatio rounded scaleFactor
+        in
+            TxRatio.unsafeRatio rounded scaleFactor
     where
         !scaleFactor = 1_000
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
@@ -212,7 +217,8 @@ setAndLoosePrecisionGetOnlyNum !r !n =
         !scaleFactor = 10 `powInteger` n
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
         !scaled = r * scaleFactorRational
-    in TxRatio.truncate scaled
+    in
+        TxRatio.truncate scaled
 
 {-# INLINEABLE setAndLoosePrecision1e6GetOnlyNumerator #-}
 setAndLoosePrecision1e6GetOnlyNumerator :: Rational -> Integer
@@ -221,8 +227,8 @@ setAndLoosePrecision1e6GetOnlyNumerator !r =
         !scaleFactor = 1_000_000
         !scaleFactorRational = TxRatio.fromInteger scaleFactor
         !scaled = r * scaleFactorRational
-    in TxRatio.truncate scaled
-
+    in
+        TxRatio.truncate scaled
 
 --------------------------------------------------------------------------------2
 
@@ -255,38 +261,41 @@ setAndLoosePrecision1e6GetOnlyNumerator !r =
 {-# INLINEABLE powInteger #-}
 powInteger :: Integer -> Integer -> Integer
 powInteger num n
-    | n == 0    = 1
-    | num == 0    = 0
-    | n < 0     = P.error "Negative exponents not supported in powInteger"
-    | even n    = powInteger (num * num) (n `divide` 2)
+    | n == 0 = 1
+    | num == 0 = 0
+    | n < 0 = traceError "Negative exponents not supported in powInteger"
+    | even n = powInteger (num * num) (n `divide` 2)
     | otherwise = num * powInteger (num * num) (n `divide` 2)
 
 {-# INLINEABLE powRational #-}
 powRational :: Integer -> Integer -> Integer -> Rational
 powRational !num !dem !n
-    | n == 0    = TxRatio.fromInteger 1
-    | num == 0  = TxRatio.fromInteger 0
-    | n < 0     = TxRatio.recip $ powRational num dem (negate n)
-    | dem == 0  = traceError "Denominator cannot be zero in powRational"
+    | n == 0 = TxRatio.fromInteger 1
+    | num == 0 = TxRatio.fromInteger 0
+    | n < 0 = TxRatio.recip $ powRational num dem (negate n)
+    | dem == 0 = traceError "Denominator cannot be zero in powRational"
     | otherwise = TxRatio.unsafeRatio (num `powInteger` n) (dem `powInteger` n)
 
 --------------------------------------------------------------------------------2
+
 -- | Function to return the Just value from a Maybe.
 {-# INLINEABLE fromJust #-}
 fromJust :: Maybe a -> a
 fromJust (Just !valueInfo) = valueInfo
-fromJust Nothing           = traceError "fromJust"
+fromJust Nothing = traceError "fromJust"
 
 {-# INLINEABLE enumerate #-}
 enumerate :: [b] -> [(Integer, b)]
 enumerate !x =
-    let !len = length x
+    let
+        !len = length x
 
         createList :: Integer -> Integer -> [Integer] -> [Integer]
         createList !n !i !list
             | n == 0 = list
             | otherwise = createList (n - 1) (i + 1) (list ++ [i])
-    in  zip (createList len 0 []) x
+    in
+        zip (createList len 0 []) x
 
 --------------------------------------------------------------------------------
 
@@ -294,22 +303,21 @@ enumerate !x =
 enumFromTo :: Integer -> Integer -> [Integer]
 enumFromTo !start !end
     | start > end = []
-    | otherwise   = start : enumFromTo (start + 1) end
-
+    | otherwise = start : enumFromTo (start + 1) end
 
 --------------------------------------------------------------------------------22
 
 {-# INLINEABLE isElement #-}
 -- check if an element is in a list
 isElement :: Eq a => a -> [a] -> Bool
-isElement _ []        = False
+isElement _ [] = False
 isElement !x (y : ys) = x == y || isElement x ys
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE find' #-}
 find' :: (a -> Bool) -> [a] -> Maybe a
-find' _ []        = Nothing
+find' _ [] = Nothing
 find' !f (x : xs) = if f x then Just x else find' f xs
 
 --------------------------------------------------------------------------------2
@@ -318,10 +326,12 @@ find' !f (x : xs) = if f x then Just x else find' f xs
 findWithIdx' :: (a -> Bool) -> [a] -> Maybe (Integer, a)
 findWithIdx' _ [] = Nothing
 findWithIdx' !f !l =
-    let findWithIdx'' :: (a -> Bool) -> [a] -> Integer -> Maybe (Integer, a)
-        findWithIdx'' _ [] _          = Nothing
+    let
+        findWithIdx'' :: (a -> Bool) -> [a] -> Integer -> Maybe (Integer, a)
+        findWithIdx'' _ [] _ = Nothing
         findWithIdx'' !f' (x : xs) !i = if f' x then Just (i, x) else findWithIdx'' f' xs (i + 1)
-    in  findWithIdx'' f l 0
+    in
+        findWithIdx'' f l 0
 
 -- {-# INLINABLE take #-}
 -- -- | Plutus Tx version of 'Data.List.take'.
@@ -341,7 +351,7 @@ drop' !n (x : xs)
 
 {-# INLINEABLE filter' #-}
 filter' :: (a -> Bool) -> [a] -> [a]
-filter' _ []        = []
+filter' _ [] = []
 filter' !f (x : xs) = if f x then x : filter' f xs else filter' f xs
 
 --------------------------------------------------------------------------------2
@@ -362,7 +372,7 @@ compareWithFunctionWhileRemoving !xs !ys !f = go xs ys []
         go (x : xs') !ys' !prevYs =
             case findAndRemove' x [] ys' of
                 Just ys'' -> go xs' ys'' (prevYs ++ ys'')
-                Nothing   -> False
+                Nothing -> False
 
         findAndRemove' :: a -> [b] -> [b] -> Maybe [b]
         findAndRemove' _ _ [] = Nothing
@@ -398,7 +408,7 @@ isDateInRange !dateAt !info =
 --------------------------------------------------------------------------------
 
 {- Check that the tx range interval of validity. Must be lees than T.validTxTimeRange Pool Param. -}
-{-# INLINABLE isValidRange #-}
+{-# INLINEABLE isValidRange #-}
 isValidRange :: LedgerContextsV2.TxInfo -> LedgerApiV2.POSIXTime -> Bool
 isValidRange !info = isCorrectIntervalSize (LedgerApiV2.txInfoValidRange info)
 
@@ -408,7 +418,7 @@ isValidRange !info = isCorrectIntervalSize (LedgerApiV2.txInfoValidRange info)
 getLowerBoundFromInterval :: LedgerApiV2.Interval a -> Maybe a
 getLowerBoundFromInterval !iv = case LedgerApiV2.ivFrom iv of
     LedgerApiV2.LowerBound (LedgerApiV2.Finite lBound) _ -> Just lBound
-    _                                                    -> Nothing
+    _ -> Nothing
 
 --------------------------------------------------------------------------------2
 
@@ -416,7 +426,7 @@ getLowerBoundFromInterval !iv = case LedgerApiV2.ivFrom iv of
 isCorrectIntervalSize :: LedgerApiV2.Interval LedgerApiV2.POSIXTime -> LedgerApiV2.POSIXTime -> Bool
 isCorrectIntervalSize !iv !len =
     case getLowerBoundFromInterval iv of
-        Just t  -> LedgerIntervalV1.interval t (t + len) `LedgerIntervalV1.contains` iv
+        Just t -> LedgerIntervalV1.interval t (t + len) `LedgerIntervalV1.contains` iv
         Nothing -> False
 
 --------------------------------------------------------------------------------2
@@ -441,9 +451,11 @@ intToBBS !x
 {-# INLINEABLE txOutRefToBBS #-}
 txOutRefToBBS :: LedgerApiV2.TxOutRef -> BuiltinByteString
 txOutRefToBBS !txOutRef =
-    let idTxOut = LedgerApiV2.txOutRefId txOutRef
+    let
+        idTxOut = LedgerApiV2.txOutRefId txOutRef
         indexTxOut = LedgerApiV2.txOutRefIdx txOutRef
-    in  intToBBS indexTxOut <> LedgerApiV2.getTxId idTxOut
+    in
+        intToBBS indexTxOut <> LedgerApiV2.getTxId idTxOut
 
 {-# INLINEABLE flatValueToBBS #-}
 flatValueToBBS :: LedgerApiV2.CurrencySymbol -> LedgerApiV2.TokenName -> Integer -> BuiltinByteString
@@ -456,8 +468,10 @@ txValueToBBS !value = foldl (<>) zeroToBBS [flatValueToBBS cs tn am | (cs, tn, a
 {-# INLINEABLE assetClassToBBS #-}
 assetClassToBBS :: LedgerValue.AssetClass -> BuiltinByteString
 assetClassToBBS !ac =
-    let !(cs, tn) = LedgerValue.unAssetClass ac
-    in  LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn
+    let
+        !(cs, tn) = LedgerValue.unAssetClass ac
+    in
+        LedgerApiV2.unCurrencySymbol cs <> LedgerApiV2.unTokenName tn
 
 {-# INLINEABLE pOSIXTimeToBBS #-}
 pOSIXTimeToBBS :: LedgerApiV2.POSIXTime -> BuiltinByteString
@@ -485,9 +499,10 @@ getValueOfLovelace !v =
     LedgerAda.getLovelace $ LedgerAda.fromValue v
 
 {-# INLINEABLE getADAfromValue #-}
+
 -- | Get the 'Ada' in the given 'Value'.
 getADAfromValue :: LedgerApiV2.Value -> Integer
-getADAfromValue v =  LedgerValue.valueOf v LedgerValue.adaSymbol LedgerValue.adaToken
+getADAfromValue v = LedgerValue.valueOf v LedgerValue.adaSymbol LedgerValue.adaToken
 
 {-# INLINEABLE createADAValue #-}
 createADAValue :: Integer -> LedgerApiV2.Value
@@ -495,11 +510,11 @@ createADAValue = LedgerAda.lovelaceValueOf
 
 {-# INLINEABLE getADAValueInValue #-}
 getADAValueInValue :: LedgerApiV2.Value -> LedgerApiV2.Value
-getADAValueInValue v =  createADAValue $ LedgerValue.valueOf v LedgerValue.adaSymbol LedgerValue.adaToken
+getADAValueInValue v = createADAValue $ LedgerValue.valueOf v LedgerValue.adaSymbol LedgerValue.adaToken
 
 {-# INLINEABLE adaAssetClass #-}
 adaAssetClass :: LedgerValue.AssetClass
-adaAssetClass = LedgerValue.AssetClass (LedgerValue.adaSymbol , LedgerValue.adaToken)
+adaAssetClass = LedgerValue.AssetClass (LedgerValue.adaSymbol, LedgerValue.adaToken)
 
 --------------------------------------------------------------------------------2
 
@@ -508,7 +523,7 @@ adaAssetClass = LedgerValue.AssetClass (LedgerValue.adaSymbol , LedgerValue.adaT
 getValueOfCurrencySymbol :: LedgerValue.Value -> LedgerApiV2.CurrencySymbol -> LedgerValue.Value
 getValueOfCurrencySymbol (LedgerValue.Value !mp) !cs =
     case TxAssocMap.lookup cs mp of
-        Nothing  -> LedgerAda.lovelaceValueOf 0
+        Nothing -> LedgerAda.lovelaceValueOf 0
         Just mp' -> LedgerValue.Value $ TxAssocMap.singleton cs mp'
 
 --------------------------------------------------------------------------------2
@@ -581,8 +596,10 @@ isNFT_With_CS_InValue !value !cs = getAmtOfCurrencySymbol value cs == 1
 {-# INLINEABLE isNFT_Minting_With_AC #-}
 isNFT_Minting_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isNFT_Minting_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isNFT_With_AC_InValue mintingValue ac
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isNFT_With_AC_InValue mintingValue ac
 
 --------------------------------------------------------------------------------2
 
@@ -590,8 +607,10 @@ isNFT_Minting_With_AC !ac !info =
 {-# INLINEABLE isNFT_Minting_With_CS #-}
 isNFT_Minting_With_CS :: LedgerApiV2.CurrencySymbol -> LedgerContextsV2.TxInfo -> Bool
 isNFT_Minting_With_CS !currencySymbol !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isNFT_With_CS_InValue mintingValue currencySymbol
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isNFT_With_CS_InValue mintingValue currencySymbol
 
 --------------------------------------------------------------------------------2
 
@@ -599,8 +618,10 @@ isNFT_Minting_With_CS !currencySymbol !info =
 {-# INLINEABLE isNFT_Minting_With_TN #-}
 isNFT_Minting_With_TN :: LedgerApiV2.TokenName -> LedgerContextsV2.TxInfo -> Bool
 isNFT_Minting_With_TN !tokenName !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isNFT_With_TN_InValue mintingValue tokenName
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isNFT_With_TN_InValue mintingValue tokenName
 
 --------------------------------------------------------------------------------2
 
@@ -608,17 +629,19 @@ isNFT_Minting_With_TN !tokenName !info =
 {-# INLINEABLE isToken_Minting_With_AC_AndAmt #-}
 isToken_Minting_With_AC_AndAmt :: LedgerValue.AssetClass -> Integer -> LedgerContextsV2.TxInfo -> Bool
 isToken_Minting_With_AC_AndAmt !ac !amt !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_AC_AndAmt_InValue mintingValue ac amt
-
-
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_AC_AndAmt_InValue mintingValue ac amt
 
 -- | Check if there is any token minting with right currecy symbol and amount.
 {-# INLINEABLE isToken_Minting_With_CS_AndAmt #-}
 isToken_Minting_With_CS_AndAmt :: LedgerValue.CurrencySymbol -> Integer -> LedgerContextsV2.TxInfo -> Bool
 isToken_Minting_With_CS_AndAmt !cs !amt !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_CS_AndAmt_InValue mintingValue cs amt
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_CS_AndAmt_InValue mintingValue cs amt
 
 --------------------------------------------------------------------------------2
 
@@ -626,32 +649,40 @@ isToken_Minting_With_CS_AndAmt !cs !amt !info =
 {-# INLINEABLE isToken_Minting_With_AC #-}
 isToken_Minting_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isToken_Minting_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_AC_InValue mintingValue ac
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_AC_InValue mintingValue ac
 
 {-# INLINEABLE isOnlyToken_Minting_With_AC #-}
 isOnlyToken_Minting_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isOnlyToken_Minting_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
         !amountToken = LedgerValue.assetClassValueOf mintingValue ac
         !valueTokenAC = LedgerValue.assetClassValue ac amountToken
-    in  mintingValue  `isEqValue` valueTokenAC && amountToken > 0
+    in
+        mintingValue `isEqValue` valueTokenAC && amountToken > 0
 
 {-# INLINEABLE isOnlyToken_Minting_With_AC_AndAmt #-}
 isOnlyToken_Minting_With_AC_AndAmt :: LedgerValue.AssetClass -> Integer -> LedgerContextsV2.TxInfo -> Bool
 isOnlyToken_Minting_With_AC_AndAmt !ac !amtExpected !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
         !amountToken = LedgerValue.assetClassValueOf mintingValue ac
         !valueTokenAC = LedgerValue.assetClassValue ac amountToken
-    in  mintingValue  `isEqValue` valueTokenAC && amountToken > 0  && amountToken == amtExpected
+    in
+        mintingValue `isEqValue` valueTokenAC && amountToken > 0 && amountToken == amtExpected
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE isToken_Minting_With_CS #-}
 isToken_Minting_With_CS :: LedgerApiV2.CurrencySymbol -> LedgerContextsV2.TxInfo -> Bool
 isToken_Minting_With_CS !cs !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_CS_InValue mintingValue cs
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_CS_InValue mintingValue cs
 
 --------------------------------------------------------------------------------2
 
@@ -659,8 +690,10 @@ isToken_Minting_With_CS !cs !info =
 {-# INLINEABLE isNFT_Burning_With_AC #-}
 isNFT_Burning_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isNFT_Burning_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_AC_AndAmt_InValue mintingValue ac (negate 1)
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_AC_AndAmt_InValue mintingValue ac (negate 1)
 
 --------------------------------------------------------------------------------2
 
@@ -668,8 +701,10 @@ isNFT_Burning_With_AC !ac !info =
 {-# INLINEABLE isNFT_Burning_With_CS #-}
 isNFT_Burning_With_CS :: LedgerApiV2.CurrencySymbol -> LedgerContextsV2.TxInfo -> Bool
 isNFT_Burning_With_CS !currencySymbol !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_CS_AndAmt_InValue mintingValue currencySymbol (negate 1)
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_CS_AndAmt_InValue mintingValue currencySymbol (negate 1)
 
 --------------------------------------------------------------------------------2
 
@@ -677,24 +712,30 @@ isNFT_Burning_With_CS !currencySymbol !info =
 {-# INLINEABLE isToken_Burning_With_AC #-}
 isToken_Burning_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isToken_Burning_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
-    in  isToken_With_AC_And_Negative_Amt_InValue mintingValue ac
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
+    in
+        isToken_With_AC_And_Negative_Amt_InValue mintingValue ac
 
 {-# INLINEABLE isOnlyToken_Burning_With_AC #-}
 isOnlyToken_Burning_With_AC :: LedgerValue.AssetClass -> LedgerContextsV2.TxInfo -> Bool
 isOnlyToken_Burning_With_AC !ac !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
         !amountToken = LedgerValue.assetClassValueOf mintingValue ac
         !valueTokenAC = LedgerValue.assetClassValue ac amountToken
-    in  mintingValue  `isEqValue` valueTokenAC && amountToken < 0
+    in
+        mintingValue `isEqValue` valueTokenAC && amountToken < 0
 
 {-# INLINEABLE isOnlyToken_Burning_With_AC_AndAmt #-}
 isOnlyToken_Burning_With_AC_AndAmt :: LedgerValue.AssetClass -> Integer -> LedgerContextsV2.TxInfo -> Bool
 isOnlyToken_Burning_With_AC_AndAmt !ac !amtExpected !info =
-    let !mintingValue = LedgerApiV2.txInfoMint info
+    let
+        !mintingValue = LedgerApiV2.txInfoMint info
         !amountToken = LedgerValue.assetClassValueOf mintingValue ac
         !valueTokenAC = LedgerValue.assetClassValue ac amountToken
-    in  mintingValue  `isEqValue` valueTokenAC && amountToken < 0  && amountToken == amtExpected
+    in
+        mintingValue `isEqValue` valueTokenAC && amountToken < 0 && amountToken == amtExpected
 
 --------------------------------------------------------------------------------2
 
@@ -727,17 +768,20 @@ flattenValue = flattenValueWithoutZeros
 {-# INLINEABLE flattenValueWithoutZeros #-}
 flattenValueWithoutZeros :: LedgerValue.Value -> [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)]
 flattenValueWithoutZeros (LedgerValue.Value !mp) =
-    let !f1 = TxAssocMap.toList mp
+    let
+        !f1 = TxAssocMap.toList mp
         !f2 = [(cs, TxAssocMap.toList mp') | (cs, mp') <- f1]
         !f3 = [(cs, tn, amt) | (cs, f4) <- f2, (tn, amt) <- f4, amt /= 0]
-    in  f3
+    in
+        f3
 
 ---------------------------------------------------
 
 {-# INLINEABLE isEqFlattenValue #-}
 isEqFlattenValue :: [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.CurrencySymbol, LedgerApiV2.TokenName, Integer)] -> Bool
 isEqFlattenValue !a !b = TxBuiltins.serialiseData (LedgerApiV2.toBuiltinData a) == TxBuiltins.serialiseData (LedgerApiV2.toBuiltinData b)
-    -- TODO : check if this is correct
+
+-- TODO : check if this is correct
 
 ---------------------------------------------------
 
@@ -756,13 +800,15 @@ isEqListTN ((!tn1, !am1) : (!xs1)) ((!tn2, !am2) : (!xs2))
     | tn1 == tn2 && am1 == am2 =
         isEqListTN xs1 xs2
     | otherwise =
-        let isEqListTN' :: (LedgerApiV2.TokenName, Integer) -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> Bool
+        let
+            isEqListTN' :: (LedgerApiV2.TokenName, Integer) -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> Bool
             isEqListTN' (!tn1', !am1') !xs1' !xs2' ((!tn2', !am2') : (!xs3'))
                 | am2' == 0 = isEqListTN' (tn1', am1') xs1' xs2' xs3'
                 | tn1' == tn2' && am1' == am2' = isEqListTN xs1' (xs2' ++ xs3')
                 | otherwise = isEqListTN' (tn1', am1') xs1' ((tn2', am2') : xs2') xs3'
             isEqListTN' _ _ _ _ = False
-        in  isEqListTN' (tn1, am1) xs1 [(tn2, am2)] xs2
+        in
+            isEqListTN' (tn1, am1) xs1 [(tn2, am2)] xs2
 
 ---------------------------------------------------
 
@@ -780,13 +826,15 @@ isIncludeListTN ((!tn1, !am1) : (!xs1)) ((!tn2, !am2) : (!xs2))
     | tn1 == tn2 && am1 >= am2 =
         isIncludeListTN xs1 xs2
     | otherwise =
-        let listTNIsIncludesListTN' :: (LedgerApiV2.TokenName, Integer) -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> Bool
+        let
+            listTNIsIncludesListTN' :: (LedgerApiV2.TokenName, Integer) -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> [(LedgerApiV2.TokenName, Integer)] -> Bool
             listTNIsIncludesListTN' (!tn2', !am2') !xs2' !xs1' ((!tn1', !am1') : (!xs3'))
                 | am1' == 0 = listTNIsIncludesListTN' (tn2', am2') xs2' xs1' xs3'
                 | tn1' == tn2' && am1' >= am2' = isIncludeListTN (xs1' ++ xs3') xs2'
                 | otherwise = listTNIsIncludesListTN' (tn2', am2') xs2' ((tn1', am1') : xs1') xs3'
             listTNIsIncludesListTN' _ _ _ _ = False
-        in  listTNIsIncludesListTN' (tn2, am2) xs2 [(tn1, am1)] xs1
+        in
+            listTNIsIncludesListTN' (tn2, am2) xs2 [(tn1, am1)] xs1
 
 ---------------------------------------------------
 
@@ -794,30 +842,42 @@ isIncludeListTN ((!tn1, !am1) : (!xs1)) ((!tn2, !am2) : (!xs2))
 isEqListCS :: [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> Bool
 isEqListCS [] [] = True
 isEqListCS ((_, !mp1) : (!xs1)) [] =
-    let !listTN1 = TxAssocMap.toList mp1
-    in  isEqListTN listTN1 [] && isEqListCS xs1 []
+    let
+        !listTN1 = TxAssocMap.toList mp1
+    in
+        isEqListTN listTN1 [] && isEqListCS xs1 []
 isEqListCS [] ((_, !mp2) : (!xs2)) =
-    let !listTN2 = TxAssocMap.toList mp2
-    in  isEqListTN [] listTN2 && isEqListCS [] xs2
+    let
+        !listTN2 = TxAssocMap.toList mp2
+    in
+        isEqListTN [] listTN2 && isEqListCS [] xs2
 isEqListCS ((!cs1, !mp1) : (!xs1)) ((!cs2, !mp2) : (!xs2))
     | cs1 == cs2 =
-        let !listTN1 = TxAssocMap.toList mp1
+        let
+            !listTN1 = TxAssocMap.toList mp1
             !listTN2 = TxAssocMap.toList mp2
-        in  isEqListTN listTN1 listTN2 && isEqListCS xs1 xs2
+        in
+            isEqListTN listTN1 listTN2 && isEqListCS xs1 xs2
     | otherwise =
-        let isEqListCS' :: (LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer) -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> Bool
+        let
+            isEqListCS' :: (LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer) -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> Bool
 
             isEqListCS' (!_, !mp1') !xs1' !xs2' [] =
-                let !listTN1 = TxAssocMap.toList mp1'
-                in  isEqListTN listTN1 [] && isEqListCS xs1' xs2'
+                let
+                    !listTN1 = TxAssocMap.toList mp1'
+                in
+                    isEqListTN listTN1 [] && isEqListCS xs1' xs2'
             isEqListCS' (!cs1', !mp1') !xs1' !xs2' ((!cs2', !mp2') : xs3') =
                 if cs1' == cs2'
                     then
-                        let !listTN1 = TxAssocMap.toList mp1'
+                        let
+                            !listTN1 = TxAssocMap.toList mp1'
                             !listTN2 = TxAssocMap.toList mp2'
-                        in  isEqListTN listTN1 listTN2 && isEqListCS xs1' (xs2' ++ xs3')
+                        in
+                            isEqListTN listTN1 listTN2 && isEqListCS xs1' (xs2' ++ xs3')
                     else isEqListCS' (cs1', mp1') xs1' ((cs2', mp2') : xs2') xs3'
-        in  isEqListCS' (cs1, mp1) xs1 [(cs2, mp2)] xs2
+        in
+            isEqListCS' (cs1, mp1) xs1 [(cs2, mp2)] xs2
 
 ---------------------------------------------------
 
@@ -826,63 +886,82 @@ isIncludeListCS :: [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.Toke
 isIncludeListCS [] [] = True
 isIncludeListCS _ [] = True
 isIncludeListCS [] ((_, !mp2) : (!xs2)) =
-    let !listTN2 = TxAssocMap.toList mp2
-    in  isIncludeListTN [] listTN2 && isIncludeListCS [] xs2
+    let
+        !listTN2 = TxAssocMap.toList mp2
+    in
+        isIncludeListTN [] listTN2 && isIncludeListCS [] xs2
 isIncludeListCS ((!cs1, !mp1) : (!xs1)) ((!cs2, !mp2) : (!xs2))
     | cs1 == cs2 =
-        let !listTN1 = TxAssocMap.toList mp1
+        let
+            !listTN1 = TxAssocMap.toList mp1
             !listTN2 = TxAssocMap.toList mp2
-        in  isIncludeListTN listTN1 listTN2 && isIncludeListCS xs1 xs2
+        in
+            isIncludeListTN listTN1 listTN2 && isIncludeListCS xs1 xs2
     | otherwise =
-        let listCSIsIncludesListCS' :: (LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer) -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> Bool
+        let
+            listCSIsIncludesListCS' :: (LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer) -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> [(LedgerApiV2.CurrencySymbol, TxAssocMap.Map LedgerApiV2.TokenName Integer)] -> Bool
 
             listCSIsIncludesListCS' (!_, !mp2') !xs2' !xs1' [] =
-                let !listTN2 = TxAssocMap.toList mp2'
-                in  isIncludeListTN [] listTN2 && isIncludeListCS xs1' xs2'
+                let
+                    !listTN2 = TxAssocMap.toList mp2'
+                in
+                    isIncludeListTN [] listTN2 && isIncludeListCS xs1' xs2'
             listCSIsIncludesListCS' (!cs2', !mp2') !xs2' !xs1' ((!cs1', !mp1') : xs3') =
                 if cs1' == cs2'
                     then
-                        let !listTN1 = TxAssocMap.toList mp1'
+                        let
+                            !listTN1 = TxAssocMap.toList mp1'
                             !listTN2 = TxAssocMap.toList mp2'
-                        in  isIncludeListTN listTN1 listTN2 && isIncludeListCS (xs1' ++ xs3') xs2'
+                        in
+                            isIncludeListTN listTN1 listTN2 && isIncludeListCS (xs1' ++ xs3') xs2'
                     else listCSIsIncludesListCS' (cs2', mp2') xs2' ((cs1', mp1') : xs1') xs3'
-        in  listCSIsIncludesListCS' (cs2, mp2) xs2 [(cs1, mp1)] xs1
+        in
+            listCSIsIncludesListCS' (cs2, mp2) xs2 [(cs1, mp1)] xs1
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE isIncludeValue' #-}
 isIncludeValue' :: LedgerApiV2.Value -> LedgerApiV2.Value -> Bool
 isIncludeValue' !value !valueToFind =
-    let !valueToFind' = flattenValue valueToFind
-    in  all
+    let
+        !valueToFind' = flattenValue valueToFind
+    in
+        all
             ( \(!cs, !tn, !amount) ->
-                let !ac = LedgerValue.AssetClass (cs, tn)
-                in  LedgerValue.assetClassValueOf value ac >= amount
+                let
+                    !ac = LedgerValue.AssetClass (cs, tn)
+                in
+                    LedgerValue.assetClassValueOf value ac >= amount
             )
             valueToFind'
 
 {-# INLINEABLE isIncludeValue #-}
 isIncludeValue :: LedgerApiV2.Value -> LedgerApiV2.Value -> Bool
 isIncludeValue (LedgerValue.Value !mp1) (LedgerValue.Value !mpToFind2) =
-    let !listCS1 = TxAssocMap.toList mp1
+    let
+        !listCS1 = TxAssocMap.toList mp1
         !listToFindCS2 = TxAssocMap.toList mpToFind2
-    in  listCS1 `isIncludeListCS` listToFindCS2
+    in
+        listCS1 `isIncludeListCS` listToFindCS2
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE isEqValue #-}
 isEqValue :: LedgerApiV2.Value -> LedgerApiV2.Value -> Bool
 isEqValue (LedgerValue.Value !mp1) (LedgerValue.Value !mp2) =
-    let !listCS1 = TxAssocMap.toList mp1
+    let
+        !listCS1 = TxAssocMap.toList mp1
         !listCS2 = TxAssocMap.toList mp2
-    in  listCS1 `isEqListCS` listCS2
+    in
+        listCS1 `isEqListCS` listCS2
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE isEqValuesAndDatums #-}
 isEqValuesAndDatums :: LedgerApiV2.ToData d => [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> Bool
 isEqValuesAndDatums !valuesAndDatums1 !valuesAndDatums2 =
-    let valuesAndDatumsEqualsValuesAndDatums1 ::  LedgerApiV2.ToData d => [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> Bool
+    let
+        valuesAndDatumsEqualsValuesAndDatums1 :: LedgerApiV2.ToData d => [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> Bool
         valuesAndDatumsEqualsValuesAndDatums1 [] [] = True
         valuesAndDatumsEqualsValuesAndDatums1 ((!v1, !d1) : xs1) ((v2, d2) : xs2)
             | v1 `isEqValue` v2 && d1 `isUnsafeEqDatums` d2 =
@@ -891,14 +970,15 @@ isEqValuesAndDatums !valuesAndDatums1 !valuesAndDatums2 =
                 flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 (v1, d1) xs1 [(v2, d2)] xs2
         valuesAndDatumsEqualsValuesAndDatums1 _ _ = False
 
-        flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 ::  LedgerApiV2.ToData d  => (LedgerApiV2.Value, d) -> [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> Bool
+        flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 :: LedgerApiV2.ToData d => (LedgerApiV2.Value, d) -> [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> [(LedgerApiV2.Value, d)] -> Bool
         flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 (!v1, !d1) !xs1 !xs2 ((!v2, !d2) : xs3)
             | v1 `isEqValue` v2 && d1 `isUnsafeEqDatums` d2 =
                 valuesAndDatumsEqualsValuesAndDatums1 xs1 (xs2 ++ xs3)
             | otherwise =
                 flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 (v1, d1) xs1 ((v2, d2) : xs2) xs3
         flattenValuesAndDatumsEqualsFlattenValuesAndDatums2 _ _ _ _ = False
-    in  valuesAndDatums1 `valuesAndDatumsEqualsValuesAndDatums1` valuesAndDatums2
+    in
+        valuesAndDatums1 `valuesAndDatumsEqualsValuesAndDatums1` valuesAndDatums2
 
 --------------------------------------------------------------------------------2
 
@@ -906,32 +986,37 @@ isEqValuesAndDatums !valuesAndDatums1 !valuesAndDatums2 =
 {-# INLINEABLE isUnsafeEqDatums #-}
 isUnsafeEqDatums :: PlutusTx.ToData d => d -> d -> Bool
 isUnsafeEqDatums !dat1 !dat2 =
--- #ifdef NO_USE_SERIALISE_DATA
---     dat1 == dat2
--- #else
+    -- #ifdef NO_USE_SERIALISE_DATA
+    --     dat1 == dat2
+    -- #else
     TxBuiltins.serialiseData (LedgerApiV2.toBuiltinData dat1) == TxBuiltins.serialiseData (LedgerApiV2.toBuiltinData dat2)
+
 -- #endif
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE getUnsafeOwnMintingTokenNameAndAmt #-}
 getUnsafeOwnMintingTokenNameAndAmt :: LedgerContextsV2.ScriptContext -> [(LedgerApiV2.TokenName, Integer)]
 getUnsafeOwnMintingTokenNameAndAmt !ctx =
-    let !cs = LedgerContextsV2.ownCurrencySymbol ctx
+    let
+        !cs = LedgerContextsV2.ownCurrencySymbol ctx
         !info = LedgerContextsV2.scriptContextTxInfo ctx
         !flatten = TxAssocMap.lookup cs (LedgerApiV2.getValue $ LedgerApiV2.txInfoMint info)
-    in  TxAssocMap.toList $ fromJust flatten
+    in
+        TxAssocMap.toList $ fromJust flatten
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE getUnsafeOwnMintingValue #-}
 getUnsafeOwnMintingValue :: LedgerContextsV2.ScriptContext -> LedgerValue.Value
 getUnsafeOwnMintingValue !ctx =
-    let !cs = LedgerContextsV2.ownCurrencySymbol ctx
+    let
+        !cs = LedgerContextsV2.ownCurrencySymbol ctx
         !info = LedgerContextsV2.scriptContextTxInfo ctx
         !flatten = TxAssocMap.lookup cs (LedgerApiV2.getValue $ LedgerApiV2.txInfoMint info)
         !list = TxAssocMap.toList $ fromJust flatten
         makeVal (!tn, !am) = LedgerValue.assetClassValue (LedgerValue.AssetClass (cs, tn)) am
-    in  sumValues  ((\(tn, am) -> makeVal (tn, am)) <$> list)
+    in
+        sumValues ((\(tn, am) -> makeVal (tn, am)) <$> list)
 
 --------------------------------------------------------------------------------2
 
@@ -941,7 +1026,8 @@ createValueAddingTokensOfCurrencySymbol !ac !cs !acIsWithoutTokenName !value !ca
     if not acIsWithoutTokenName
         then LedgerValue.assetClassValue ac cantidad
         else
-            let !tokenOfCurrencySymbol = [(tn, am) | (!cs', !tn, !am) <- flattenValue value, cs' == cs]
+            let
+                !tokenOfCurrencySymbol = [(tn, am) | (!cs', !tn, !am) <- flattenValue value, cs' == cs]
 
                 compareTokenName :: (LedgerApiV2.TokenName, Integer) -> (LedgerApiV2.TokenName, Integer) -> Ordering
                 compareTokenName (!tn1, _) (!tn2, _)
@@ -957,25 +1043,29 @@ createValueAddingTokensOfCurrencySymbol !ac !cs !acIsWithoutTokenName !value !ca
                             traceError "createValueAddingTokensOfCurrencySymbol"
                         else LedgerAda.lovelaceValueOf 0
                 sumarTokens !list !left =
-                    let (!tn, !am) = head list
+                    let
+                        (!tn, !am) = head list
                         !harvest_AC = LedgerValue.AssetClass (cs, tn)
-                    in  if am > left
+                    in
+                        if am > left
                             then LedgerValue.assetClassValue harvest_AC left
                             else LedgerValue.assetClassValue harvest_AC am <> sumarTokens (tail list) (left - am)
-            in  sumarTokens tokenOfCurrencySymbol_Ordered cantidad
+            in
+                sumarTokens tokenOfCurrencySymbol_Ordered cantidad
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE sumValues #-}
 sumValues :: [LedgerApiV2.Value] -> LedgerApiV2.Value
-sumValues  = foldl (<>) (LedgerAda.lovelaceValueOf 0)
+sumValues = foldl (<>) (LedgerAda.lovelaceValueOf 0)
 
 --------------------------------------------------------------------------------22
 
 {-# INLINEABLE calculateMinADA #-}
 calculateMinADA :: Integer -> Integer -> Integer -> Bool -> Integer
 calculateMinADA !numAssets !sumAssetNameLengths !numPIDs !isHash =
-    let -- const numPIDs=1
+    let
+        -- const numPIDs=1
         -- The number of policy scripts referenced in the UTxO. If there is only one type of token in the UTxO, then this is just 1.
         -- var numAssets=1
         -- The number of asset names present in the UTxO. If there is only one type of token, then this is just 1.
@@ -1005,19 +1095,18 @@ calculateMinADA !numAssets !sumAssetNameLengths !numPIDs !isHash =
         -- sizeCoins =  coinsPerUTxOByte * (160 + (sizeWords + hash )* 8 )
 
         !minADA = max minUTxOValue sizeCoins
-
-    in  TxRatio.truncate (TxRatio.unsafeRatio (130 * minADA) 100) -- TODO: 130% of the minimum UTxO value
+    in
+        TxRatio.truncate (TxRatio.unsafeRatio (130 * minADA) 100) -- TODO: 130% of the minimum UTxO value
 
 {-# INLINEABLE calculateNumAssetsAndPIDS #-}
 calculateNumAssetsAndPIDS :: LedgerApiV2.Value -> (Integer, Integer, Integer)
 calculateNumAssetsAndPIDS !value =
     let
-
         -- !valueWithOutAda = value <> negate ( LedgerValue.adaOnlyValue value)
         !valueWithAda = value <> LedgerAda.lovelaceValueOf 0
         !flattenValue' = flattenValue valueWithAda
 
-        sumarPId :: LedgerValue.Value-> Integer
+        sumarPId :: LedgerValue.Value -> Integer
         sumarPId (LedgerValue.Value !mp) = length (TxAssocMap.toList mp) - 1
         -- necesito restar uno por que en funcionamiento la entrada de ada siempre esta
         -- de hecho me aseguro de que este sumando cero antes
@@ -1030,14 +1119,17 @@ calculateNumAssetsAndPIDS !value =
         !numAssets = length [tn | (_, tn, _) <- flattenValue']
         -- !sumAssetNameLengths = sum [lengthOfByteString $ LedgerApiV2.unTokenName tn | (_, tn, amt) <- flattenValue', amt > 0]
         !sumAssetNameLengths = sum [lengthOfByteString $ LedgerApiV2.unTokenName tn | (_, tn, _) <- flattenValue']
-    in  (numAssets, sumAssetNameLengths, numPIDs)
+    in
+        (numAssets, sumAssetNameLengths, numPIDs)
 
 {-# INLINEABLE calculateMinADAOfValue #-}
 calculateMinADAOfValue :: LedgerApiV2.Value -> Bool -> Integer
 calculateMinADAOfValue !value !isHash =
-    let !(numAssets, sumAssetNameLengths, numPIDs) = calculateNumAssetsAndPIDS value
+    let
+        !(numAssets, sumAssetNameLengths, numPIDs) = calculateNumAssetsAndPIDS value
         !minADA = calculateMinADA numAssets sumAssetNameLengths numPIDs isHash
-    in  minADA
+    in
+        minADA
 
 --------------------------------------------------------------------------------2
 
@@ -1061,20 +1153,20 @@ getDatum_In_TxOut_And_Datum = snd
 
 {-# INLINEABLE getUnsafeScriptHash_In_Address #-}
 getUnsafeScriptHash_In_Address :: LedgerApiV2.Address -> LedgerApiV2.ValidatorHash
-getUnsafeScriptHash_In_Address  (LedgerApiV2.Address (LedgerApiV2.ScriptCredential !script_Hash) _) = script_Hash
-getUnsafeScriptHash_In_Address  _                                                                   = traceError "getScriptHash_In_Address"
+getUnsafeScriptHash_In_Address (LedgerApiV2.Address (LedgerApiV2.ScriptCredential !script_Hash) _) = script_Hash
+getUnsafeScriptHash_In_Address _ = traceError "getScriptHash_In_Address"
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE isScriptAddress #-}
 isScriptAddress :: LedgerApiV2.Address -> Bool
 isScriptAddress (LedgerApiV2.Address (LedgerApiV2.ScriptCredential _) _) = True
-isScriptAddress _                                                        = False
+isScriptAddress _ = False
 
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE getRedeemerForConsumeInput #-}
-getRedeemerForConsumeInput ::  LedgerApiV2.TxOutRef -> LedgerApiV2.TxInfo -> Maybe LedgerApiV2.Redeemer
+getRedeemerForConsumeInput :: LedgerApiV2.TxOutRef -> LedgerApiV2.TxInfo -> Maybe LedgerApiV2.Redeemer
 getRedeemerForConsumeInput !txOutRef !info =
     let
         !txInfoRedeemers = LedgerApiV2.txInfoRedeemers info
@@ -1097,9 +1189,11 @@ isMintingNFTOwnCSAnyTN :: LedgerContextsV2.ScriptContext -> Bool
 isMintingNFTOwnCSAnyTN ctx = case getUnsafeOwnMintingTokenNameAndAmt ctx of
     [] -> False
     !x -> all (\(_, amt) -> amt == 1) x
+
 --------------------------------------------------------------------------------2
 
 -- OK helper function for others methods
+
 -- | Gets the Input TxInInfo corresponding to the TxOutRef. Its unsafe because it assumes that the TxOutRef is in the list
 {-# INLINEABLE getUnsafe_TxInInfo_By_TxOutRef #-}
 getUnsafe_TxInInfo_By_TxOutRef :: [LedgerApiV2.TxInInfo] -> LedgerApiV2.TxOutRef -> LedgerApiV2.TxInInfo
@@ -1112,7 +1206,7 @@ getUnsafe_TxInInfo_By_TxOutRef ((LedgerApiV2.TxInInfo !tref !ot) : tl) o_ref
 {-# INLINEABLE getUnsafe_Own_Input_TxOut #-}
 getUnsafe_Own_Input_TxOut :: LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut
 getUnsafe_Own_Input_TxOut (LedgerContextsV2.ScriptContext !t_info (LedgerContextsV2.Spending !o_ref)) = LedgerApiV2.txInInfoResolved (getUnsafe_TxInInfo_By_TxOutRef (LedgerApiV2.txInfoInputs t_info) o_ref)
-getUnsafe_Own_Input_TxOut _                                                                           = traceError "getUnsafe_Own_Input_TxOut"
+getUnsafe_Own_Input_TxOut _ = traceError "getUnsafe_Own_Input_TxOut"
 
 --------------------------------------------------------------------------------2
 
@@ -1121,73 +1215,79 @@ getInlineDatum_From_TxOut :: forall datum. PlutusTx.FromData datum => LedgerApiV
 getInlineDatum_From_TxOut !txOut =
     case LedgerApiV2.txOutDatum txOut of
         (LedgerApiV2.OutputDatum !datum) -> LedgerApiV2.fromBuiltinData @datum $ LedgerApiV2.getDatum datum
-        _                                -> Nothing
+        _ -> Nothing
 
 {-# INLINEABLE getUnsafe_InlineDatum_From_TxOut #-}
 getUnsafe_InlineDatum_From_TxOut :: forall datum. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> datum
-getUnsafe_InlineDatum_From_TxOut _  !txOut =
+getUnsafe_InlineDatum_From_TxOut _ !txOut =
     case LedgerTxV2.txOutDatum txOut of
         (LedgerTxV2.OutputDatum !datum) -> LedgerApiV2.unsafeFromBuiltinData @datum $ LedgerApiV2.getDatum datum
-        _                               -> traceError "getUnsafe_InlineDatum_From_TxOut"
+        _ -> traceError "getUnsafe_InlineDatum_From_TxOut"
 
 -- | Gets the Datum attached to the TxOut. Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
 {-# INLINEABLE getUnsafe_Datum_From_TxOut #-}
 getUnsafe_Datum_From_TxOut :: forall datum. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> datum
 getUnsafe_Datum_From_TxOut !ctx !txOut =
-    let findDatum :: LedgerTxV2.OutputDatum -> Maybe LedgerApiV2.Datum
-        findDatum LedgerTxV2.NoOutputDatum                = Nothing
+    let
+        findDatum :: LedgerTxV2.OutputDatum -> Maybe LedgerApiV2.Datum
+        findDatum LedgerTxV2.NoOutputDatum = Nothing
         findDatum (LedgerTxV2.OutputDatumHash !datumHash) = LedgerContextsV2.findDatum datumHash (LedgerContextsV2.scriptContextTxInfo ctx)
-        findDatum (LedgerTxV2.OutputDatum !datum)         = Just datum
-    in  case findDatum $ LedgerTxV2.txOutDatum txOut of
+        findDatum (LedgerTxV2.OutputDatum !datum) = Just datum
+    in
+        case findDatum $ LedgerTxV2.txOutDatum txOut of
             Nothing -> traceError "getUnsafe_Datum_From_TxOut"
-            Just x  -> LedgerApiV2.unsafeFromBuiltinData @datum $ LedgerApiV2.getDatum x
+            Just x -> LedgerApiV2.unsafeFromBuiltinData @datum $ LedgerApiV2.getDatum x
 
--- | Gets the Datum type attached to the TxOut and returns a tuple (txOut, datum type).
--- | Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
+{- | Gets the Datum type attached to the TxOut and returns a tuple (txOut, datum type).
+ | Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
+-}
 {-# INLINEABLE getTxOuts_And_DatumTypes_From_TxOuts_By_CS #-}
 getTxOuts_And_DatumTypes_From_TxOuts_By_CS :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [LedgerApiV2.TxOut] -> LedgerApiV2.CurrencySymbol -> (datum -> datumType) -> [(LedgerApiV2.TxOut, datumType)]
 getTxOuts_And_DatumTypes_From_TxOuts_By_CS !ctx !txOuts !cs !getDatumTypeFromDatum =
-    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts,
-        isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs]
+    [ (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts, isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs
+    ]
 
--- | Gets the Datum type attached to the TxOut and returns a tuple (txOut, datum type).
--- | Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
+{- | Gets the Datum type attached to the TxOut and returns a tuple (txOut, datum type).
+ | Its unsafe becasue is asuming that the txOut has a Datum and that the Datum is of type datum
+-}
 {-# INLINEABLE getTxOuts_And_DatumTypes_From_TxOuts_By_AC #-}
 getTxOuts_And_DatumTypes_From_TxOuts_By_AC :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [LedgerApiV2.TxOut] -> LedgerValue.AssetClass -> (datum -> datumType) -> [(LedgerApiV2.TxOut, datumType)]
 getTxOuts_And_DatumTypes_From_TxOuts_By_AC !ctx !txOuts !ac !getDatumTypeFromDatum =
-    [(txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts,
-        isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac]
+    [ (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | !txOut <- txOuts, isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac
+    ]
 
 {-# INLINEABLE getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS #-}
 getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut)] -> LedgerApiV2.CurrencySymbol -> (datum -> datumType) -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut, datumType)]
 getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_CS !ctx !txOutRef_And_TxOuts !cs !getDatumTypeFromDatum =
-    [(txOutRef, txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | (!txOutRef, !txOut) <- txOutRef_And_TxOuts,
-        isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs]
+    [ (txOutRef, txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | (!txOutRef, !txOut) <- txOutRef_And_TxOuts, isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs
+    ]
 
 {-# INLINEABLE getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_AC #-}
 getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_AC :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut)] -> LedgerValue.AssetClass -> (datum -> datumType) -> [(LedgerApiV2.TxOutRef, LedgerApiV2.TxOut, datumType)]
-getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_AC !ctx !txOutRef_And_TxOuts  !ac !getDatumTypeFromDatum =
+getTxOutRefs_TxOuts_And_DatumTypes_From_TxOutRefs_TxOuts_By_AC !ctx !txOutRef_And_TxOuts !ac !getDatumTypeFromDatum =
     [(txOutRef, txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut) | (!txOutRef, !txOut) <- txOutRef_And_TxOuts, isScriptAddress (LedgerApiV2.txOutAddress txOut) && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac]
 
 {-# INLINEABLE getTxOut_And_DatumType_From_TxOut_And_CS_And_Address #-}
 getTxOut_And_DatumType_From_TxOut_And_CS_And_Address :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> LedgerApiV2.CurrencySymbol -> Maybe Ledger.Address -> (datum -> datumType) -> Maybe (LedgerApiV2.TxOut, datumType)
 getTxOut_And_DatumType_From_TxOut_And_CS_And_Address !ctx !txOut !cs !add' !getDatumTypeFromDatum =
-    if (case  add' of
+    if ( case add' of
             Just add -> LedgerApiV2.txOutAddress txOut == add
-            _        -> True)
+            _ -> True
+       )
         && isToken_With_CS_InValue (LedgerApiV2.txOutValue txOut) cs
-       then Just (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut)
-       else Nothing
+        then Just (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut)
+        else Nothing
 
 {-# INLINEABLE getTxOut_And_DatumType_From_TxOut_And_AC_And_Address #-}
 getTxOut_And_DatumType_From_TxOut_And_AC_And_Address :: forall datum datumType. PlutusTx.UnsafeFromData datum => LedgerContextsV2.ScriptContext -> LedgerApiV2.TxOut -> LedgerValue.AssetClass -> Maybe Ledger.Address -> (datum -> datumType) -> Maybe (LedgerApiV2.TxOut, datumType)
 getTxOut_And_DatumType_From_TxOut_And_AC_And_Address !ctx !txOut !ac !add' !getDatumTypeFromDatum =
-    if (case  add' of
+    if ( case add' of
             Just !add -> LedgerApiV2.txOutAddress txOut == add
-            _         -> True)
+            _ -> True
+       )
         && isToken_With_AC_InValue (LedgerApiV2.txOutValue txOut) ac
-       then Just (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut)
-       else Nothing
+        then Just (txOut, getDatumTypeFromDatum $ getUnsafe_InlineDatum_From_TxOut @datum ctx txOut)
+        else Nothing
 
 --------------------------------------------------------------------------------2
 {-
@@ -1288,8 +1388,8 @@ multiply_By_Scaled_And_RoundUp amount number_scaled base =
         (result, remainder') = abs multiplied `divMod` base
     in
         if multiplied >= 0
-        then (if remainder' > 0 then result + 1 else result)
-        else (if remainder' > 0 then negate (result + 1) else negate result)
+            then (if remainder' > 0 then result + 1 else result)
+            else (if remainder' > 0 then negate (result + 1) else negate result)
 
 {-# INLINEABLE multiply_By_Scaled_And_RoundDown #-}
 multiply_By_Scaled_And_RoundDown :: Integer -> Integer -> Integer -> Integer
@@ -1306,9 +1406,10 @@ divide_By_Scaled_And_RoundDownSafe amount number_scaled base =
     let
         rawAmount = amount * base
         absResult = abs rawAmount `divide` abs number_scaled
-    in if (rawAmount >= 0) == (number_scaled >= 0)
-       then absResult
-       else negate absResult
+    in
+        if (rawAmount >= 0) == (number_scaled >= 0)
+            then absResult
+            else negate absResult
 
 {-# INLINEABLE multiply_By_Scaled_1e6_And_RoundUp #-}
 multiply_By_Scaled_1e6_And_RoundUp :: Integer -> Integer -> Integer
@@ -1342,13 +1443,13 @@ divide_By_Scaled_BPx1e3_And_RoundDownSafe amount number_BPx1e3 =
     divide_By_Scaled_And_RoundDownSafe amount number_BPx1e3 10_000_000
 
 {-# INLINEABLE multiply_By_Scaled_1e2_And_RoundUp #-}
-multiply_By_Scaled_1e2_And_RoundUp  :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e2_And_RoundUp amount number1e2  =
+multiply_By_Scaled_1e2_And_RoundUp :: Integer -> Integer -> Integer
+multiply_By_Scaled_1e2_And_RoundUp amount number1e2 =
     multiply_By_Scaled_And_RoundUp amount number1e2 100
 
 {-# INLINEABLE multiply_By_Scaled_1e2_And_RoundDown #-}
-multiply_By_Scaled_1e2_And_RoundDown  :: Integer -> Integer -> Integer
-multiply_By_Scaled_1e2_And_RoundDown amount number1e2  =
+multiply_By_Scaled_1e2_And_RoundDown :: Integer -> Integer -> Integer
+multiply_By_Scaled_1e2_And_RoundDown amount number1e2 =
     multiply_By_Scaled_And_RoundDown amount number1e2 100
 
 {-# INLINEABLE divide_By_Scaled_1e2_And_RoundDownSafe #-}

@@ -33,8 +33,8 @@ import PlutusTx.Prelude (divide)
 import qualified Generic.Constants as T
 import qualified Protocol.Fund.Helpers as FundHelpers
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Fund.Types as FundT
 import qualified Protocol.Fund.InvestUnit.Types as InvestUnitT
+import qualified Protocol.Fund.Types as FundT
 import qualified Protocol.OnChainHelpers as OnChainHelpers
 import qualified Protocol.PABTypes as T
 import qualified Protocol.Types as T
@@ -109,6 +109,18 @@ fundHolding_Validator_Redeemer_Deposit_Tests tp =
                     results <- testContextWrapper tp ctx'
                     (Nothing, results)
                         `assertResultsContainAnyOf` []
+                , Tasty.testCase "Depositing zero must fail" $ do
+                    let
+                        ctx' = fundHolding_Deposit_TxContext tp (tpDepositDate tp) 0
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not Correct Deposit Amount"]
+                , Tasty.testCase "Depositing negative must fail" $ do
+                    let
+                        ctx' = fundHolding_Deposit_TxContext tp (tpDepositDate tp) (-10)
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["Deposit cannot be negative"]
                 , Tasty.testCase "Depositing without minting FT must fail" $ do
                     let
                         ctx' =
@@ -192,6 +204,18 @@ fundHolding_Validator_Redeemer_Withdraw_Tests tp =
                     results <- testContextWrapper tp ctx'
                     (Nothing, results)
                         `assertResultsContainAnyOf` []
+                , Tasty.testCase "Withdrawing zero must fail" $ do
+                    let
+                        ctx' = fundHolding_Withdraw_TxContext tp (tpDepositDate tp) deposit_MockData (tpWithdrawDate tp) 0
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["not Correct Withdraw Amount"]
+                , Tasty.testCase "Withdrawing negative must fail" $ do
+                    let
+                        ctx' = fundHolding_Withdraw_TxContext tp (tpDepositDate tp) deposit_MockData (tpWithdrawDate tp) (-10)
+                    results <- testContextWrapper tp ctx'
+                    (Just selectedRedeemer, results)
+                        `assertResultsContainAnyOf` ["Withdraw cannot be negative"]
                 , Tasty.testCase "Withdrawing without burning FT must fail" $ do
                     let
                         ctx' =
@@ -655,15 +679,15 @@ fundHolding_Validator_Redeemer_BalanceAssets_Tests tp =
                     results <- testContextWrapper tp ctx'
                     (Nothing, results)
                         `assertResultsContainAnyOf` []
-                -- TODO: deberia fallar pero no lo hace por que mi test context no verifica que ningun valor en value sea menor a cero. 
-                -- deberia agregar ese control en el test context
-                -- , Tasty.testCase "Balancing a LITLE MORE deposits and ALL commissions FT correctly release must fail" $ do
-                --     let
-                --         ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData - 100, deposit_MockData + 100] [-1991200, 1991200] False []
-                --     results <- testContextWrapperTrace tp ctx'
-                --     (Nothing, results)
-                --         `assertResultsContainAnyOf` []
-                , Tasty.testCase "Balancing a ALL deposits and LITLE MORE commissions FT correctly release must fail" $ do
+                , -- TODO: deberia fallar pero no lo hace por que mi test context no verifica que ningun valor en value sea menor a cero.
+                  -- deberia agregar ese control en el test context
+                  -- , Tasty.testCase "Balancing a LITLE MORE deposits and ALL commissions FT correctly release must fail" $ do
+                  --     let
+                  --         ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData - 100, deposit_MockData + 100] [-1991200, 1991200] False []
+                  --     results <- testContextWrapperTrace tp ctx'
+                  --     (Nothing, results)
+                  --         `assertResultsContainAnyOf` []
+                  Tasty.testCase "Balancing a ALL deposits and LITLE MORE commissions FT correctly release must fail" $ do
                     let
                         ctx' = fundHolding_BalanceAssets_TxContext tp [deposit_MockData, 0] [-deposit_MockData, deposit_MockData] [-1991200 - 1, 1991200 + 1] False []
                     results <- testContextWrapper tp ctx'

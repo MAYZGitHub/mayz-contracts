@@ -259,13 +259,13 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                             --         den = 120_000_000
                             --         commissions_Table_Numerator_1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemainingPlusOne
                             --     in
-                            --         -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
+                            --         -- the table contains monthly commissions, from 0 remaining months, to the life of the fund plus 1 month
                             --         -- that is why there are 2 elements in the table more than the life of the fund
                             --         monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
                             let
                                 !monthsRemainingPlusOne = monthsRemaining + 1
                             in
-                                -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
+                                -- the table contains monthly commissions, from 0 remaining months, to the life of the fund plus 1 month
                                 -- that is why there are 2 elements in the table more than the life of the fund
 
                                 monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6

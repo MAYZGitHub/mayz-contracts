@@ -4,4 +4,14 @@ cabal test PropertyBasedTests
 cabal test PerformanceTests
 cabal test AutomaticTests
 
+cabal test UnitTests -j1 --test-options="--list-tests"
+
+cabal test UnitTests -j1 --test-options="-p \"Commissions Table\""
+
+
+cabal test PropertyBasedTests -j1  --test-options="-p \"zero or negative must fail\" --quickcheck-replay=895760"
+
+
+cabal test AutomaticTests -j1  --test-options="-p \"0 must fail\" "
+
 cabal run deploy
