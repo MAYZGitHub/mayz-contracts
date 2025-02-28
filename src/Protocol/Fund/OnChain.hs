@@ -39,8 +39,8 @@ import qualified Generic.OnChainHelpers as OnChainHelpers
 import qualified Protocol.Constants as T
 import qualified Protocol.Fund.Helpers as FundHelpers
 import qualified Protocol.Fund.Holding.Types as FundHoldingT
-import qualified Protocol.Fund.Types as T
 import qualified Protocol.Fund.InvestUnit.Types as InvestUnitT
+import qualified Protocol.Fund.Types as T
 import qualified Protocol.Protocol.Types as ProtocolT
 import qualified Protocol.Types as T
 
@@ -49,7 +49,7 @@ import qualified Protocol.Types as T
 --------------------------------------------------------------------------------2
 
 -- Any change in the logic, datum or redeemer must change the version of the fundVersion on Protocol.Fund.Types
-      
+
 --------------------------------------------------------------------------------2
 
 {-# INLINEABLE mkPolicy #-}
@@ -208,6 +208,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                         !commissions_Table_Numerator_1e6 = T.fdCommissions_Table_Numerator_1e6 fundDatum_Out
                         !holdingsCount = 0
                         !holdingsIndex = 0
+                        !maxDepositAndWithdraw = T.fdMaxDepositAndWithdraw fundDatum_Out
                         ---------------------
                         !fundDatum_Out_Control =
                             T.mkFund_DatumType
@@ -227,7 +228,7 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 commissions_Table_Numerator_1e6
                                 holdingsCount
                                 holdingsIndex
-                                (ProtocolT.pdMaxDepositAndWithdraw protocolDatum_In)
+                                maxDepositAndWithdraw
                                 tokenMAYZ_AC
                                 requiredMAYZ
                                 minADA_For_FundDatum
@@ -248,24 +249,26 @@ mkPolicy (T.PolicyParams !protocolPolicyID_CS !fundPolicy_TxOutRef !fundValidato
                                 && traceIfFalse "not deadline > beginAt" (deadline > beginAt)
                                 && traceIfFalse "not isInRange fundLifeTime" (ProtocolT.isInRange fundLifeTime (deadline - beginAt))
                                 && traceIfFalse "not isInRange commissionFund_PerYear_InBPx1e3" (ProtocolT.isInRange commissionFund_PerYear_InBPx1e3 commission_PerYear_InBPx1e3)
+                                && traceIfFalse "not (maxDepositAndWithdraw >= 0" (maxDepositAndWithdraw >= 0)
                         ------------------
                         isCorrect_Output_CommissionsTable :: Bool
                         !isCorrect_Output_CommissionsTable =
-                        --     let
-                        --         !monthsRemainingPlusOne = monthsRemaining + 1
-                        --         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
-                        --         den = 120_000_000
-                        --         commissions_Table_Numerator_1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemainingPlusOne
-                        --     in
-                        --         -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
-                        --         -- that is why there are 2 elements in the table more than the life of the fund
-                        --         monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
+                            --     let
+                            --         !monthsRemainingPlusOne = monthsRemaining + 1
+                            --         -- defino den = 1e3 * 100 * 100 * 12 = 1000 * 100 * 100 * 12 = 120 000 000
+                            --         den = 120_000_000
+                            --         commissions_Table_Numerator_1e6_lastElement = OnChainHelpers.setAndLoosePrecision1e6GetOnlyNumerator $ OnChainHelpers.powRational (den - commission_PerYear_InBPx1e3) den monthsRemainingPlusOne
+                            --     in
+                            --         -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
+                            --         -- that is why there are 2 elements in the table more than the life of the fund
+                            --         monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 && head (reverse commissions_Table_Numerator_1e6) == commissions_Table_Numerator_1e6_lastElement
                             let
                                 !monthsRemainingPlusOne = monthsRemaining + 1
+                            in
                                 -- the table contains motnhly commissions, from 0 remaining months, to the life of the fund plus 1 month
                                 -- that is why there are 2 elements in the table more than the life of the fund
-                            in
-                                monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6 
+
+                                monthsRemainingPlusOne + 1 == length commissions_Table_Numerator_1e6
                         ------------------
                         isCorrect_Output_Fund_Value :: Bool
                         !isCorrect_Output_Fund_Value =
@@ -531,12 +534,16 @@ mkValidator (T.ValidatorParams !protocolPolicyID_CS !tokenEmergencyAdminPolicy_C
                                         && traceIfFalse "not isCorrect_Output_Fund_Value_NotChanged" isCorrect_Output_Fund_Value_NotChanged
                                     where
                                         ---------------------
+                                        !maxDepositAndWithdraw = T.fdMaxDepositAndWithdraw fundDatum_Out
+                                        ---------------------
                                         isCorrect_Output_Fund_Datum_Updated :: Bool
                                         !isCorrect_Output_Fund_Datum_Updated =
                                             let
-                                                !fundDatum_Out_Control = FundHelpers.mkUpdated_Fund_Datum_With_NormalChanges fundDatum_In (T.fdAdmins fundDatum_Out) (T.fdTokenAdminPolicy_CS fundDatum_Out)  (T.fdMaxDepositAndWithdraw fundDatum_Out)
+                                                !fundDatum_Out_Control = FundHelpers.mkUpdated_Fund_Datum_With_NormalChanges fundDatum_In (T.fdAdmins fundDatum_Out) (T.fdTokenAdminPolicy_CS fundDatum_Out) maxDepositAndWithdraw
                                             in
-                                                fundDatum_Out `OnChainHelpers.isUnsafeEqDatums` fundDatum_Out_Control
+                                                fundDatum_Out
+                                                    `OnChainHelpers.isUnsafeEqDatums` fundDatum_Out_Control
+                                                    && traceIfFalse "not (maxDepositAndWithdraw >= 0" (maxDepositAndWithdraw >= 0)
                                 ------------------
                                 (T.ValidatorRedeemerFundHoldingAdd T.ValidatorRedeemerFundHoldingAddType) ->
                                     ------------------
